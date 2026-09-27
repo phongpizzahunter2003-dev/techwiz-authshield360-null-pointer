@@ -1,17 +1,34 @@
 import { useEffect, useRef } from 'react'
 
 export function Modal({ open, title, onClose, children, footer, size = 'md' }) {
-  const ref = useRef(null)
+  const panelRef = useRef(null)
+  // Keep the latest onClose in a ref so the effect below can be keyed on `open` only.
+  // (Putting an inline `onClose` in the dependency array made the effect re-run on every
+  // render, which re-focused the dialog container and stole focus from the form fields.)
+  const onCloseRef = useRef(onClose)
+  onCloseRef.current = onClose
 
   useEffect(() => {
     if (!open) return undefined
     const onKey = (e) => {
-      if (e.key === 'Escape') onClose?.()
+      if (e.key === 'Escape') onCloseRef.current?.()
     }
     document.addEventListener('keydown', onKey)
-    ref.current?.focus()
+
+    // Focus the first real control once, on open — never on subsequent renders.
+    // Separate queries keep priority order (a comma-separated selector would return the
+    // first match in document order, i.e. the close button in the header).
+    const panel = panelRef.current
+    if (panel && !panel.contains(document.activeElement)) {
+      const firstControl =
+        panel.querySelector('input:not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled])') ||
+        panel.querySelector('button:not([disabled]):not([aria-label="Đóng"])') ||
+        panel
+      firstControl.focus()
+    }
+
     return () => document.removeEventListener('keydown', onKey)
-  }, [open, onClose])
+  }, [open])
 
   if (!open) return null
   const width = size === 'lg' ? 'max-w-3xl' : size === 'sm' ? 'max-w-md' : 'max-w-xl'
@@ -24,7 +41,7 @@ export function Modal({ open, title, onClose, children, footer, size = 'md' }) {
       }}
     >
       <div
-        ref={ref}
+        ref={panelRef}
         tabIndex={-1}
         role="dialog"
         aria-modal="true"
