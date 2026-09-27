@@ -15,6 +15,7 @@ public record UserResponse(
         UserStatus status,
         boolean mfaEnabled,
         boolean mfaEnrolled,
+        String authModeOverride,
         int failedAttempts,
         int lockoutLevel,
         Instant lockedUntil,

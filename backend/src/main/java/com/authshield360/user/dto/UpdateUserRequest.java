@@ -20,6 +20,9 @@ public record UpdateUserRequest(
 
         UserStatus status,
 
+        /** S1 | S2 | S3 | INHERIT (INHERIT clears the override). Null = unchanged. */
+        String authMode,
+
         @Size(min = 8, max = 72, message = "Mật khẩu tối thiểu 8 ký tự.")
         String password
 ) {

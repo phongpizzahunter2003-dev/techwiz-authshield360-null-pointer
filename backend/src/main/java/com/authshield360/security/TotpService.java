@@ -28,9 +28,15 @@ public class TotpService {
     }
 
     public String otpauthUri(String secret, String account, String issuer) {
-        return "otpauth://totp/" + urlEncode(issuer) + ":" + urlEncode(account)
-                + "?secret=" + secret + "&issuer=" + urlEncode(issuer)
-                + "&digits=" + DIGITS + "&period=" + STEP_SECONDS;
+        // Google Authenticator Key URI Format: label and issuer MUST be percent-encoded
+        // (space => %20, never '+'), otherwise scanners reject the deep link.
+        String label = percentEncode(issuer) + ":" + percentEncode(account);
+        return "otpauth://totp/" + label
+                + "?secret=" + secret
+                + "&issuer=" + percentEncode(issuer)
+                + "&algorithm=SHA1"
+                + "&digits=" + DIGITS
+                + "&period=" + STEP_SECONDS;
     }
 
     public String currentCode(String secret) {
@@ -112,7 +118,7 @@ public class TotpService {
         return out.toByteArray();
     }
 
-    private String urlEncode(String value) {
-        return java.net.URLEncoder.encode(value, StandardCharsets.UTF_8);
+    private String percentEncode(String value) {
+        return java.net.URLEncoder.encode(value, StandardCharsets.UTF_8).replace("+", "%20");
     }
 }

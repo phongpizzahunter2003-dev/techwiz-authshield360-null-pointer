@@ -20,6 +20,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /** Account & role management (UC-07). */
 @Service
 public class UserService {
@@ -76,7 +78,9 @@ public class UserService {
         user.setFullName(req.fullName());
         user.setRole(req.role());
         user.setStatus(UserStatus.ACTIVE);
-        user.setMfaEnabled(req.role() != RoleType.STUDENT);
+        String authMode = normalizeAuthMode(req.authMode());
+        user.setAuthModeOverride(authMode);
+        user.setMfaEnabled(mfaRequiredFor(req.role(), authMode));
         user.setPasswordHash(passwordEncoder.encode(req.password()));
         User saved = users.save(user);
         createProfile(saved);
@@ -106,6 +110,13 @@ public class UserService {
                 user.setFailedAttempts(0);
                 user.setLockoutLevel(0);
                 user.setLockedUntil(null);
+            }
+        }
+        if (req.authMode() != null) {
+            String authMode = normalizeAuthMode(req.authMode());
+            user.setAuthModeOverride(authMode);
+            if (authMode != null) {
+                user.setMfaEnabled(!"S1".equals(authMode));
             }
         }
         if (req.password() != null && !req.password().isBlank()) {
@@ -162,7 +173,51 @@ public class UserService {
 
     public static UserResponse toResponse(User u) {
         return new UserResponse(u.getId(), u.getUsername(), u.getEmail(), u.getPhone(), u.getFullName(),
-                u.getRole(), u.getStatus(), u.isMfaEnabled(), u.isMfaEnrolled(), u.getFailedAttempts(),
-                u.getLockoutLevel(), u.getLockedUntil(), u.getCreatedAt());
+                u.getRole(), u.getStatus(), u.isMfaEnabled(), u.isMfaEnrolled(), u.getAuthModeOverride(),
+                u.getFailedAttempts(), u.getLockoutLevel(), u.getLockedUntil(), u.getCreatedAt());
+    }
+
+    /**
+     * Admin bulk action: assign an authentication mode (S1/S2/S3) to every user, or to one role.
+     * S1 clears the MFA requirement; S2/S3 require it. Enrolment itself stays self-service (UC-09).
+     *
+     * @return number of updated accounts
+     */
+    @Transactional
+    public int applyAuthMode(String rawMode, RoleType role) {
+        String mode = normalizeAuthMode(rawMode);
+        List<User> targets = (role == null) ? users.findAll() : users.findByRoleOrderByUsernameAsc(role);
+        for (User user : targets) {
+            user.setAuthModeOverride(mode);
+            if (mode != null) {
+                user.setMfaEnabled(!"S1".equals(mode));
+            }
+        }
+        users.saveAll(targets);
+        audit.record(AuditEvent.action(AuditAction.CONFIG_CHANGE).success()
+                .user(actor())
+                .detail("scope", role == null ? "ALL_USERS" : role.name())
+                .detail("mode", mode == null ? "INHERIT" : mode)
+                .detail("affectedUsers", targets.size()));
+        return targets.size();
+    }
+
+    /** "S1" | "S2" | "S3" | null (= inherit the global auth_config mode). */
+    static String normalizeAuthMode(String raw) {
+        if (raw == null) return null;
+        String value = raw.trim().toUpperCase(java.util.Locale.ROOT);
+        if (value.isEmpty() || value.equals("INHERIT") || value.equals("GLOBAL") || value.equals("DEFAULT")) {
+            return null;
+        }
+        if (!value.equals("S1") && !value.equals("S2") && !value.equals("S3")) {
+            throw new BusinessException(ErrorCode.VALIDATION_ERROR,
+                    "Chế độ xác thực không hợp lệ (chỉ chấp nhận S1, S2, S3 hoặc INHERIT).");
+        }
+        return value;
+    }
+
+    private static boolean mfaRequiredFor(RoleType role, String authMode) {
+        if (authMode == null) return role != RoleType.STUDENT;
+        return !"S1".equals(authMode);
     }
 }

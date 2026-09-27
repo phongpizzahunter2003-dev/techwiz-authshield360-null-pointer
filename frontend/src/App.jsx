@@ -20,6 +20,7 @@ import { AdminConfig } from './features/admin/AdminConfig.jsx'
 import { AdminAuditLogs } from './features/admin/AdminAuditLogs.jsx'
 import { AdminAuditDetail } from './features/admin/AdminAuditDetail.jsx'
 import { AdminComparison } from './features/admin/AdminComparison.jsx'
+import { AdminSystem } from './features/admin/AdminSystem.jsx'
 import { Spinner } from './components/ui/Spinner.jsx'
 
 function HomeRedirect() {
@@ -168,6 +169,14 @@ export default function App() {
         element={
           <ProtectedRoute roles={['ADMIN']}>
             <AdminAuditDetail />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/system"
+        element={
+          <ProtectedRoute roles={['ADMIN']}>
+            <AdminSystem />
           </ProtectedRoute>
         }
       />

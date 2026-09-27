@@ -10,7 +10,14 @@ import { adminApi } from '../../api/endpoints.js'
 import { ROLE_LABEL } from '../../i18n/messages.js'
 import { formatDateTime } from '../../utils/format.js'
 
-const EMPTY_FORM = { username: '', email: '', phone: '', fullName: '', password: '', role: 'STUDENT' }
+const EMPTY_FORM = { username: '', email: '', phone: '', fullName: '', password: '', role: 'STUDENT', authMode: 'INHERIT' }
+
+const AUTH_MODE_LABEL = {
+  S1: 'S1 · Chỉ mật khẩu',
+  S2: 'S2 · Mật khẩu + Mobile OTP',
+  S3: 'S3 · Mật khẩu + Mobile + Email OTP',
+  INHERIT: 'Theo cấu hình chung',
+}
 
 export function AdminUsers() {
   const toast = useToast()
@@ -25,6 +32,10 @@ export function AdminUsers() {
   const [editing, setEditing] = useState(null)
   const [form, setForm] = useState(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
+
+  const [bulkOpen, setBulkOpen] = useState(false)
+  const [bulkForm, setBulkForm] = useState({ mode: 'S2', role: '' })
+  const [bulkSaving, setBulkSaving] = useState(false)
 
   const load = async (next = filters) => {
     setLoading(true)
@@ -61,6 +72,7 @@ export function AdminUsers() {
       password: '',
       role: u.role,
       status: u.status,
+      authMode: u.authModeOverride || 'INHERIT',
     })
     setEditorOpen(true)
   }
@@ -76,12 +88,13 @@ export function AdminUsers() {
           fullName: form.fullName,
           role: form.role,
           status: form.status,
+          authMode: form.authMode,
         }
         if (form.password) payload.password = form.password
         await adminApi.updateUser(editing.id, payload)
         toast.success('Cập nhật tài khoản thành công.')
       } else {
-        await adminApi.createUser(form)
+        await adminApi.createUser({ ...form, authMode: form.authMode })
         toast.success('Tạo tài khoản thành công.')
       }
       setEditorOpen(false)
@@ -113,6 +126,21 @@ export function AdminUsers() {
     }
   }
 
+  const applyBulk = async (event) => {
+    event.preventDefault()
+    setBulkSaving(true)
+    try {
+      const res = await adminApi.applyAuthMode({ mode: bulkForm.mode, role: bulkForm.role || null })
+      toast.success(res.message)
+      setBulkOpen(false)
+      await load()
+    } catch (err) {
+      toast.error(err.message)
+    } finally {
+      setBulkSaving(false)
+    }
+  }
+
   const items = data?.items || []
   const totalPages = data?.totalPages || 0
 
@@ -121,9 +149,14 @@ export function AdminUsers() {
       title="Người dùng & vai trò"
       subtitle="Quản lý tài khoản, gán vai trò và đặt lại MFA"
       actions={
-        <button type="button" className="btn-primary" onClick={openCreate}>
-          ➕ Thêm người dùng
-        </button>
+        <>
+          <button type="button" className="btn-accent" onClick={() => setBulkOpen(true)}>
+            🛡️ Áp dụng S1/S2/S3 hàng loạt
+          </button>
+          <button type="button" className="btn-primary" onClick={openCreate}>
+            ➕ Thêm người dùng
+          </button>
+        </>
       }
     >
       <div className="mb-4 flex flex-wrap items-end gap-3">
@@ -182,6 +215,7 @@ export function AdminUsers() {
                   <th>Vai trò</th>
                   <th>Trạng thái</th>
                   <th>MFA</th>
+                  <th>Chế độ xác thực</th>
                   <th>Sai liên tiếp</th>
                   <th className="text-right">Thao tác</th>
                 </tr>
@@ -203,6 +237,15 @@ export function AdminUsers() {
                       <Badge tone={statusTone(u.status)}>{u.status}</Badge>
                     </td>
                     <td>{u.mfaEnrolled ? '✅ Đã đăng ký' : u.mfaEnabled ? '⏳ Chưa đăng ký' : '—'}</td>
+                    <td>
+                      {u.authModeOverride ? (
+                        <Badge tone={u.authModeOverride === 'S1' ? 'coral' : u.authModeOverride === 'S2' ? 'sun' : 'accent'}>
+                          {u.authModeOverride}
+                        </Badge>
+                      ) : (
+                        <span className="text-xs text-ink-400">Theo cấu hình</span>
+                      )}
+                    </td>
                     <td>
                       {u.failedAttempts}
                       {u.lockedUntil ? (
@@ -359,12 +402,102 @@ export function AdminUsers() {
               onChange={(e) => setForm({ ...form, password: e.target.value })}
             />
           </div>
+
+          <div>
+            <label className="label" htmlFor="u-authmode">
+              Chế độ xác thực áp dụng cho tài khoản
+            </label>
+            <select
+              id="u-authmode"
+              className="input"
+              value={form.authMode}
+              onChange={(e) => setForm({ ...form, authMode: e.target.value })}
+            >
+              {Object.entries(AUTH_MODE_LABEL).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-xs text-ink-400">
+              S1 không yêu cầu MFA · S2 yêu cầu Mobile OTP · S3 yêu cầu Mobile + Email OTP. Chọn "Theo cấu hình
+              chung" để dùng chế độ ở trang Cấu hình xác thực.
+            </p>
+          </div>
+
           <div className="flex justify-end gap-2">
             <button type="button" className="btn-ghost" onClick={() => setEditorOpen(false)}>
               Hủy
             </button>
             <button type="submit" className="btn-primary" disabled={saving}>
               {saving ? <InlineSpinner /> : '💾'} Lưu
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Bulk security policy: apply S1/S2/S3 to all users or one role */}
+      <Modal
+        open={bulkOpen}
+        onClose={() => setBulkOpen(false)}
+        title="Áp dụng chế độ xác thực hàng loạt"
+      >
+        <form onSubmit={applyBulk} className="space-y-4">
+          <p className="rounded-xl bg-surface-soft px-3 py-2 text-xs text-ink-400">
+            Chức năng dành cho quản trị viên: gán chế độ xác thực (S1/S2/S3) cho nhiều tài khoản cùng lúc.
+            Việc <strong>đăng ký</strong> yếu tố MFA vẫn do từng người dùng tự thực hiện (UC-09) — quản trị viên
+            không tạo QR thay họ.
+          </p>
+
+          <div>
+            <label className="label" htmlFor="bulk-mode">
+              Chế độ xác thực
+            </label>
+            <select
+              id="bulk-mode"
+              className="input"
+              value={bulkForm.mode}
+              onChange={(e) => setBulkForm({ ...bulkForm, mode: e.target.value })}
+            >
+              {Object.entries(AUTH_MODE_LABEL).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="label" htmlFor="bulk-role">
+              Phạm vi áp dụng
+            </label>
+            <select
+              id="bulk-role"
+              className="input"
+              value={bulkForm.role}
+              onChange={(e) => setBulkForm({ ...bulkForm, role: e.target.value })}
+            >
+              <option value="">Tất cả người dùng</option>
+              <option value="STUDENT">Chỉ Học sinh</option>
+              <option value="TEACHER">Chỉ Giáo viên</option>
+              <option value="ADMIN">Chỉ Quản trị viên</option>
+            </select>
+          </div>
+
+          <div className="rounded-xl border border-sun-400 bg-sun-100/60 px-3 py-2 text-xs text-ink-600">
+            {bulkForm.mode === 'S1'
+              ? 'S1: tắt yêu cầu MFA cho các tài khoản trong phạm vi.'
+              : bulkForm.mode === 'INHERIT'
+                ? 'Các tài khoản sẽ dùng chế độ chung ở trang Cấu hình xác thực.'
+                : `${bulkForm.mode}: bật yêu cầu MFA. Người dùng sẽ được nhắc đăng ký ở lần đăng nhập kế tiếp.`}
+          </div>
+
+          <div className="flex justify-end gap-2">
+            <button type="button" className="btn-ghost" onClick={() => setBulkOpen(false)}>
+              Hủy
+            </button>
+            <button type="submit" className="btn-accent" disabled={bulkSaving}>
+              {bulkSaving ? <InlineSpinner /> : '🛡️'} Áp dụng
             </button>
           </div>
         </form>

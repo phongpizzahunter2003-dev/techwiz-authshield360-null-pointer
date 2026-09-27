@@ -67,13 +67,13 @@ public class DataSeeder implements CommandLineRunner {
         log.info("Seeding AuthShield 360 lab data (simulated accounts only — BR-01)");
 
         userService.create(new CreateUserRequest(
-                "admin01", "admin01@mailtrap.io", "0912000001", "Quản trị viên", "admin123", RoleType.ADMIN));
+                "admin01", "admin01@mailtrap.io", "0912000001", "Quản trị viên", "admin123", RoleType.ADMIN, null));
         UserResponse teacher = userService.create(new CreateUserRequest(
-                "teacher01", "teacher01@mailtrap.io", "0912000002", "Nguyễn Văn Tùng", "teacher123", RoleType.TEACHER));
+                "teacher01", "teacher01@mailtrap.io", "0912000002", "Nguyễn Văn Tùng", "teacher123", RoleType.TEACHER, null));
         UserResponse student1 = userService.create(new CreateUserRequest(
-                "student01", "student01@mailtrap.io", "0912000003", "Trần Minh Anh", "student123", RoleType.STUDENT));
+                "student01", "student01@mailtrap.io", "0912000003", "Trần Minh Anh", "student123", RoleType.STUDENT, null));
         UserResponse student2 = userService.create(new CreateUserRequest(
-                "student02", "student02@mailtrap.io", "0912000004", "Lê Gia Bảo", "student123", RoleType.STUDENT));
+                "student02", "student02@mailtrap.io", "0912000004", "Lê Gia Bảo", "student123", RoleType.STUDENT, null));
 
         Classroom cs101 = new Classroom();
         cs101.setCode("CS101");

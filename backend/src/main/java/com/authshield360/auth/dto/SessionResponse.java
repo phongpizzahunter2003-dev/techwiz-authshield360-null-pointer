@@ -13,6 +13,8 @@ public record SessionResponse(
         String authMethod,
         boolean mfaEnabled,
         boolean mfaEnrolled,
+        String authModeOverride,
+        String effectiveAuthMode,
         Instant issuedAt,
         Instant expiresAt
 ) {

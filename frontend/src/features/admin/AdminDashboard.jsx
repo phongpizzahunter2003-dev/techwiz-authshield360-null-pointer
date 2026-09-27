@@ -57,6 +57,11 @@ export function AdminDashboard() {
               <p className="mt-2 text-sm font-bold text-ink-900">So sánh S1/S2/S3</p>
               <p className="text-xs text-ink-400">UC-15</p>
             </Link>
+            <Link to="/admin/system" className="card transition hover:shadow-glow">
+              <p className="text-2xl" aria-hidden="true">🗄️</p>
+              <p className="mt-2 text-sm font-bold text-ink-900">Hệ thống & dữ liệu</p>
+              <p className="text-xs text-ink-400">Kiểm tra CSDL</p>
+            </Link>
           </div>
 
           <section>

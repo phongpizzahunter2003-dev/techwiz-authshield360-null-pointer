@@ -73,6 +73,10 @@ public class AuthService {
             throw new BusinessException(ErrorCode.INVALID_CREDENTIALS);
         }
 
+        // Effective mode = per-user override (admin-assigned) or the global configuration.
+        AuthMode effectiveMode = resolveMode(user);
+        mode = effectiveMode.name();
+
         lockoutService.assertNotLocked(user);
         if (user.getStatus() == UserStatus.DISABLED) {
             throw new BusinessException(ErrorCode.ACCOUNT_DISABLED);
@@ -89,7 +93,7 @@ public class AuthService {
         }
 
         AuthConfig config = configService.current();
-        if (config.getMode() == AuthMode.S1) {
+        if (effectiveMode == AuthMode.S1) {
             return issueSession(user, "PASSWORD");
         }
 
@@ -110,7 +114,7 @@ public class AuthService {
         OtpFactor factor = OtpFactor.valueOf(claims.purpose());
         User user = users.findById(claims.userId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_CHALLENGE));
-        String mode = configService.current().getMode().name();
+        String mode = resolveMode(user).name();
 
         lockoutService.assertNotLocked(user);
 
@@ -135,7 +139,7 @@ public class AuthService {
                 .user(user.getUsername()).role(user.getRole().name()).factor(factor.name()).mode(mode));
 
         AuthConfig config = configService.current();
-        if (factor == OtpFactor.MOBILE_OTP && config.getMode() == AuthMode.S3) {
+        if (factor == OtpFactor.MOBILE_OTP && resolveMode(user) == AuthMode.S3) {
             if (!config.isEmailOtpEnabled()) {
                 throw new BusinessException(ErrorCode.EMAIL_OTP_UNSUPPORTED);
             }
@@ -153,7 +157,7 @@ public class AuthService {
         OtpFactor factor = OtpFactor.valueOf(claims.purpose());
         User user = users.findById(claims.userId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_CHALLENGE));
-        String mode = configService.current().getMode().name();
+        String mode = resolveMode(user).name();
 
         lockoutService.assertNotLocked(user);
         captchaService.recordOtpRequest(user.getUsername());
@@ -196,7 +200,8 @@ public class AuthService {
         var session = sessionService.find(cu.sessionId()).orElseThrow(() -> new BusinessException(ErrorCode.UNAUTHENTICATED));
         return new SessionResponse(user.getId(), user.getUsername(), user.getFullName(), user.getEmail(),
                 user.getRole().name(), session.getSessionId(), session.getAuthMethod(),
-                user.isMfaEnabled(), user.isMfaEnrolled(), session.getIssuedAt(), session.getExpiresAt());
+                user.isMfaEnabled(), user.isMfaEnrolled(), user.getAuthModeOverride(),
+                resolveMode(user).name(), session.getIssuedAt(), session.getExpiresAt());
     }
 
     // ------------------------------------------------------------------ UC-09
@@ -242,7 +247,7 @@ public class AuthService {
         lockoutService.recordSuccess(user, authMethod);
         audit.record(AuditEvent.action(AuditAction.LOGIN_SUCCESS).success()
                 .user(user.getUsername()).role(user.getRole().name()).factor(authMethod)
-                .session(session.getSessionId()).mode(configService.current().getMode().name()));
+                .session(session.getSessionId()).mode(resolveMode(user).name()));
         return LoginResponse.authenticated(token, session.getExpiresAt(), summary(user));
     }
 
@@ -296,5 +301,21 @@ public class AuthService {
     @Transactional(readOnly = true)
     public Instant lockedUntil(Long userId) {
         return users.findById(userId).map(User::getLockedUntil).orElse(null);
+    }
+
+    /**
+     * Effective authentication mode for a user: the per-user override assigned by an
+     * administrator, otherwise the global {@code auth_config} mode (UC-08).
+     */
+    public AuthMode resolveMode(User user) {
+        String override = user.getAuthModeOverride();
+        if (override != null && !override.isBlank()) {
+            try {
+                return AuthMode.valueOf(override.trim().toUpperCase(java.util.Locale.ROOT));
+            } catch (IllegalArgumentException ignored) {
+                // fall through to the global configuration
+            }
+        }
+        return configService.current().getMode();
     }
 }

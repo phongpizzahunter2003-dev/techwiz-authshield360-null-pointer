@@ -55,9 +55,16 @@ lock still denied; release ⇒ `LOCKOUT_RELEASED`.
 | Can MFA be reset? | UC-16 (optional): *Tác nhân chính* = "Người dùng portal; Administrator" — the system **or** an admin may reset the factor, after which the user must re-enrol (UC-09). Reset is logged as `MFA_RESET`. |
 | When is enrolment prompted? | UC-09 precondition "MFA đã được bật; người dùng chưa đăng ký yếu tố" + trigger "Lần đăng nhập đầu tiên sau khi bật MFA" ⇒ after a successful password login, if `mfaEnabled && !mfaEnrolled`, the portal prompts the user to enrol (implemented as a post-login modal, dismissible for the session; strict blocking can be enabled by policy). |
 
-**Implementation mapping:** `POST /api/v1/auth/mfa/enroll` (start) and
+| **Implementation mapping:** `POST /api/v1/auth/mfa/enroll` (start) and
 `POST /api/v1/auth/mfa/enroll/confirm` (confirm) are self-scoped and require only an authenticated
 session — no admin role. `POST /api/v1/admin/users/{id}/reset-mfa` is the admin reset path.
+
+**Assigning a mode to users (C-05):** the global mode is UC-08 (`auth_config`). An administrator may
+additionally set a **per-user** mode (`users.auth_mode_override` = S1/S2/S3, or empty = inherit the
+global mode) through the user editor or the bulk action
+`POST /api/v1/admin/users/apply-auth-mode` (`{ "mode": "S1|S2|S3|INHERIT", "role": "STUDENT|null" }`).
+The effective mode at login is the override when present, otherwise the global configuration.
+Assignment changes *whether MFA is required*; **enrolment remains the user's own action (UC-09)**.
 
 ## Part B — NEW: Student assignment use cases (project extension)
 

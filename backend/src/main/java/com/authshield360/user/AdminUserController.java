@@ -60,4 +60,18 @@ public class AdminUserController {
         userService.resetMfa(id);
         return ApiResponse.ok("Đã đặt lại xác thực hai lớp.", null);
     }
+
+    /**
+     * Bulk security-policy assignment (admin): apply S1 / S2 / S3 to every user or to one role.
+     * MFA enrolment itself remains self-service (UC-09).
+     */
+    @PostMapping("/apply-auth-mode")
+    public ApiResponse<java.util.Map<String, Object>> applyAuthMode(
+            @Valid @RequestBody com.authshield360.user.dto.ApplyAuthModeRequest request) {
+        int affected = userService.applyAuthMode(request.mode(), request.role());
+        String scope = request.role() == null ? "tất cả người dùng" : request.role().name();
+        return ApiResponse.ok("Đã áp dụng chế độ " + request.mode() + " cho " + affected + " tài khoản (" + scope + ").",
+                java.util.Map.of("affected", affected, "mode", request.mode(),
+                        "scope", request.role() == null ? "ALL" : request.role().name()));
+    }
 }

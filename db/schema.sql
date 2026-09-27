@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS users (
   mfa_enabled     BIT(1)       NOT NULL DEFAULT b'0',
   mfa_enrolled    BIT(1)       NOT NULL DEFAULT b'0',
   mfa_secret_enc  VARCHAR(255) NULL,
+  auth_mode_override VARCHAR(4) NULL,
   failed_attempts INT          NOT NULL DEFAULT 0,
   lockout_level   INT          NOT NULL DEFAULT 0,
   locked_until    DATETIME(6)  NULL,

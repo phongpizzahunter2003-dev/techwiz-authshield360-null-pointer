@@ -47,6 +47,13 @@ public class User {
     @Column(name = "mfa_secret_enc", length = 255)
     private String mfaSecretEnc;
 
+    /**
+     * Per-user authentication mode override: "S1", "S2", "S3" or null = follow the global
+     * auth_config mode. Lets an administrator assign a mode to a single user or in bulk.
+     */
+    @Column(name = "auth_mode_override", length = 4)
+    private String authModeOverride;
+
     @Column(name = "failed_attempts", nullable = false)
     private int failedAttempts = 0;
 
@@ -87,6 +94,8 @@ public class User {
     public void setMfaEnrolled(boolean mfaEnrolled) { this.mfaEnrolled = mfaEnrolled; }
     public String getMfaSecretEnc() { return mfaSecretEnc; }
     public void setMfaSecretEnc(String mfaSecretEnc) { this.mfaSecretEnc = mfaSecretEnc; }
+    public String getAuthModeOverride() { return authModeOverride; }
+    public void setAuthModeOverride(String authModeOverride) { this.authModeOverride = authModeOverride; }
     public int getFailedAttempts() { return failedAttempts; }
     public void setFailedAttempts(int failedAttempts) { this.failedAttempts = failedAttempts; }
     public int getLockoutLevel() { return lockoutLevel; }

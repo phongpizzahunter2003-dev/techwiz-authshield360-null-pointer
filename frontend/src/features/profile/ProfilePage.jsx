@@ -42,6 +42,15 @@ export function ProfilePage() {
     }
   }, [enroll?.secret])
 
+  const copy = async (text, label) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      toast.success(`Đã sao chép ${label}.`)
+    } catch {
+      toast.error('Không thể sao chép tự động. Vui lòng chọn và sao chép thủ công.')
+    }
+  }
+
   const startEnroll = async () => {
     setBusy(true)
     try {
@@ -105,6 +114,17 @@ export function ProfilePage() {
                 <dt className="text-ink-400">Phương thức xác thực</dt>
                 <dd className="font-semibold text-ink-900">{s.authMethod || '—'}</dd>
               </div>
+              <div className="flex items-start justify-between gap-3">
+                <dt className="text-ink-400">Chế độ xác thực hiệu lực</dt>
+                <dd className="text-right">
+                  <Badge tone="brand">{s.effectiveAuthMode || 'S1'}</Badge>
+                  <p className="mt-1 text-xs text-ink-400">
+                    {s.authModeOverride
+                      ? 'Do quản trị viên gán cho tài khoản này'
+                      : 'Theo cấu hình chung của hệ thống'}
+                  </p>
+                </dd>
+              </div>
               <div className="flex justify-between gap-3">
                 <dt className="text-ink-400">Session ID</dt>
                 <dd className="max-w-[220px] truncate font-mono text-xs text-ink-600">{s.sessionId}</dd>
@@ -139,17 +159,52 @@ export function ProfilePage() {
               </>
             ) : (
               <form onSubmit={confirmEnroll} className="mt-3 space-y-4">
+                <ol className="list-decimal space-y-1 pl-5 text-sm text-ink-600">
+                  <li>Mở ứng dụng xác thực (Google Authenticator, Microsoft Authenticator, FreeOTP…).</li>
+                  <li>
+                    Chọn <strong>“Quét mã QR”</strong> <em>trong ứng dụng xác thực</em> rồi quét mã bên dưới.
+                    Đừng quét bằng ứng dụng camera mặc định của điện thoại — camera sẽ báo “chỉ mở bằng ứng dụng”.
+                  </li>
+                  <li>Nhập mã 6 số mà ứng dụng hiển thị để hoàn tất.</li>
+                </ol>
+
                 <div className="flex flex-col items-center gap-3 rounded-2xl bg-surface-soft p-4">
                   <div className="rounded-2xl bg-white p-3 shadow-soft">
                     <QRCodeSVG value={enroll.otpauthUri} size={168} />
                   </div>
-                  <div className="w-full text-center">
-                    <p className="text-xs font-bold uppercase text-ink-400">Hoặc nhập thủ công mã bí mật</p>
-                    <code className="mt-1 block break-all rounded-xl bg-white px-3 py-2 font-mono text-xs text-ink-900">
-                      {enroll.secret}
-                    </code>
+                  <div className="w-full">
+                    <p className="text-center text-xs font-bold uppercase text-ink-400">
+                      Hoặc nhập thủ công mã bí mật
+                    </p>
+                    <div className="mt-1 flex items-center gap-2">
+                      <code className="min-w-0 flex-1 break-all rounded-xl bg-white px-3 py-2 font-mono text-xs text-ink-900">
+                        {enroll.secret}
+                      </code>
+                      <button
+                        type="button"
+                        className="btn-ghost !px-3 !py-2"
+                        onClick={() => copy(enroll.secret, 'mã bí mật')}
+                        title="Sao chép mã bí mật"
+                      >
+                        📋
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      className="btn-ghost mt-2 w-full !py-2 text-xs"
+                      onClick={() => copy(enroll.otpauthUri, 'liên kết otpauth')}
+                    >
+                      🔗 Sao chép liên kết otpauth:// (dán vào ứng dụng xác thực)
+                    </button>
                   </div>
                 </div>
+
+                <p className="rounded-xl border border-sun-400 bg-sun-100/60 px-3 py-2 text-xs text-ink-600">
+                  <strong>Gặp lỗi “chỉ mở bằng ứng dụng”?</strong> Điện thoại đang mở liên kết{' '}
+                  <code className="font-mono">otpauth://</code> bằng trình duyệt nên không có ứng dụng nào nhận.
+                  Hãy quét QR <strong>trực tiếp trong ứng dụng xác thực</strong>, hoặc dùng chức năng “Nhập khóa
+                  thủ công” và dán mã bí mật ở trên.
+                </p>
 
                 <div className="rounded-2xl border border-sun-400 bg-sun-100/60 p-3 text-sm">
                   <p className="font-semibold text-ink-900">

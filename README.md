@@ -137,6 +137,30 @@ chưa đăng ký), hệ thống sẽ **nhắc** người dùng thiết lập.
 Quản trị viên **không tạo QR thay người dùng**: admin chỉ bật/cấu hình chế độ xác thực (UC-08) và có
 thể **đặt lại MFA** cho một tài khoản (UC-16), sau đó người dùng phải đăng ký lại.
 
+### 6.2 Gán S1/S2/S3 cho người dùng (quản trị viên)
+
+Vào **Quản trị → Người dùng & vai trò**:
+
+- Nút **“🛡️ Áp dụng S1/S2/S3 hàng loạt”**: chọn chế độ (S1 / S2 / S3 / Theo cấu hình chung) và phạm vi
+  (**Tất cả người dùng** hoặc **chỉ Học sinh / Giáo viên / Quản trị viên**) rồi bấm Áp dụng.
+- Trong form sửa từng tài khoản có mục **“Chế độ xác thực áp dụng cho tài khoản”**; cột *Chế độ xác thực*
+  trong bảng cho biết tài khoản đang dùng chế độ riêng hay theo cấu hình chung.
+
+Cách hoạt động: mỗi người dùng có trường `auth_mode_override` (S1/S2/S3) trong bảng `users`.
+**Chế độ hiệu lực khi đăng nhập** = override của người dùng, nếu trống thì lấy chế độ chung ở
+*Cấu hình xác thực*. Gán `S1` sẽ tắt yêu cầu MFA; `S2`/`S3` sẽ bật yêu cầu MFA — nhưng **việc đăng ký
+MFA vẫn do chính người dùng thực hiện** (UC-09).
+
+### 6.3 Kiểm tra dữ liệu đã vào CSDL chưa
+
+Vào **Quản trị → Hệ thống & dữ liệu** (`/admin/system`): hiển thị
+
+- Sản phẩm/phiên bản CSDL, JDBC URL, profile đang chạy và CSDL có lưu trữ bền vững hay không.
+- **Số bản ghi của từng bảng**, đọc trực tiếp bằng SQL trên kết nối đang hoạt động.
+
+> Lưu ý: profile `dev` dùng **H2 trong bộ nhớ** — dữ liệu *có* được ghi vào CSDL nhưng sẽ mất khi khởi
+> động lại backend. Muốn dữ liệu tồn tại lâu dài, chạy profile `mysql` (mục 3).
+
 ---
 
 ## 7. Kịch bản nộp bài của học sinh (bổ sung theo yêu cầu)
@@ -211,5 +235,6 @@ Chi tiết: [`docs/security-bac.md`](docs/security-bac.md).
 | Cổng 8080 đã dùng | Đổi `server.port` hoặc dừng tiến trình đang chiếm cổng |
 | Không đăng nhập được | Kiểm tra backend đã chạy; xem log audit; tài khoản có thể đang bị khóa tạm |
 | Không nhận OTP | Ở `dev`, mã hiển thị trên UI/ log `[SIMULATED-SMS]`; ở S3 cần bật Email OTP |
+| Quét QR báo “chỉ mở bằng ứng dụng” | Do camera mặc định của điện thoại không xử lý được liên kết `otpauth://`. Hãy mở **ứng dụng xác thực → Quét mã QR**, hoặc dùng **nhập khóa thủ công** và dán mã bí mật (đã sửa định dạng URI: khoảng trắng thành `%20`) |
 | Lỗi kết nối MySQL | Kiểm tra `DB_*` trong `.env`; đảm bảo schema đã tạo |
 | `mvn` không có | Dùng `./mvnw` (Maven wrapper đi kèm) |

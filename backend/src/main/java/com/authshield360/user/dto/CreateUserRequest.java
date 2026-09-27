@@ -28,6 +28,9 @@ public record CreateUserRequest(
         String password,
 
         @NotNull(message = "Vai trò là bắt buộc.")
-        RoleType role
+        RoleType role,
+
+        /** Optional per-user mode: S1 | S2 | S3 (blank/null = follow global config). */
+        String authMode
 ) {
 }

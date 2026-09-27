@@ -23,6 +23,7 @@ const NAV = {
     { to: '/admin/config', label: 'Cấu hình xác thực', icon: '⚙️' },
     { to: '/admin/audit-logs', label: 'Nhật ký xác thực', icon: '📜' },
     { to: '/admin/comparison', label: 'So sánh S1/S2/S3', icon: '📈' },
+    { to: '/admin/system', label: 'Hệ thống & dữ liệu', icon: '🗄️' },
     { to: '/profile', label: 'Bảo mật & MFA', icon: '🔐' },
   ],
 }

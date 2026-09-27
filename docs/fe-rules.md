@@ -119,7 +119,7 @@ Every dashboard shows **role-specific, clickable charts**; every displayed item 
 
 - Every detail view is wrapped in `DetailShell`, which always renders a **Back button**.
 - `BackButton` uses `navigate(-1)` when real history exists, otherwise a deterministic fallback route (`fallback` prop) so a directly-opened URL is never a dead end.
-- Detail routes: `/student/assignments/:id`, `/teacher/assignments/:id`, `/teacher/classes/:id`, `/admin/users/:id`, `/admin/audit-logs/:id`.
+- Detail routes: `/student/assignments/:id`, `/teacher/assignments/:id`, `/teacher/classes/:id`, `/admin/users/:id`, `/admin/audit-logs/:id`, `/admin/system`.
 - List pages accept drill-down **query params** (`?bucket=`, `?role=`, `?action=`, `?mode=`, `?from=`, `?to=`) so a chart click lands on a pre-filtered view.
 - Never rely on the client filter for authorisation — the detail endpoints re-check the role server-side (BR-05).
 

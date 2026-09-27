@@ -74,6 +74,8 @@ export const adminApi = {
   updateConfig: (payload) => put('/admin/config', payload),
   auditLogs: (params) => get('/admin/audit-logs', params),
   auditLog: (id) => get(`/admin/audit-logs/${id}`),
+  applyAuthMode: (payload) => post('/admin/users/apply-auth-mode', payload),
+  dbStatus: () => get('/admin/system/db-status'),
 }
 
 export function auditExportUrl(params) {

@@ -44,6 +44,7 @@ otp_tokens  (transient, keyed by user_identifier + factor)
 | mfa_enabled | BOOLEAN NOT NULL DEFAULT FALSE | |
 | mfa_enrolled | BOOLEAN NOT NULL DEFAULT FALSE | |
 | mfa_secret_enc | VARCHAR(255) | encrypted TOTP secret (BR-10) |
+| auth_mode_override | VARCHAR(4) | per-user mode `S1\|S2\|S3`; NULL = follow global `auth_config` |
 | failed_attempts | INT NOT NULL DEFAULT 0 | lockout counter (BR-04, VĐ-04) |
 | lockout_level | INT NOT NULL DEFAULT 0 | exponential step index |
 | locked_until | DATETIME(6) | null when unlocked |

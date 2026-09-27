@@ -66,6 +66,12 @@
 | TC-M2 | User completes enrolment from the prompt | QR + secret shown to the **user**; confirming a valid TOTP sets `mfaEnrolled=true`, logs `MFA_ENROLL_SUCCESS` | UC-09 |
 | TC-M3 | Admin resets a user's MFA | `mfaEnrolled=false`, old factor invalidated, `MFA_RESET` logged, user must re-enrol | UC-16 |
 | TC-M4 | Verify admin has no "create QR for user" capability | Only self-scoped `/auth/mfa/enroll*` endpoints exist; admin path is reset-only | C-01 |
+| TC-P1 | Admin applies S2 in bulk to STUDENT | Response `affected=2`; each student's `auth_mode_override=S2`, `mfaEnabled=true`; student login now returns `OTP_REQUIRED` | C-05 |
+| TC-P2 | Admin applies INHERIT in bulk | Overrides cleared; effective mode falls back to the global `auth_config` (baseline login works) | C-05 |
+| TC-P3 | Admin sets a single user's mode via the user editor | Only that account's override changes; other users unaffected | C-05 |
+| TC-P4 | Non-admin calls `POST /admin/users/apply-auth-mode` | `403` + `PRIVILEGE_VIOLATION` | BR-05 |
+| TC-P5 | Admin opens `/admin/system` | Shows JDBC product/URL, durability flag and per-table row counts read over the live connection | C-06 |
+| TC-P6 | Scan the enrolment QR with an authenticator app | The `otpauth://` URI uses `%20` (never `+`) and includes `issuer`, `algorithm=SHA1`, `digits`, `period` | UC-09 |
 
 ## 4. Negative & abuse tests
 
