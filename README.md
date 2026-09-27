@@ -100,20 +100,46 @@ Fast reset (UC-14): apply `db/reset.sql` or `docker compose down -v && docker co
 
 ---
 
-## 4. Demo accounts (simulated — BR-01)
+## 4. Demo accounts and seeded sample data (simulated — BR-01)
 
-| Username | Password | Role | Home |
-|---|---|---|---|
-| `admin01` | `admin123` | Administrator | `/admin` |
-| `teacher01` | `teacher123` | Teacher | `/teacher` |
-| `student01` | `student123` | Student | `/student` |
-| `student02` | `student123` | Student | `/student` |
+The seeder creates **1 admin + 20 teachers + 20 students (20 sample records per group)** plus
+classrooms, assignments, submissions, exam results and notifications, so every list, chart and
+pagination control has realistic content.
+
+| Group | Accounts | Password |
+|---|---|---|
+| Administrator | `admin01` | `admin123` |
+| Teachers (20) | `teacher01` … `teacher20` | `teacher123` |
+| Students (20) | `student01` … `student20` | `student123` |
+
+Seeded volume on a fresh database:
+
+| Table | Rows |
+|---|---|
+| users | 41 (1 admin · 20 teachers · 20 students) |
+| classrooms | 20 (CS101 … CS120, one owner teacher each) |
+| enrollments | 41 (each student in 2 classes; CS101 keeps the two demo students) |
+| assignments | 43 (CS101 keeps the UC-A1..UC-A4 scenarios; the rest get 2 each) |
+| assignment_submissions | ~71 (mix of on-time / late, some graded; placeholder files are written to `backend/uploads`) |
+| exam_results | 40 (2 per student) |
+| notifications | ~160 (welcome + graded + submission-received) |
+
+Convenient accounts for demonstrations:
+
+- `student01` — the flagship class CS101, exercises the scenario assignments (on-time, late, locked, resubmit).
+- `teacher01` — owns CS101 (the class used in all the tutorial screenshots).
+- `teacher05`, `student10` — ordinary seeded accounts with submissions/grades already present.
 
 The system starts in **S1 (password only)** so you can sign in immediately. Switch to **S2** (adds
 Mobile OTP) or **S3** (adds Email OTP) in **Admin → Auth configuration**.
 
 > In the `dev` environment the OTP code is returned in the API response and shown in the UI so no
-> real SMS/email is needed (VD-06). With the `mysql` profile, `authshield.expose-otp=false`.
+> real SMS/email is needed (VD-06). With the `mysql` profile, `authshield.expose-otp` defaults to
+> `false` — set `AUTHSHIELD_EXPOSE_OTP=true` to see the code in the UI, otherwise read it from the
+> backend log line `[SIMULATED-SMS] … code=123456`.
+>
+> Seeding runs only when the `users` table is empty, and hashing 41 passwords with BCrypt (cost 12)
+> takes roughly 15-20 seconds on first start.
 
 ---
 
