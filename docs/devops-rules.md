@@ -19,6 +19,11 @@
 |---|---|---|---|---|
 | `dev` (default) | H2 in-file/mem, MySQL mode | `ddl-auto=update` | env or defaults | local run without MySQL |
 | `mysql` | MySQL 8 | `ddl-auto=update` (first run) → `validate` | **env required** | primary target |
+
+**MariaDB note:** some MySQL-compatible servers (for example the MariaDB bundled with XAMPP) report
+themselves as `5.5.5-...-MariaDB`. In that case set `DB_DIALECT=org.hibernate.dialect.MariaDBDialect`
+so Hibernate uses the MariaDB dialect; otherwise the driver still works but Hibernate logs a
+"version is no longer supported" warning.
 | `test` | H2 mem | `create-drop` | test fixtures | CI/tests |
 
 ## 3. Configuration & secrets (BR-10)

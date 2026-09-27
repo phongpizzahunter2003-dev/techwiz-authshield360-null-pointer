@@ -56,24 +56,47 @@ npm run dev
 
 ## 3. Running with MySQL (primary target)
 
-```bash
-# 1) Create the schema (optional — Hibernate also creates/aligns it on first run)
-mysql -u root -p < db/schema.sql
-mysql -u root -p authshield360 < db/seed.sql
+The backend connects with the MySQL driver. Two servers can be used — pick whichever is running:
 
-# 2) Provide secrets through environment variables (never commit them — BR-10)
-$env:DB_PASSWORD="..."                       # PowerShell
-$env:AUTHSHIELD_SIGNING_KEY="<random 32+ chars>"
+| Option | Typical JDBC | Notes |
+|---|---|---|
+| **MySQL Server 8** (installed as service `MySQL80`) | `jdbc:mysql://localhost:3306/authshield360` | No dialect override needed |
+| **MariaDB** (e.g. the server bundled with XAMPP) | same URL, port 3306 | Reports version `5.5.5-...-MariaDB`, so set `DB_DIALECT` to the MariaDB dialect |
+
+```powershell
+# 1) Create the schema and default configuration (14 tables)
+#    XAMPP example — use your own mysql.exe path if MySQL Server 8 is installed:
+& 'C:\xampp\mysql\bin\mysql.exe' -u root --default-character-set=utf8mb4 -e "source <repo>/db/schema.sql"
+& 'C:\xampp\mysql\bin\mysql.exe' -u root authshield360 --default-character-set=utf8mb4 -e "source <repo>/db/seed.sql"
+
+# 2) Provide the connection settings and a stable signing key (never committed — BR-10)
+$env:DB_HOST='127.0.0.1'; $env:DB_PORT='3306'
+$env:DB_NAME='authshield360'; $env:DB_USER='root'; $env:DB_PASSWORD=''
+$env:AUTHSHIELD_SIGNING_KEY='<random 32+ characters>'
+# MariaDB only (XAMPP):
+$env:DB_DIALECT='org.hibernate.dialect.MariaDBDialect'
+# Optional, for demos where no real SMS/e-mail is delivered:
+$env:AUTHSHIELD_EXPOSE_OTP='true'
 
 # 3) Run
 cd backend
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=mysql
 ```
 
-The `mysql` profile uses `ddl-auto=update` for the first provision; afterwards you can switch to
-`validate` for drift protection. Copy `.env.example` to `.env` and fill in the values.
+On first start the seeder creates the four demo accounts; on every later start the existing data
+is reused (**BR-12**: accounts, roles, MFA configuration and the audit log survive a restart).
 
-Fast reset (UC-14): `docker compose down -v && docker compose up -d` or `db/reset.sql`.
+### Where the data lives and how to inspect it
+
+- **On disk**: the server's data directory — e.g. `C:\xampp\mysql\data\authshield360\` (one
+  `.ibd`/`.frm` pair per table).
+- **In the app**: *Admin → System & data* (`/admin/system`) shows the product, JDBC URL,
+  `persistent: true` and the row count of every table.
+- **SQL client**: `mysql -u root authshield360 -e "SELECT id, username, role FROM users;"`
+- **phpMyAdmin** (XAMPP): http://localhost/phpmyadmin → database `authshield360`
+- **MySQL Workbench**: connect to `localhost:3306`, schema `authshield360`
+
+Fast reset (UC-14): apply `db/reset.sql` or `docker compose down -v && docker compose up -d`.
 
 ---
 
