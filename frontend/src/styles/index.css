@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-surface-soft text-ink-600 font-sans antialiased;
+    margin: 0;
+    min-height: 100vh;
+  }
+  h1, h2, h3, h4 {
+    @apply text-ink-900 font-bold;
+  }
+  /* Accessible focus ring everywhere (fe-rules.md §9) */
+  :focus-visible {
+    @apply outline-none ring-2 ring-brand-500 ring-offset-2 ring-offset-white;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white rounded-2xl shadow-soft border border-brand-50 p-5;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold
+           transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px];
+  }
+  .btn-primary {
+    @apply btn bg-brand-500 text-white hover:bg-brand-600 shadow-glow;
+  }
+  .btn-accent {
+    @apply btn bg-accent-400 text-ink-900 hover:bg-accent-600 hover:text-white;
+  }
+  .btn-ghost {
+    @apply btn bg-surface-muted text-ink-600 hover:bg-brand-100;
+  }
+  .btn-danger {
+    @apply btn bg-coral-400 text-white hover:bg-coral-600;
+  }
+  .input {
+    @apply w-full rounded-xl border border-brand-100 bg-white px-3.5 py-2.5 text-sm text-ink-900
+           placeholder:text-ink-400 focus:border-brand-400 focus:ring-2 focus:ring-brand-100 transition;
+  }
+  .label {
+    @apply block text-xs font-semibold uppercase tracking-wide text-ink-600 mb-1.5;
+  }
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-brand-100 bg-white px-3 py-1.5
+           text-xs font-medium text-ink-600 hover:border-brand-300 transition;
+  }
+  .table-wrap {
+    @apply w-full overflow-x-auto rounded-2xl border border-brand-50 bg-white;
+  }
+  .table {
+    @apply w-full text-left text-sm border-collapse;
+  }
+  .table thead th {
+    @apply bg-surface-soft px-4 py-3 text-xs font-bold uppercase tracking-wide text-ink-600 whitespace-nowrap;
+  }
+  .table tbody td {
+    @apply border-t border-brand-50 px-4 py-3 align-middle;
+  }
+  .hero-gradient {
+    background:
+      radial-gradient(1200px 500px at 10% -10%, #E4E1FF 0%, transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, #D7FBF2 0%, transparent 55%),
+      radial-gradient(700px 400px at 50% 120%, #FFF3D1 0%, transparent 60%),
+      #FFFFFF;
+  }
+}

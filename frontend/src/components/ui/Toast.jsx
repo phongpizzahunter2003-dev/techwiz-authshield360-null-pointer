@@ -1,0 +1,78 @@
+import { createContext, useCallback, useContext, useMemo, useState } from 'react'
+
+const ToastContext = createContext(null)
+
+let seq = 0
+
+const TONES = {
+  success: { ring: 'border-accent-400', icon: '✅', text: 'text-ink-900' },
+  error: { ring: 'border-coral-400', icon: '⚠️', text: 'text-ink-900' },
+  info: { ring: 'border-sky-400', icon: 'ℹ️', text: 'text-ink-900' },
+  warning: { ring: 'border-sun-400', icon: '🔔', text: 'text-ink-900' },
+}
+
+export function ToastProvider({ children }) {
+  const [toasts, setToasts] = useState([])
+
+  const remove = useCallback((id) => setToasts((list) => list.filter((t) => t.id !== id)), [])
+
+  const push = useCallback(
+    (message, tone = 'info', timeout = 4200) => {
+      const id = ++seq
+      setToasts((list) => [...list, { id, message, tone }])
+      if (timeout > 0) window.setTimeout(() => remove(id), timeout)
+      return id
+    },
+    [remove],
+  )
+
+  const value = useMemo(
+    () => ({
+      push,
+      success: (m) => push(m, 'success'),
+      error: (m) => push(m, 'error', 6000),
+      info: (m) => push(m, 'info'),
+      warning: (m) => push(m, 'warning', 5500),
+      remove,
+    }),
+    [push, remove],
+  )
+
+  return (
+    <ToastContext.Provider value={value}>
+      {children}
+      <div
+        className="fixed z-[100] bottom-4 right-4 left-4 sm:left-auto flex flex-col gap-2 sm:w-96"
+        role="status"
+        aria-live="polite"
+      >
+        {toasts.map((toast) => {
+          const tone = TONES[toast.tone] || TONES.info
+          return (
+            <div
+              key={toast.id}
+              className={`animate-pop-in flex items-start gap-3 rounded-2xl border-l-4 ${tone.ring} bg-white px-4 py-3 shadow-soft`}
+            >
+              <span aria-hidden="true">{tone.icon}</span>
+              <p className={`flex-1 text-sm ${tone.text}`}>{toast.message}</p>
+              <button
+                type="button"
+                onClick={() => remove(toast.id)}
+                className="text-ink-400 hover:text-ink-600"
+                aria-label="Đóng thông báo"
+              >
+                ✕
+              </button>
+            </div>
+          )
+        })}
+      </div>
+    </ToastContext.Provider>
+  )
+}
+
+export function useToast() {
+  const ctx = useContext(ToastContext)
+  if (!ctx) throw new Error('useToast must be used inside ToastProvider')
+  return ctx
+}
