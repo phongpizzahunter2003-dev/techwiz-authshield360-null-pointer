@@ -5,8 +5,8 @@ import com.authshield360.auth.OtpFactor;
 import java.time.Instant;
 
 /**
- * Login step result. {@code status} is either AUTHENTICATED (a token is present) or OTP_REQUIRED
- * (a challenge token + factor is present).
+ * Result of a sign-in step. {@code status} is either {@code AUTHENTICATED} (an access token is
+ * present) or {@code OTP_REQUIRED} (a challenge token and factor are present).
  */
 public record LoginResponse(
         String status,
@@ -25,15 +25,15 @@ public record LoginResponse(
     public static final String OTP_REQUIRED = "OTP_REQUIRED";
 
     public static LoginResponse authenticated(String token, Instant expiresAt, UserSummary user) {
-        return new LoginResponse(AUTHENTICATED, "Đăng nhập thành công. Đang chuyển hướng...",
+        return new LoginResponse(AUTHENTICATED, "Signed in successfully. Redirecting...",
                 token, expiresAt, null, null, null, null, null, false, user);
     }
 
     public static LoginResponse otpRequired(String challengeToken, OtpFactor factor, Long expiresInSeconds,
                                             String deliveryCode, String deliveryChannel, boolean totpBased) {
         String message = factor == OtpFactor.EMAIL_OTP
-                ? "Xác thực Mobile OTP thành công. Một mã xác minh đã được gửi đến email của bạn."
-                : "Mã OTP đã được gửi đến thiết bị của bạn. Vui lòng kiểm tra.";
+                ? "Mobile OTP verified. A verification code has been sent to your email."
+                : "A verification code has been sent to your device. Please check it.";
         return new LoginResponse(OTP_REQUIRED, message, null, null, challengeToken, factor,
                 expiresInSeconds, deliveryCode, deliveryChannel, totpBased, null);
     }

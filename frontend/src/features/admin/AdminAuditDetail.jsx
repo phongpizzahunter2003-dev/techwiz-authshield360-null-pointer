@@ -15,16 +15,16 @@ export function AdminAuditDetail() {
 
   const rows = event
     ? [
-        ['Thời điểm', formatDateTime(event.eventTime)],
-        ['Mã sự kiện', event.eventId],
-        ['Hành động', event.eventAction],
-        ['Người dùng', event.userIdentifier || '—'],
-        ['Vai trò', event.role || '—'],
-        ['Yếu tố xác thực', event.authFactor || '—'],
-        ['Chế độ', event.authMode || '—'],
-        ['Địa chỉ IP', event.clientIp || '—'],
+        ['Time', formatDateTime(event.eventTime)],
+        ['Event ID', event.eventId],
+        ['Action', event.eventAction],
+        ['User', event.userIdentifier || '—'],
+        ['Role', event.role || '—'],
+        ['Authentication factor', event.authFactor || '—'],
+        ['Mode', event.authMode || '—'],
+        ['IP address', event.clientIp || '—'],
         ['Session ID', event.sessionId || '—'],
-        ['Lý do thất bại', event.failureReason || '—'],
+        ['Failure reason', event.failureReason || '—'],
         ['Correlation ID', event.correlationId || '—'],
       ]
     : []
@@ -40,8 +40,8 @@ export function AdminAuditDetail() {
 
   return (
     <DetailShell
-      title={event ? `Sự kiện: ${event.eventAction}` : 'Chi tiết nhật ký'}
-      subtitle="Nhật ký xác thực — UC-11"
+      title={event ? `Event: ${event.eventAction}` : 'Audit log details'}
+      subtitle="Audit log — UC-11"
       fallback="/admin/audit-logs"
     >
       {loading ? <Spinner /> : null}
@@ -53,7 +53,7 @@ export function AdminAuditDetail() {
             <div className="flex flex-wrap items-center gap-2">
               <Badge tone={statusTone(event.status)}>{event.status}</Badge>
               <Badge tone="brand">{event.eventAction}</Badge>
-              {event.authMode ? <Badge tone="neutral">Chế độ {event.authMode}</Badge> : null}
+              {event.authMode ? <Badge tone="neutral">Mode {event.authMode}</Badge> : null}
               {event.authFactor ? <Badge tone="sky">{event.authFactor}</Badge> : null}
             </div>
             <dl className="mt-4 grid grid-cols-1 gap-x-8 gap-y-3 text-sm sm:grid-cols-2">
@@ -70,7 +70,7 @@ export function AdminAuditDetail() {
 
           {prettyDetail ? (
             <section className="card">
-              <h2 className="text-base font-bold text-ink-900">Chi tiết bổ sung</h2>
+              <h2 className="text-base font-bold text-ink-900">Additional details</h2>
               <pre className="mt-3 overflow-x-auto rounded-xl bg-surface-soft p-4 text-xs text-ink-600">
                 {prettyDetail}
               </pre>

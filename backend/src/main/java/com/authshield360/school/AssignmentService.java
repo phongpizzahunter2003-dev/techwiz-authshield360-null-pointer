@@ -5,6 +5,7 @@ import com.authshield360.audit.AuditEvent;
 import com.authshield360.audit.AuditService;
 import com.authshield360.common.BusinessException;
 import com.authshield360.common.ErrorCode;
+import com.authshield360.notification.NotificationService;
 import com.authshield360.school.dto.AssignmentResponse;
 import com.authshield360.school.dto.CreateAssignmentRequest;
 import com.authshield360.school.dto.UpdateAssignmentRequest;
@@ -25,14 +26,17 @@ public class AssignmentService {
     private final ClassroomService classroomService;
     private final SchoolMapper mapper;
     private final AuditService audit;
+    private final NotificationService notifications;
 
     public AssignmentService(AssignmentRepository assignments, EnrollmentRepository enrollments,
-                             ClassroomService classroomService, SchoolMapper mapper, AuditService audit) {
+                             ClassroomService classroomService, SchoolMapper mapper, AuditService audit,
+                             NotificationService notifications) {
         this.assignments = assignments;
         this.enrollments = enrollments;
         this.classroomService = classroomService;
         this.mapper = mapper;
         this.audit = audit;
+        this.notifications = notifications;
     }
 
     @Transactional(readOnly = true)
@@ -108,6 +112,9 @@ public class AssignmentService {
         audit.record(AuditEvent.action(AuditAction.ASSIGNMENT_CREATE).success()
                 .user(viewer.username()).role(viewer.role())
                 .detail("assignmentId", saved.getId()).detail("classroomId", saved.getClassroomId()));
+        if (saved.getStatus() == AssignmentStatus.PUBLISHED) {
+            notifications.assignmentPublished(saved);
+        }
         return mapper.toAssignment(saved, viewer, false);
     }
 
@@ -129,6 +136,9 @@ public class AssignmentService {
         audit.record(AuditEvent.action(AuditAction.ASSIGNMENT_UPDATE).success()
                 .user(viewer.username()).role(viewer.role())
                 .detail("assignmentId", saved.getId()).detail("status", saved.getStatus().name()));
+        if (saved.getStatus() == AssignmentStatus.PUBLISHED) {
+            notifications.assignmentUpdated(saved);
+        }
         return mapper.toAssignment(saved, viewer, false);
     }
 
@@ -140,6 +150,7 @@ public class AssignmentService {
         Assignment saved = assignments.save(assignment);
         audit.record(AuditEvent.action(AuditAction.ASSIGNMENT_CLOSE).success()
                 .user(viewer.username()).role(viewer.role()).detail("assignmentId", saved.getId()));
+        notifications.assignmentClosed(saved);
         return mapper.toAssignment(saved, viewer, false);
     }
 }

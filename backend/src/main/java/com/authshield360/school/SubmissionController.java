@@ -32,7 +32,7 @@ public class SubmissionController {
     @PreAuthorize("hasRole('STUDENT')")
     public ApiResponse<SubmissionResponse> submit(@PathVariable Long assignmentId,
                                                   @RequestParam("file") MultipartFile file) {
-        return ApiResponse.ok("Nộp bài thành công.", submissionService.submit(assignmentId, file, SecurityUtils.current()));
+        return ApiResponse.ok("Submission accepted.", submissionService.submit(assignmentId, file, SecurityUtils.current()));
     }
 
     /** Own attempt history (UC-A4c). */
@@ -59,7 +59,7 @@ public class SubmissionController {
     @PostMapping("/teacher/submissions/{id}/grade")
     @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
     public ApiResponse<SubmissionResponse> grade(@PathVariable Long id, @Valid @RequestBody GradeRequest request) {
-        return ApiResponse.ok("Đã chấm điểm.", submissionService.grade(id, request, SecurityUtils.current()));
+        return ApiResponse.ok("Submission graded.", submissionService.grade(id, request, SecurityUtils.current()));
     }
 
     /** Download a stored file — ownership checked server-side (BR-05). */

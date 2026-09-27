@@ -15,7 +15,7 @@ export function ChartBoard({ role }) {
   const fetchFn = FETCHERS[role] || analyticsApi.student
   const { data, loading, error, reload } = useAsync(() => fetchFn(), [role])
 
-  if (loading) return <Spinner label="Đang tải biểu đồ..." />
+  if (loading) return <Spinner label="Loading charts..." />
   if (error) return <ErrorState message={error.message} onRetry={reload} />
 
   const charts = data?.data?.charts || []
@@ -24,8 +24,8 @@ export function ChartBoard({ role }) {
   return (
     <section>
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-base font-bold text-ink-900">Biểu đồ phân tích</h2>
-        <span className="text-xs text-ink-400">Bấm vào biểu đồ hoặc nhãn để xem chi tiết</span>
+        <h2 className="text-base font-bold text-ink-900">Analytics charts</h2>
+        <span className="text-xs text-ink-400">Click a chart or label to view details</span>
       </div>
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
         {charts.map((series) => (

@@ -59,7 +59,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<ApiResponse<Void>> handleUploadSize(MaxUploadSizeExceededException ex) {
         return ResponseEntity.badRequest()
-                .body(ApiResponse.error(ErrorCode.INVALID_FILE.name(), "Tệp vượt quá dung lượng cho phép."));
+                .body(ApiResponse.error(ErrorCode.INVALID_FILE.name(), "The file exceeds the allowed size."));
     }
 
     /** Method-security denial (BR-05): record the violation and return 403; 401 when anonymous. */

@@ -37,6 +37,9 @@ export function TeacherAssignments() {
   const [grading, setGrading] = useState(null)
   const [submissions, setSubmissions] = useState([])
   const [loadingSubs, setLoadingSubs] = useState(false)
+  const [closingId, setClosingId] = useState(null)
+  const [openingId, setOpeningId] = useState(null)
+  const [savingGradeId, setSavingGradeId] = useState(null)
   const [gradeDraft, setGradeDraft] = useState({})
 
   const list = assignments.data?.data || []
@@ -85,10 +88,10 @@ export function TeacherAssignments() {
     try {
       if (editing) {
         await assignmentApi.update(editing.id, payload)
-        toast.success('Cập nhật bài tập thành công.')
+        toast.success('Assignment updated successfully.')
       } else {
         await assignmentApi.create(payload)
-        toast.success('Tạo bài tập thành công.')
+        toast.success('Assignment created successfully.')
       }
       setEditorOpen(false)
       await assignments.reload()
@@ -100,16 +103,22 @@ export function TeacherAssignments() {
   }
 
   const closeAssignment = async (a) => {
+    if (closingId) return
+    setClosingId(a.id)
     try {
       await assignmentApi.close(a.id)
-      toast.success('Đã đóng bài tập.')
+      toast.success('Assignment closed.')
       await assignments.reload()
     } catch (err) {
       toast.error(err.message)
+    } finally {
+      setClosingId(null)
     }
   }
 
   const openGrading = async (a) => {
+    if (openingId) return
+    setOpeningId(a.id)
     setGrading(a)
     setLoadingSubs(true)
     setGradeDraft({})
@@ -121,30 +130,35 @@ export function TeacherAssignments() {
       setSubmissions([])
     } finally {
       setLoadingSubs(false)
+      setOpeningId(null)
     }
   }
 
   const submitGrade = async (submission) => {
+    if (savingGradeId) return
     const draft = gradeDraft[submission.id] || {}
+    setSavingGradeId(submission.id)
     try {
       await submissionApi.grade(submission.id, {
         score: Number(draft.score),
         feedback: draft.feedback || '',
       })
-      toast.success('Đã chấm điểm.')
+      toast.success('Graded.')
       await openGrading(grading)
     } catch (err) {
       toast.error(err.message)
+    } finally {
+      setSavingGradeId(null)
     }
   }
 
   return (
     <AppShell
-      title="Quản lý bài tập"
-      subtitle="Tạo, chỉnh sửa, đóng bài tập và chấm điểm bài nộp"
+      title="Assignment management"
+      subtitle="Create, edit and close assignments, and grade submissions"
       actions={
         <button type="button" className="btn-primary" onClick={openCreate}>
-          ➕ Tạo bài tập
+          ➕ Create assignment
         </button>
       }
     >
@@ -152,7 +166,7 @@ export function TeacherAssignments() {
       {assignments.error ? <ErrorState message={assignments.error.message} onRetry={assignments.reload} /> : null}
 
       {!assignments.loading && list.length === 0 ? (
-        <EmptyState icon="📝" title="Chưa có bài tập" description="Bấm 'Tạo bài tập' để giao bài cho lớp." />
+        <EmptyState icon="📝" title="No assignments yet" description="Click 'Create assignment' to assign work to a class." />
       ) : null}
 
       {list.length > 0 ? (
@@ -160,13 +174,13 @@ export function TeacherAssignments() {
           <table className="table min-w-[900px]">
             <thead>
               <tr>
-                <th>Tiêu đề</th>
-                <th>Lớp</th>
-                <th>Hạn nộp</th>
-                <th>Cho nộp muộn</th>
-                <th>Nộp lại</th>
-                <th>Trạng thái</th>
-                <th className="text-right">Thao tác</th>
+                <th>Title</th>
+                <th>Class</th>
+                <th>Due date</th>
+                <th>Allow late submission</th>
+                <th>Resubmission</th>
+                <th>Status</th>
+                <th className="text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -175,9 +189,9 @@ export function TeacherAssignments() {
                   <td className="font-semibold text-ink-900">{a.title}</td>
                   <td className="whitespace-nowrap">{a.classroomName}</td>
                   <td className="whitespace-nowrap">{formatDateTime(a.dueAt)}</td>
-                  <td className="whitespace-nowrap">{a.allowLate ? `Có (${a.latePenaltyPct}%)` : 'Không'}</td>
+                  <td className="whitespace-nowrap">{a.allowLate ? `Yes (${a.latePenaltyPct}%)` : 'No'}</td>
                   <td className="whitespace-nowrap">
-                    {a.allowResubmission ? `Có (tối đa ${a.maxAttempts})` : 'Không'}
+                    {a.allowResubmission ? `Yes (max ${a.maxAttempts})` : 'No'}
                   </td>
                   <td className="whitespace-nowrap">
                     <Badge tone={statusTone(a.status)}>{a.status}</Badge>
@@ -185,17 +199,27 @@ export function TeacherAssignments() {
                   <td>
                     <div className="table-actions">
                       <Link className="btn-xs btn-ghost" to={`/teacher/assignments/${a.id}`}>
-                        Chi tiết
+                        Details
                       </Link>
-                      <button type="button" className="btn-xs btn-ghost" onClick={() => openGrading(a)}>
-                        Chấm điểm
+                      <button
+                        type="button"
+                        className="btn-xs btn-ghost"
+                        onClick={() => openGrading(a)}
+                        disabled={openingId === a.id}
+                      >
+                        {openingId === a.id ? <InlineSpinner /> : null} Grade
                       </button>
                       <button type="button" className="btn-xs btn-ghost" onClick={() => openEdit(a)}>
-                        Sửa
+                        Edit
                       </button>
                       {a.status !== 'CLOSED' ? (
-                        <button type="button" className="btn-xs btn-danger" onClick={() => closeAssignment(a)}>
-                          Đóng
+                        <button
+                          type="button"
+                          className="btn-xs btn-danger"
+                          onClick={() => closeAssignment(a)}
+                          disabled={closingId === a.id}
+                        >
+                          {closingId === a.id ? <InlineSpinner /> : null} Close
                         </button>
                       ) : null}
                     </div>
@@ -211,13 +235,13 @@ export function TeacherAssignments() {
       <Modal
         open={editorOpen}
         onClose={() => setEditorOpen(false)}
-        title={editing ? 'Chỉnh sửa bài tập' : 'Tạo bài tập mới'}
+        title={editing ? 'Edit assignment' : 'Create new assignment'}
         size="lg"
       >
         <form onSubmit={save} className="space-y-4">
           <div>
             <label className="label" htmlFor="as-title">
-              Tiêu đề
+              Title
             </label>
             <input
               id="as-title"
@@ -229,7 +253,7 @@ export function TeacherAssignments() {
           </div>
           <div>
             <label className="label" htmlFor="as-class">
-              Lớp học
+              Class
             </label>
             <select
               id="as-class"
@@ -238,7 +262,7 @@ export function TeacherAssignments() {
               value={form.classroomId}
               onChange={(e) => setForm({ ...form, classroomId: e.target.value })}
             >
-              <option value="">-- Chọn lớp --</option>
+              <option value="">-- Select a class --</option>
               {classList.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name} ({c.code})
@@ -248,7 +272,7 @@ export function TeacherAssignments() {
           </div>
           <div>
             <label className="label" htmlFor="as-desc">
-              Mô tả
+              Description
             </label>
             <textarea
               id="as-desc"
@@ -260,7 +284,7 @@ export function TeacherAssignments() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="label" htmlFor="as-due">
-                Hạn nộp
+                Due date
               </label>
               <input
                 id="as-due"
@@ -273,7 +297,7 @@ export function TeacherAssignments() {
             </div>
             <div>
               <label className="label" htmlFor="as-max">
-                Điểm tối đa
+                Max score
               </label>
               <input
                 id="as-max"
@@ -287,7 +311,7 @@ export function TeacherAssignments() {
           </div>
 
           <fieldset className="rounded-2xl border border-brand-100 p-4">
-            <legend className="px-2 text-xs font-bold uppercase text-ink-600">Chính sách nộp bài</legend>
+            <legend className="px-2 text-xs font-bold uppercase text-ink-600">Submission policy</legend>
             <div className="space-y-3">
               <label className="flex items-center gap-2 text-sm">
                 <input
@@ -295,13 +319,13 @@ export function TeacherAssignments() {
                   checked={form.allowLate}
                   onChange={(e) => setForm({ ...form, allowLate: e.target.checked })}
                 />
-                Cho phép nộp muộn (UC-A2)
+                Allow late submission (UC-A2)
               </label>
               {form.allowLate ? (
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div>
                     <label className="label" htmlFor="as-cutoff">
-                      Hạn cuối nộp muộn
+                      Late submission deadline
                     </label>
                     <input
                       id="as-cutoff"
@@ -313,7 +337,7 @@ export function TeacherAssignments() {
                   </div>
                   <div>
                     <label className="label" htmlFor="as-penalty">
-                      Trừ điểm muộn (%)
+                      Late penalty (%)
                     </label>
                     <input
                       id="as-penalty"
@@ -333,12 +357,12 @@ export function TeacherAssignments() {
                   checked={form.allowResubmission}
                   onChange={(e) => setForm({ ...form, allowResubmission: e.target.checked })}
                 />
-                Cho phép cập nhật / nộp lại bài (UC-A4)
+                Allow updating / resubmitting (UC-A4)
               </label>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
                   <label className="label" htmlFor="as-attempts">
-                    Số lần nộp tối đa
+                    Maximum attempts
                   </label>
                   <input
                     id="as-attempts"
@@ -351,7 +375,7 @@ export function TeacherAssignments() {
                 </div>
                 <div>
                   <label className="label" htmlFor="as-status">
-                    Trạng thái
+                    Status
                   </label>
                   <select
                     id="as-status"
@@ -359,9 +383,9 @@ export function TeacherAssignments() {
                     value={form.status}
                     onChange={(e) => setForm({ ...form, status: e.target.value })}
                   >
-                    <option value="DRAFT">Bản nháp</option>
-                    <option value="PUBLISHED">Đang mở</option>
-                    <option value="CLOSED">Đã đóng</option>
+                    <option value="DRAFT">Draft</option>
+                    <option value="PUBLISHED">Open</option>
+                    <option value="CLOSED">Closed</option>
                   </select>
                 </div>
               </div>
@@ -370,20 +394,20 @@ export function TeacherAssignments() {
 
           <div className="flex justify-end gap-2">
             <button type="button" className="btn-ghost" onClick={() => setEditorOpen(false)}>
-              Hủy
+              Cancel
             </button>
             <button type="submit" className="btn-primary" disabled={saving}>
-              {saving ? <InlineSpinner /> : '💾'} Lưu
+              {saving ? <InlineSpinner /> : '💾'} Save
             </button>
           </div>
         </form>
       </Modal>
 
       {/* Grading */}
-      <Modal open={Boolean(grading)} onClose={() => setGrading(null)} title={`Chấm điểm — ${grading?.title || ''}`} size="lg">
+      <Modal open={Boolean(grading)} onClose={() => setGrading(null)} title={`Grade — ${grading?.title || ''}`} size="lg">
         {loadingSubs ? <Spinner /> : null}
         {!loadingSubs && submissions.length === 0 ? (
-          <EmptyState icon="📥" title="Chưa có bài nộp" description="Học sinh chưa nộp bài cho bài tập này." />
+          <EmptyState icon="📥" title="No submissions yet" description="Students have not submitted anything for this assignment." />
         ) : null}
         {!loadingSubs && submissions.length > 0 ? (
           <ul className="space-y-3">
@@ -395,15 +419,15 @@ export function TeacherAssignments() {
                     <div className="min-w-0">
                       <p className="truncate text-sm font-bold text-ink-900">{s.studentName}</p>
                       <p className="truncate text-xs text-ink-400">
-                        Lần #{s.attemptNumber} · {s.originalName} · {formatDateTime(s.submittedAt)}
+                        Attempt #{s.attemptNumber} · {s.originalName} · {formatDateTime(s.submittedAt)}
                       </p>
                     </div>
-                    <Badge tone={s.late ? 'coral' : 'accent'}>{s.late ? 'Muộn' : 'Đúng hạn'}</Badge>
+                    <Badge tone={s.late ? 'coral' : 'accent'}>{s.late ? 'Late' : 'On time'}</Badge>
                   </div>
                   <div className="mt-3 flex flex-wrap items-end gap-2">
                     <div className="w-24">
                       <label className="label" htmlFor={`score-${s.id}`}>
-                        Điểm
+                        Score
                       </label>
                       <input
                         id={`score-${s.id}`}
@@ -416,7 +440,7 @@ export function TeacherAssignments() {
                     </div>
                     <div className="min-w-[200px] flex-1">
                       <label className="label" htmlFor={`fb-${s.id}`}>
-                        Nhận xét
+                        Feedback
                       </label>
                       <input
                         id={`fb-${s.id}`}
@@ -425,8 +449,13 @@ export function TeacherAssignments() {
                         onChange={(e) => setGradeDraft({ ...gradeDraft, [s.id]: { ...draft, feedback: e.target.value } })}
                       />
                     </div>
-                    <button type="button" className="btn-accent" onClick={() => submitGrade(s)}>
-                      Lưu điểm
+                    <button
+                      type="button"
+                      className="btn-accent"
+                      onClick={() => submitGrade(s)}
+                      disabled={savingGradeId === s.id}
+                    >
+                      {savingGradeId === s.id ? <InlineSpinner /> : null} Save score
                     </button>
                   </div>
                 </li>

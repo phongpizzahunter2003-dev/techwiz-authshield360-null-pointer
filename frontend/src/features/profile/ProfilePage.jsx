@@ -45,9 +45,9 @@ export function ProfilePage() {
   const copy = async (text, label) => {
     try {
       await navigator.clipboard.writeText(text)
-      toast.success(`Đã sao chép ${label}.`)
+      toast.success(`Copied ${label}.`)
     } catch {
-      toast.error('Không thể sao chép tự động. Vui lòng chọn và sao chép thủ công.')
+      toast.error('Could not copy automatically. Please select and copy manually.')
     }
   }
 
@@ -56,7 +56,7 @@ export function ProfilePage() {
     try {
       const res = await authApi.enrollMfa()
       setEnroll(res.data)
-      toast.info('Quét mã QR bằng ứng dụng xác thực, sau đó nhập mã 6 số để xác nhận.')
+      toast.info('Scan the QR code with your authenticator app, then enter the 6-digit code to confirm.')
     } catch (err) {
       toast.error(err.message)
     } finally {
@@ -69,7 +69,7 @@ export function ProfilePage() {
     setBusy(true)
     try {
       await authApi.confirmMfa({ code: code.trim() })
-      toast.success('Thiết lập xác thực hai yếu tố thành công.')
+      toast.success('Two-factor authentication set up successfully.')
       setEnroll(null)
       setCode('')
       await current.reload()
@@ -83,21 +83,21 @@ export function ProfilePage() {
   const s = current.data?.data || session
 
   return (
-    <AppShell title="Hồ sơ & bảo mật" subtitle="Thông tin phiên làm việc và xác thực hai lớp (UC-09)">
+    <AppShell title="Profile & security" subtitle="Session information and two-factor authentication (UC-09)">
       {current.loading ? <Spinner /> : null}
       {current.error ? <ErrorState message={current.error.message} onRetry={current.reload} /> : null}
 
       {s ? (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <section className="card">
-            <h2 className="text-base font-bold text-ink-900">Phiên làm việc hiện tại</h2>
+            <h2 className="text-base font-bold text-ink-900">Current session</h2>
             <dl className="mt-4 space-y-3 text-sm">
               <div className="flex justify-between gap-3">
-                <dt className="text-ink-400">Tên đăng nhập</dt>
+                <dt className="text-ink-400">Username</dt>
                 <dd className="font-semibold text-ink-900">{s.username}</dd>
               </div>
               <div className="flex justify-between gap-3">
-                <dt className="text-ink-400">Họ tên</dt>
+                <dt className="text-ink-400">Full name</dt>
                 <dd className="font-semibold text-ink-900">{s.fullName || '—'}</dd>
               </div>
               <div className="flex justify-between gap-3">
@@ -105,23 +105,23 @@ export function ProfilePage() {
                 <dd className="font-semibold text-ink-900">{s.email || '—'}</dd>
               </div>
               <div className="flex justify-between gap-3">
-                <dt className="text-ink-400">Vai trò</dt>
+                <dt className="text-ink-400">Role</dt>
                 <dd>
                   <Badge tone="brand">{ROLE_LABEL[s.role] || s.role}</Badge>
                 </dd>
               </div>
               <div className="flex justify-between gap-3">
-                <dt className="text-ink-400">Phương thức xác thực</dt>
+                <dt className="text-ink-400">Authentication method</dt>
                 <dd className="font-semibold text-ink-900">{s.authMethod || '—'}</dd>
               </div>
               <div className="flex items-start justify-between gap-3">
-                <dt className="text-ink-400">Chế độ xác thực hiệu lực</dt>
+                <dt className="text-ink-400">Effective authentication mode</dt>
                 <dd className="text-right">
                   <Badge tone="brand">{s.effectiveAuthMode || 'S1'}</Badge>
                   <p className="mt-1 text-xs text-ink-400">
                     {s.authModeOverride
-                      ? 'Do quản trị viên gán cho tài khoản này'
-                      : 'Theo cấu hình chung của hệ thống'}
+                      ? 'Assigned by an administrator for this account'
+                      : 'Uses the global system configuration'}
                   </p>
                 </dd>
               </div>
@@ -130,42 +130,42 @@ export function ProfilePage() {
                 <dd className="max-w-[220px] truncate font-mono text-xs text-ink-600">{s.sessionId}</dd>
               </div>
               <div className="flex justify-between gap-3">
-                <dt className="text-ink-400">Bắt đầu</dt>
+                <dt className="text-ink-400">Started</dt>
                 <dd className="font-semibold text-ink-900">{formatDateTime(s.issuedAt)}</dd>
               </div>
               <div className="flex justify-between gap-3">
-                <dt className="text-ink-400">Hết hạn</dt>
+                <dt className="text-ink-400">Expires</dt>
                 <dd className="font-semibold text-ink-900">{formatDateTime(s.expiresAt)}</dd>
               </div>
             </dl>
             <button type="button" className="btn-danger mt-5" onClick={logout}>
-              ↩ Đăng xuất
+              ↩ Sign out
             </button>
             <p className="mt-2 text-xs text-ink-400">
-              Đăng xuất sẽ hủy phiên phía máy chủ và xóa lịch sử trình duyệt (UC-06).
+              Signing out destroys the server-side session and clears browser history (UC-06).
             </p>
           </section>
 
           <section className="card">
-            <h2 className="text-base font-bold text-ink-900">Xác thực hai lớp (MFA)</h2>
+            <h2 className="text-base font-bold text-ink-900">Two-factor authentication (MFA)</h2>
             {!enroll ? (
               <>
                 <p className="mt-2 text-sm text-ink-600">
-                  Thiết lập ứng dụng xác thực (Google Authenticator, FreeOTP) để bảo vệ tài khoản bằng TOTP.
+                  Set up an authenticator app (Google Authenticator, FreeOTP) to protect your account with TOTP.
                 </p>
                 <button type="button" className="btn-primary mt-4" onClick={startEnroll} disabled={busy}>
-                  {busy ? <InlineSpinner /> : '🔐'} Bắt đầu thiết lập
+                  {busy ? <InlineSpinner /> : '🔐'} Start setup
                 </button>
               </>
             ) : (
               <form onSubmit={confirmEnroll} className="mt-3 space-y-4">
                 <ol className="list-decimal space-y-1 pl-5 text-sm text-ink-600">
-                  <li>Mở ứng dụng xác thực (Google Authenticator, Microsoft Authenticator, FreeOTP…).</li>
+                  <li>Open your authenticator app (Google Authenticator, Microsoft Authenticator, FreeOTP…).</li>
                   <li>
-                    Chọn <strong>“Quét mã QR”</strong> <em>trong ứng dụng xác thực</em> rồi quét mã bên dưới.
-                    Đừng quét bằng ứng dụng camera mặc định của điện thoại — camera sẽ báo “chỉ mở bằng ứng dụng”.
+                    Choose <strong>“Scan QR code”</strong> <em>in the authenticator app</em> and then scan the code below.
+                    Don't scan it with your phone's default camera app — the camera will say “open with an app only”.
                   </li>
-                  <li>Nhập mã 6 số mà ứng dụng hiển thị để hoàn tất.</li>
+                  <li>Enter the 6-digit code shown by the app to finish.</li>
                 </ol>
 
                 <div className="flex flex-col items-center gap-3 rounded-2xl bg-surface-soft p-4">
@@ -174,7 +174,7 @@ export function ProfilePage() {
                   </div>
                   <div className="w-full">
                     <p className="text-center text-xs font-bold uppercase text-ink-400">
-                      Hoặc nhập thủ công mã bí mật
+                      Or enter the secret code manually
                     </p>
                     <div className="mt-1 flex items-center gap-2">
                       <code className="min-w-0 flex-1 break-all rounded-xl bg-white px-3 py-2 font-mono text-xs text-ink-900">
@@ -183,8 +183,8 @@ export function ProfilePage() {
                       <button
                         type="button"
                         className="btn-ghost !px-3 !py-2"
-                        onClick={() => copy(enroll.secret, 'mã bí mật')}
-                        title="Sao chép mã bí mật"
+                        onClick={() => copy(enroll.secret, 'secret code')}
+                        title="Copy secret code"
                       >
                         📋
                       </button>
@@ -192,30 +192,30 @@ export function ProfilePage() {
                     <button
                       type="button"
                       className="btn-ghost mt-2 w-full !py-2 text-xs"
-                      onClick={() => copy(enroll.otpauthUri, 'liên kết otpauth')}
+                      onClick={() => copy(enroll.otpauthUri, 'otpauth link')}
                     >
-                      🔗 Sao chép liên kết otpauth:// (dán vào ứng dụng xác thực)
+                      🔗 Copy the otpauth:// link (paste into your authenticator app)
                     </button>
                   </div>
                 </div>
 
                 <details className="rounded-xl border border-sky-300 bg-sky-100/50 px-3 py-2 text-xs text-ink-600">
                   <summary className="cursor-pointer font-semibold text-sky-600">
-                    ❓ Không quét được mã QR? Mở hướng dẫn khắc phục
+                    ❓ Can't scan the QR code? Open troubleshooting
                   </summary>
                   <div className="mt-2 space-y-1.5">
                     <p>
-                      • Điện thoại báo <strong>“chỉ mở bằng ứng dụng”</strong>: điện thoại đang mở liên kết{' '}
-                      <code className="font-mono">otpauth://</code> bằng trình duyệt/camera nên không có ứng dụng nào
-                      nhận. Hãy quét QR <strong>trực tiếp trong ứng dụng xác thực</strong>.
+                      • The phone says <strong>“open with an app only”</strong>: the phone is opening the{' '}
+                      <code className="font-mono">otpauth://</code> link with a browser/camera, so no app can handle
+                      it. Scan the QR code <strong>directly in the authenticator app</strong>.
                     </p>
                     <p>
-                      • Không quét được? Chọn <strong>“Nhập khóa thủ công / Enter setup key”</strong> trong ứng dụng
-                      xác thực rồi dán <strong>mã bí mật</strong> ở trên.
+                      • Can't scan? Choose <strong>“Enter setup key”</strong> in the authenticator
+                      app and then paste the <strong>secret code</strong> above.
                     </p>
                     <p>
-                      • Mã luôn báo sai dù đã nhập đúng? Kiểm tra <strong>thời gian trên điện thoại</strong> đã bật
-                      tự động chưa — TOTP cần đồng bộ giờ.
+                      • The code is always wrong even when entered correctly? Check whether your phone's{' '}
+                      <strong>time</strong> is set to automatic — TOTP needs synchronized clocks.
                     </p>
                   </div>
                 </details>
@@ -223,7 +223,7 @@ export function ProfilePage() {
                 <div className="rounded-2xl border border-sun-400 bg-sun-100/60 p-3 text-sm">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <p className="font-semibold text-ink-900">
-                      Mã TOTP hiện tại (chỉ dùng cho môi trường thử nghiệm): <strong>{totpPreview}</strong>
+                      Current TOTP code (test environment only): <strong>{totpPreview}</strong>
                     </p>
                     <button
                       type="button"
@@ -231,11 +231,11 @@ export function ProfilePage() {
                       onClick={() => setCode(totpPreview)}
                       disabled={!totpPreview}
                     >
-                      ⌨️ Điền mã này
+                      ⌨️ Fill in this code
                     </button>
                   </div>
                   <p className="text-xs text-ink-600">
-                    Mã đổi sau {seconds}s. Trong môi trường thật, mã chỉ hiển thị trên thiết bị.
+                    The code changes in {seconds}s. In a real environment, the code is only shown on the device.
                   </p>
                 </div>
 
@@ -244,14 +244,14 @@ export function ProfilePage() {
                     <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand-500 text-xs text-white">
                       4
                     </span>
-                    Nhập mã 6 chữ số từ ứng dụng xác thực vào đây
+                    Enter the 6-digit code from your authenticator app here
                   </p>
                   <p className="mt-1 text-xs text-ink-600">
-                    Mở <strong>Google Authenticator</strong> → chọn mục <strong>AuthShield 360</strong> → gõ 6 số hiển
-                    thị vào ô dưới. Mã làm mới mỗi 30 giây.
+                    Open <strong>Google Authenticator</strong> → select <strong>AuthShield 360</strong> → type the
+                    6-digit code shown into the field below. The code refreshes every 30 seconds.
                   </p>
                   <label className="label mt-3" htmlFor="txt-mfa-code">
-                    Mã xác nhận (6 chữ số)
+                    Confirmation code (6 digits)
                   </label>
                   <input
                     id="txt-mfa-code"
@@ -265,17 +265,17 @@ export function ProfilePage() {
                     placeholder="123456"
                   />
                   <p className="mt-2 text-xs text-ink-400">
-                    Đã nhập: <strong>{code ? `${code.length}/6` : '0/6'}</strong> chữ số
-                    {code.length === 6 ? ' — bấm “Xác nhận” bên dưới.' : ''}
+                    Entered: <strong>{code ? `${code.length}/6` : '0/6'}</strong> digits
+                    {code.length === 6 ? ' — press “Confirm” below.' : ''}
                   </p>
                 </div>
 
                 <div className="flex justify-end gap-2">
                   <button type="button" className="btn-ghost" onClick={() => setEnroll(null)}>
-                    Hủy
+                    Cancel
                   </button>
                   <button type="submit" className="btn-primary" disabled={busy || code.length !== 6}>
-                    {busy ? <InlineSpinner /> : '✓'} Xác nhận
+                    {busy ? <InlineSpinner /> : '✓'} Confirm
                   </button>
                 </div>
               </form>

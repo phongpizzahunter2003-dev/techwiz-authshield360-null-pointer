@@ -41,24 +41,24 @@ public class AdminUserController {
 
     @PostMapping
     public ApiResponse<UserResponse> create(@Valid @RequestBody CreateUserRequest request) {
-        return ApiResponse.ok("Tạo tài khoản thành công.", userService.create(request));
+        return ApiResponse.ok("Account created.", userService.create(request));
     }
 
     @PutMapping("/{id}")
     public ApiResponse<UserResponse> update(@PathVariable Long id, @Valid @RequestBody UpdateUserRequest request) {
-        return ApiResponse.ok("Cập nhật tài khoản thành công.", userService.update(id, request));
+        return ApiResponse.ok("Account updated.", userService.update(id, request));
     }
 
     @DeleteMapping("/{id}")
     public ApiResponse<Void> delete(@PathVariable Long id) {
         userService.delete(id);
-        return ApiResponse.ok("Đã xóa tài khoản.", null);
+        return ApiResponse.ok("Account deleted.", null);
     }
 
     @PostMapping("/{id}/reset-mfa")
     public ApiResponse<Void> resetMfa(@PathVariable Long id) {
         userService.resetMfa(id);
-        return ApiResponse.ok("Đã đặt lại xác thực hai lớp.", null);
+        return ApiResponse.ok("MFA has been reset.", null);
     }
 
     /**
@@ -69,8 +69,8 @@ public class AdminUserController {
     public ApiResponse<java.util.Map<String, Object>> applyAuthMode(
             @Valid @RequestBody com.authshield360.user.dto.ApplyAuthModeRequest request) {
         int affected = userService.applyAuthMode(request.mode(), request.role());
-        String scope = request.role() == null ? "tất cả người dùng" : request.role().name();
-        return ApiResponse.ok("Đã áp dụng chế độ " + request.mode() + " cho " + affected + " tài khoản (" + scope + ").",
+        String scope = request.role() == null ? "all users" : request.role().name();
+        return ApiResponse.ok("Applied mode " + request.mode() + " to " + affected + " account(s) (" + scope + ").",
                 java.util.Map.of("affected", affected, "mode", request.mode(),
                         "scope", request.role() == null ? "ALL" : request.role().name()));
     }

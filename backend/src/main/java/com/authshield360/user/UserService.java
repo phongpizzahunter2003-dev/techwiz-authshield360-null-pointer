@@ -153,14 +153,14 @@ public class UserService {
                 StudentProfile p = new StudentProfile();
                 p.setUserId(user.getId());
                 p.setStudentCode(String.format("SV%05d", user.getId()));
-                p.setClassName("Chưa xếp lớp");
+                p.setClassName("Unassigned");
                 return studentProfiles.save(p);
             });
             case TEACHER -> teacherProfiles.findByUserId(user.getId()).orElseGet(() -> {
                 TeacherProfile p = new TeacherProfile();
                 p.setUserId(user.getId());
                 p.setEmployeeCode(String.format("GV%05d", user.getId()));
-                p.setDepartment("Tổ Tin học");
+                p.setDepartment("Information Technology");
                 return teacherProfiles.save(p);
             });
             default -> { /* ADMIN has no profile row */ }
@@ -211,7 +211,7 @@ public class UserService {
         }
         if (!value.equals("S1") && !value.equals("S2") && !value.equals("S3")) {
             throw new BusinessException(ErrorCode.VALIDATION_ERROR,
-                    "Chế độ xác thực không hợp lệ (chỉ chấp nhận S1, S2, S3 hoặc INHERIT).");
+                    "Invalid authentication mode (allowed: S1, S2, S3 or INHERIT).");
         }
         return value;
     }

@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
- * Simulated delivery channel for OTP codes (VĐ-06: no paid SMS).
+ * Simulated delivery channel for OTP codes (VD-06: no paid SMS).
  * In this lab the code is written to the application log and returned to the dev UI when
  * {@code authshield.expose-otp=true}. Production would delegate to an SMS/SMTP provider.
  */

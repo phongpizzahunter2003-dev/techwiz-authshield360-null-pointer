@@ -9,31 +9,31 @@ import jakarta.validation.constraints.Size;
 import java.time.Instant;
 
 public record CreateAssignmentRequest(
-        @NotBlank(message = "Tiêu đề bài tập không được để trống.")
-        @Size(max = 200)
+        @NotBlank(message = "Assignment title is required.")
+        @Size(max = 200, message = "Title must be at most 200 characters.")
         String title,
 
-        @Size(max = 4000)
+        @Size(max = 4000, message = "Description is too long.")
         String description,
 
-        @NotNull(message = "Lớp học là bắt buộc.")
+        @NotNull(message = "Class is required.")
         Long classroomId,
 
-        @NotNull(message = "Hạn nộp là bắt buộc.")
+        @NotNull(message = "Due date is required.")
         Instant dueAt,
 
         Boolean allowLate,
         Instant lateCutoffAt,
 
-        @Min(value = 0, message = "Mức trừ điểm không hợp lệ.")
+        @Min(value = 0, message = "Late penalty is invalid.")
         Integer latePenaltyPct,
 
         Boolean allowResubmission,
 
-        @Min(value = 1, message = "Số lần nộp tối thiểu 1.")
+        @Min(value = 1, message = "Maximum attempts must be at least 1.")
         Integer maxAttempts,
 
-        @Min(value = 1, message = "Điểm tối đa tối thiểu 1.")
+        @Min(value = 1, message = "Maximum score must be at least 1.")
         Integer maxScore,
 
         AssignmentStatus status

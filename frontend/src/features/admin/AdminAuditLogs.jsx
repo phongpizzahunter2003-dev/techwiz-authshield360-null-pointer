@@ -105,7 +105,7 @@ export function AdminAuditLogs() {
         return
       }
       const result = await downloadAuditExport({ ...params(), format })
-      toast.success(`Đã xuất ${result.total} bản ghi (${result.filename}).`)
+      toast.success(`Exported ${result.total} records (${result.filename}).`)
     } catch (err) {
       toast.error(err.message)
     } finally {
@@ -119,7 +119,7 @@ export function AdminAuditLogs() {
     setExporting(true)
     try {
       const result = await downloadAuditExport({ ...params(), format })
-      toast.warning(`Dữ liệu vượt 10,000 bản ghi — đã xuất 10,000 bản ghi mới nhất (${result.filename}).`)
+      toast.warning(`Data exceeds 10,000 records — exported the newest 10,000 records (${result.filename}).`)
     } catch (err) {
       toast.error(err.message)
     } finally {
@@ -132,15 +132,15 @@ export function AdminAuditLogs() {
 
   return (
     <AppShell
-      title="Nhật ký xác thực"
-      subtitle="Theo dõi mọi sự kiện xác thực và phân quyền (UC-11)"
+      title="Audit log"
+      subtitle="Track every authentication and authorization event (UC-11)"
       actions={
         <>
           <button type="button" className="btn-ghost" onClick={() => runExport('csv')} disabled={exporting}>
-            {exporting ? <InlineSpinner /> : '📄'} Xuất CSV
+            {exporting ? <InlineSpinner /> : '📄'} Export CSV
           </button>
           <button type="button" className="btn-ghost" onClick={() => runExport('json')} disabled={exporting}>
-            {exporting ? <InlineSpinner /> : '🧾'} Xuất JSON
+            {exporting ? <InlineSpinner /> : '🧾'} Export JSON
           </button>
         </>
       }
@@ -149,12 +149,12 @@ export function AdminAuditLogs() {
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div className="lg:col-span-2">
             <label className="label" htmlFor="log-q">
-              Tìm theo người dùng / IP
+              Search by user / IP
             </label>
             <input
               id="log-q"
               className="input"
-              placeholder="vd: student01 hoặc 127.0.0.1"
+              placeholder="e.g. student01 or 127.0.0.1"
               value={filters.q}
               onChange={(e) => setFilters({ ...filters, q: e.target.value })}
               onKeyDown={(e) => e.key === 'Enter' && load(0, filters)}
@@ -162,7 +162,7 @@ export function AdminAuditLogs() {
           </div>
           <div>
             <label className="label" htmlFor="log-action">
-              Hành động
+              Action
             </label>
             <select
               id="log-action"
@@ -170,7 +170,7 @@ export function AdminAuditLogs() {
               value={filters.action}
               onChange={(e) => setFilters({ ...filters, action: e.target.value })}
             >
-              <option value="">Tất cả</option>
+              <option value="">All</option>
               {ACTIONS.map((a) => (
                 <option key={a} value={a}>
                   {a}
@@ -180,7 +180,7 @@ export function AdminAuditLogs() {
           </div>
           <div>
             <label className="label" htmlFor="log-status">
-              Kết quả
+              Result
             </label>
             <select
               id="log-status"
@@ -188,14 +188,14 @@ export function AdminAuditLogs() {
               value={filters.status}
               onChange={(e) => setFilters({ ...filters, status: e.target.value })}
             >
-              <option value="">Tất cả</option>
+              <option value="">All</option>
               <option value="SUCCESS">SUCCESS</option>
               <option value="FAILURE">FAILURE</option>
             </select>
           </div>
           <div>
             <label className="label" htmlFor="log-role">
-              Vai trò
+              Role
             </label>
             <select
               id="log-role"
@@ -203,7 +203,7 @@ export function AdminAuditLogs() {
               value={filters.role}
               onChange={(e) => setFilters({ ...filters, role: e.target.value })}
             >
-              <option value="">Tất cả</option>
+              <option value="">All</option>
               <option value="STUDENT">STUDENT</option>
               <option value="TEACHER">TEACHER</option>
               <option value="ADMIN">ADMIN</option>
@@ -211,7 +211,7 @@ export function AdminAuditLogs() {
           </div>
           <div>
             <label className="label" htmlFor="log-mode">
-              Chế độ
+              Mode
             </label>
             <select
               id="log-mode"
@@ -219,7 +219,7 @@ export function AdminAuditLogs() {
               value={filters.mode}
               onChange={(e) => setFilters({ ...filters, mode: e.target.value })}
             >
-              <option value="">Tất cả</option>
+              <option value="">All</option>
               <option value="S1">S1</option>
               <option value="S2">S2</option>
               <option value="S3">S3</option>
@@ -227,7 +227,7 @@ export function AdminAuditLogs() {
           </div>
           <div>
             <label className="label" htmlFor="log-from">
-              Từ ngày
+              From
             </label>
             <input
               id="log-from"
@@ -239,7 +239,7 @@ export function AdminAuditLogs() {
           </div>
           <div>
             <label className="label" htmlFor="log-to">
-              Đến ngày
+              To
             </label>
             <input
               id="log-to"
@@ -252,10 +252,10 @@ export function AdminAuditLogs() {
         </div>
         <div className="mt-3 flex flex-wrap justify-end gap-2">
           <button type="button" className="btn-ghost" onClick={() => load(0, EMPTY_FILTERS)}>
-            Xóa lọc
+            Clear filters
           </button>
           <button type="button" className="btn-primary" onClick={() => load(0, filters)}>
-            🔍 Lọc
+            🔍 Filter
           </button>
         </div>
       </div>
@@ -264,7 +264,7 @@ export function AdminAuditLogs() {
       {error ? <ErrorState message={error.message} onRetry={() => load()} /> : null}
 
       {!loading && !error && items.length === 0 ? (
-        <EmptyState icon="🔎" title="Không tìm thấy bản ghi log nào phù hợp" />
+        <EmptyState icon="🔎" title="No matching log records found" />
       ) : null}
 
       {!loading && items.length > 0 ? (
@@ -273,16 +273,16 @@ export function AdminAuditLogs() {
             <table className="table">
               <thead>
                 <tr>
-                  <th>Thời điểm</th>
-                  <th>Hành động</th>
-                  <th>Kết quả</th>
-                  <th>Người dùng</th>
-                  <th>Vai trò</th>
-                  <th>Yếu tố</th>
-                  <th>Chế độ</th>
+                  <th>Time</th>
+                  <th>Action</th>
+                  <th>Result</th>
+                  <th>User</th>
+                  <th>Role</th>
+                  <th>Factor</th>
+                  <th>Mode</th>
                   <th>IP</th>
-                  <th>Lý do</th>
-                  <th className="text-right">Chi tiết</th>
+                  <th>Reason</th>
+                  <th className="text-right">Details</th>
                 </tr>
               </thead>
               <tbody>
@@ -304,7 +304,7 @@ export function AdminAuditLogs() {
                         to={`/admin/audit-logs/${row.id}`}
                         className="text-sm font-semibold text-brand-600 hover:underline"
                       >
-                        Xem →
+                        View →
                       </Link>
                     </td>
                   </tr>
@@ -315,7 +315,7 @@ export function AdminAuditLogs() {
 
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-ink-400">
             <span>
-              Tổng {data.totalElements} bản ghi · Trang {data.page + 1}/{Math.max(totalPages, 1)} · Tối đa 50 dòng/trang
+              {data.totalElements} total · Page {data.page + 1}/{Math.max(totalPages, 1)} · Max 50 rows/page
             </span>
             <div className="flex gap-2">
               <button
@@ -324,7 +324,7 @@ export function AdminAuditLogs() {
                 disabled={data.page <= 0}
                 onClick={() => load(data.page - 1, filters)}
               >
-                ← Trước
+                ← Previous
               </button>
               <button
                 type="button"
@@ -332,7 +332,7 @@ export function AdminAuditLogs() {
                 disabled={data.page + 1 >= totalPages}
                 onClick={() => load(data.page + 1, filters)}
               >
-                Sau →
+                Next →
               </button>
             </div>
           </div>
@@ -342,25 +342,25 @@ export function AdminAuditLogs() {
       <Modal
         open={Boolean(limitDialog)}
         onClose={() => setLimitDialog(null)}
-        title="Cảnh báo giới hạn xuất dữ liệu"
+        title="Export limit warning"
         footer={
           <>
             <button type="button" className="btn-ghost" onClick={() => setLimitDialog(null)}>
-              Hủy
+              Cancel
             </button>
             <button id="btn-confirm-export-limit" type="button" className="btn-primary" onClick={confirmLimitedExport}>
-              Xuất 10,000 bản ghi mới nhất
+              Export the newest 10,000 records
             </button>
           </>
         }
       >
         <p className="text-sm text-ink-600">
-          Dữ liệu tìm kiếm vượt quá 10,000 bản ghi (Hiện có <strong>{limitDialog?.total?.toLocaleString('vi-VN')}</strong> bản
-          ghi). Hệ thống sẽ tự động xuất 10,000 bản ghi mới nhất. Vui lòng thu hẹp khoảng thời gian hoặc điều kiện lọc để lấy
-          đầy đủ dữ liệu.
+          The search results exceed 10,000 records (currently <strong>{limitDialog?.total?.toLocaleString('vi-VN')}</strong> records).
+          The system will automatically export the newest 10,000 records. Please narrow the time range or filter conditions to
+          retrieve the full data.
         </p>
         <p className="mt-3 rounded-xl bg-sun-100 px-3 py-2 text-xs text-sun-600">
-          Thông tin nhạy cảm (email, số điện thoại) sẽ được che giấu tự động: {M.EXPORT_LIMIT.split('.')[0]}.
+          Sensitive information (email, phone number) will be masked automatically: {M.EXPORT_LIMIT.split('.')[0]}.
         </p>
       </Modal>
     </AppShell>

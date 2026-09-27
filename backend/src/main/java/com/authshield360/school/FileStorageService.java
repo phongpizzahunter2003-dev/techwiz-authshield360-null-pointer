@@ -42,13 +42,13 @@ public class FileStorageService {
         }
         if (file.getSize() > props.getMaxUploadBytes()) {
             throw new BusinessException(ErrorCode.INVALID_FILE,
-                    "Tệp vượt quá dung lượng cho phép (" + (props.getMaxUploadBytes() / (1024 * 1024)) + " MB).");
+                    "The file exceeds the allowed size (" + (props.getMaxUploadBytes() / (1024 * 1024)) + " MB).");
         }
         String original = sanitize(file.getOriginalFilename());
         String extension = extensionOf(original);
         if (extension.isEmpty() || !ALLOWED_EXTENSIONS.contains(extension)) {
             throw new BusinessException(ErrorCode.INVALID_FILE,
-                    "Định dạng tệp không được hỗ trợ: ." + extension);
+                    "Unsupported file type: ." + extension);
         }
         String storedName = "assignments/" + assignmentId + "/" + UUID.randomUUID() + "-s" + studentId + "." + extension;
         Path target = root.resolve(storedName).normalize();
@@ -59,7 +59,7 @@ public class FileStorageService {
             Files.createDirectories(target.getParent());
             file.transferTo(target);
         } catch (IOException e) {
-            throw new BusinessException(ErrorCode.SERVER_ERROR, "Không thể lưu tệp. Vui lòng thử lại.");
+            throw new BusinessException(ErrorCode.SERVER_ERROR, "Could not save the file. Please try again.");
         }
         return new StoredFile(storedName, original, file.getContentType(), file.getSize());
     }
@@ -75,7 +75,7 @@ public class FileStorageService {
             }
             Resource resource = new UrlResource(target.toUri());
             if (!resource.exists() || !resource.isReadable()) {
-                throw new BusinessException(ErrorCode.NOT_FOUND, "Tệp không tồn tại trên hệ thống.");
+                throw new BusinessException(ErrorCode.NOT_FOUND, "The file does not exist on the server.");
             }
             return resource;
         } catch (java.net.MalformedURLException e) {

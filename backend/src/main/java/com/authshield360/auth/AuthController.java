@@ -43,7 +43,7 @@ public class AuthController {
     @PreAuthorize("isAuthenticated()")
     public ApiResponse<Void> logout() {
         authService.logout();
-        return ApiResponse.ok("Bạn đã đăng xuất thành công.", null);
+        return ApiResponse.ok("You have signed out successfully.", null);
     }
 
     /** Current session details (used by the SPA to hydrate auth state). */
@@ -65,6 +65,6 @@ public class AuthController {
     @PreAuthorize("isAuthenticated()")
     public ApiResponse<Void> confirmEnroll(@Valid @RequestBody ConfirmMfaRequest request) {
         authService.enrollConfirm(request);
-        return ApiResponse.ok("Thiết lập xác thực hai yếu tố thành công.", null);
+        return ApiResponse.ok("Two-factor authentication has been enabled.", null);
     }
 }

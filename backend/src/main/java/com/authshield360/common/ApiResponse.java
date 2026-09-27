@@ -12,7 +12,7 @@ public record ApiResponse<T>(
         String correlationId
 ) {
     public static <T> ApiResponse<T> ok(T data) {
-        return new ApiResponse<>(true, "OK", "Thành công", data, Instant.now(), Correlation.current());
+        return new ApiResponse<>(true, "OK", "Success", data, Instant.now(), Correlation.current());
     }
 
     public static <T> ApiResponse<T> ok(String message, T data) {

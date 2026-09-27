@@ -17,12 +17,12 @@ export function StatCard({ label, value, tone = 'brand', hint, to }) {
       <p className="text-xs font-semibold uppercase tracking-wide opacity-80">{label}</p>
       <p className="mt-1 text-2xl font-extrabold text-ink-900">{value}</p>
       {hint ? <p className="mt-1 text-xs text-ink-400">{hint}</p> : null}
-      {to ? <p className="mt-1 text-[11px] font-semibold text-ink-400">Xem chi tiết →</p> : null}
+      {to ? <p className="mt-1 text-[11px] font-semibold text-ink-400">View details →</p> : null}
     </>
   )
   if (to) {
     return (
-      <Link to={to} className={classes} title={`Xem chi tiết: ${label}`}>
+      <Link to={to} className={classes} title={`View details: ${label}`}>
         {body}
       </Link>
     )

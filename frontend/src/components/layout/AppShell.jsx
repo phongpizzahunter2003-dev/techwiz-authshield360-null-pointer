@@ -3,28 +3,32 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { ROLE_LABEL } from '../../i18n/messages.js'
 import { MfaEnrollmentPrompt } from './MfaEnrollmentPrompt.jsx'
+import { NotificationBell } from './NotificationBell.jsx'
 
 const NAV = {
   STUDENT: [
-    { to: '/student', label: 'Tổng quan', icon: '🏠', end: true },
-    { to: '/student/assignments', label: 'Bài tập của tôi', icon: '📚' },
-    { to: '/student/results', label: 'Kết quả thi', icon: '📊' },
-    { to: '/profile', label: 'Bảo mật & MFA', icon: '🔐' },
+    { to: '/student', label: 'Overview', icon: '🏠', end: true },
+    { to: '/student/assignments', label: 'My assignments', icon: '📚' },
+    { to: '/student/results', label: 'Exam results', icon: '📊' },
+    { to: '/notifications', label: 'Notifications', icon: '🔔' },
+    { to: '/profile', label: 'Security & MFA', icon: '🔐' },
   ],
   TEACHER: [
-    { to: '/teacher', label: 'Tổng quan', icon: '🏠', end: true },
-    { to: '/teacher/assignments', label: 'Quản lý bài tập', icon: '📝' },
-    { to: '/teacher/classes', label: 'Lớp học', icon: '🏫' },
-    { to: '/profile', label: 'Bảo mật & MFA', icon: '🔐' },
+    { to: '/teacher', label: 'Overview', icon: '🏠', end: true },
+    { to: '/teacher/assignments', label: 'Assignments', icon: '📝' },
+    { to: '/teacher/classes', label: 'Classes', icon: '🏫' },
+    { to: '/notifications', label: 'Notifications', icon: '🔔' },
+    { to: '/profile', label: 'Security & MFA', icon: '🔐' },
   ],
   ADMIN: [
-    { to: '/admin', label: 'Tổng quan', icon: '🏠', end: true },
-    { to: '/admin/users', label: 'Người dùng & vai trò', icon: '👥' },
-    { to: '/admin/config', label: 'Cấu hình xác thực', icon: '⚙️' },
-    { to: '/admin/audit-logs', label: 'Nhật ký xác thực', icon: '📜' },
-    { to: '/admin/comparison', label: 'So sánh S1/S2/S3', icon: '📈' },
-    { to: '/admin/system', label: 'Hệ thống & dữ liệu', icon: '🗄️' },
-    { to: '/profile', label: 'Bảo mật & MFA', icon: '🔐' },
+    { to: '/admin', label: 'Overview', icon: '🏠', end: true },
+    { to: '/admin/users', label: 'Users & roles', icon: '👥' },
+    { to: '/admin/config', label: 'Auth configuration', icon: '⚙️' },
+    { to: '/admin/audit-logs', label: 'Audit log', icon: '📜' },
+    { to: '/admin/comparison', label: 'S1/S2/S3 comparison', icon: '📈' },
+    { to: '/admin/system', label: 'System & data', icon: '🗄️' },
+    { to: '/notifications', label: 'Notifications', icon: '🔔' },
+    { to: '/profile', label: 'Security & MFA', icon: '🔐' },
   ],
 }
 
@@ -95,11 +99,11 @@ export function AppShell({ children, title, subtitle, actions }) {
       ) : null}
 
       <div className="lg:pl-64">
-        <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-brand-50 bg-white/90 px-4 py-3 backdrop-blur lg:px-6">
+        <header className="sticky top-0 z-30 flex items-center gap-2 border-b border-brand-50 bg-white/90 px-4 py-3 backdrop-blur lg:px-6">
           <button
             type="button"
             className="btn-ghost !min-h-0 !px-2.5 !py-2 lg:hidden"
-            aria-label="Mở menu"
+            aria-label="Open menu"
             onClick={() => setOpen(true)}
           >
             ☰
@@ -108,16 +112,15 @@ export function AppShell({ children, title, subtitle, actions }) {
             <h1 className="truncate text-lg font-extrabold text-ink-900">{title}</h1>
             {subtitle ? <p className="truncate text-xs text-ink-400">{subtitle}</p> : null}
           </div>
-          <div className="hidden items-center gap-2 sm:flex">
-            <span className="badge bg-brand-100 text-brand-700">{ROLE_LABEL[role]}</span>
-          </div>
+          <span className="badge hidden bg-brand-100 text-brand-700 sm:inline-flex">{ROLE_LABEL[role]}</span>
+          <NotificationBell />
           <button type="button" className="btn-ghost !px-3" onClick={() => navigate('/profile')}>
             👤
-            <span className="hidden sm:inline">Hồ sơ</span>
+            <span className="hidden sm:inline">Profile</span>
           </button>
           <button id="btn-logout" type="button" className="btn-danger !px-3" onClick={logout}>
             <span aria-hidden="true">↩</span>
-            <span className="hidden sm:inline">Đăng xuất</span>
+            <span className="hidden sm:inline">Sign out</span>
           </button>
         </header>
 

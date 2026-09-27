@@ -30,12 +30,12 @@ export function MfaEnrollmentPrompt() {
   return (
     <Modal
       open
-      title="Thiết lập xác thực hai yếu tố (UC-09)"
+      title="Set up two-factor authentication (UC-09)"
       onClose={dismiss}
       footer={
         <>
           <button type="button" className="btn-ghost" onClick={dismiss}>
-            Để sau
+            Later
           </button>
           <button
             type="button"
@@ -45,22 +45,22 @@ export function MfaEnrollmentPrompt() {
               navigate('/profile')
             }}
           >
-            🔐 Thiết lập ngay
+            🔐 Set up now
           </button>
         </>
       }
     >
       <p className="text-sm text-ink-600">
-        Hệ thống đã <strong>bật xác thực hai yếu tố</strong> cho vai trò{' '}
-        <strong>{ROLE_LABEL[session.role] || session.role}</strong>, nhưng tài khoản của bạn chưa đăng ký yếu tố thứ hai.
+        The system has <strong>enabled two-factor authentication</strong> for the role{' '}
+        <strong>{ROLE_LABEL[session.role] || session.role}</strong>, but your account has not enrolled a second factor yet.
       </p>
       <p className="mt-3 text-sm text-ink-600">
-        Theo UC-09, sau lần đăng nhập mật khẩu thành công đầu tiên bạn cần <strong>tự đăng ký</strong> yếu tố MFA: quét mã QR
-        bằng ứng dụng xác thực (Google Authenticator, FreeOTP) và nhập mã 6 số để xác nhận.
+        Per UC-09, after your first successful password sign-in you need to <strong>enrol yourself</strong> an MFA factor: scan the QR code
+        with an authenticator app (Google Authenticator, FreeOTP) and enter the 6-digit code to confirm.
       </p>
       <p className="mt-3 rounded-xl bg-surface-soft px-3 py-2 text-xs text-ink-400">
-        Mỗi người dùng tự thiết lập MFA cho chính mình. Quản trị viên chỉ cấu hình chế độ xác thực (UC-08) và có thể đặt lại
-        MFA khi cần (UC-16) — không tạo QR thay người dùng.
+        Each user sets up MFA for themselves. The administrator only configures the authentication mode (UC-08) and can reset
+        MFA when needed (UC-16) — they do not create the QR code on the user's behalf.
       </p>
     </Modal>
   )

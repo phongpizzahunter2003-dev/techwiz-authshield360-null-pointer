@@ -10,12 +10,12 @@ export function StudentResults() {
   const results = data?.data || []
 
   return (
-    <AppShell title="Kết quả thi" subtitle="Chỉ hiển thị kết quả của chính bạn (RBAC phía máy chủ)">
+    <AppShell title="Exam results" subtitle="Only your own results are shown (server-side RBAC)">
       {loading ? <Spinner /> : null}
       {error ? <ErrorState message={error.message} onRetry={reload} /> : null}
 
       {!loading && !error && results.length === 0 ? (
-        <EmptyState icon="📊" title="Chưa có kết quả" description="Giáo viên chưa nhập kết quả thi cho bạn." />
+        <EmptyState icon="📊" title="No results yet" description="Your teacher has not entered any exam results for you." />
       ) : null}
 
       {results.length > 0 ? (
@@ -23,11 +23,11 @@ export function StudentResults() {
           <table className="table">
             <thead>
               <tr>
-                <th>Môn học</th>
-                <th>Bài thi</th>
-                <th>Ngày</th>
-                <th>Điểm</th>
-                <th>Kết quả</th>
+                <th>Subject</th>
+                <th>Exam</th>
+                <th>Date</th>
+                <th>Score</th>
+                <th>Result</th>
               </tr>
             </thead>
             <tbody>
@@ -52,7 +52,7 @@ export function StudentResults() {
                               : 'bg-coral-100 text-coral-600'
                         }`}
                       >
-                        {ratio >= 0.8 ? 'Tốt' : ratio >= 0.5 ? 'Đạt' : 'Cần cố gắng'}
+                        {ratio >= 0.8 ? 'Good' : ratio >= 0.5 ? 'Pass' : 'Needs improvement'}
                       </span>
                     </td>
                   </tr>

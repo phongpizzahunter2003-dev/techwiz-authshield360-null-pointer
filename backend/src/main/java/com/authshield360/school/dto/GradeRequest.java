@@ -4,8 +4,8 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 public record GradeRequest(
-        @NotNull(message = "Điểm là bắt buộc.")
-        @Min(value = 0, message = "Điểm không hợp lệ.")
+        @NotNull(message = "Score is required.")
+        @Min(value = 0, message = "Score is invalid.")
         Integer score,
 
         String feedback

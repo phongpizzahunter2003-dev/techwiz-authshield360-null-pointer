@@ -11,11 +11,18 @@ export const authApi = {
 }
 
 export const dashboardApi = {
-  mine: () => get('/dashboard'),
   student: () => get('/dashboard/student'),
   teacher: () => get('/dashboard/teacher'),
   admin: () => get('/dashboard/admin'),
   comparison: () => get('/admin/comparison'),
+}
+
+export const notificationsApi = {
+  list: (params) => get('/notifications', params),
+  unreadCount: () => get('/notifications/unread-count'),
+  markRead: (id) => post(`/notifications/${id}/read`, {}),
+  markAllRead: () => post('/notifications/read-all', {}),
+  remove: (id) => del(`/notifications/${id}`),
 }
 
 export const analyticsApi = {
@@ -52,7 +59,6 @@ export const classroomApi = {
   studentsInClass: (id) => get(`/teacher/classrooms/${id}/students`),
   studentDetail: (studentId) => get(`/teacher/students/${studentId}`),
   create: (payload) => post('/teacher/classrooms', payload),
-  update: (id, payload) => put(`/teacher/classrooms/${id}`, payload),
   remove: (id) => del(`/teacher/classrooms/${id}`),
   enroll: (id, studentId) => post(`/teacher/classrooms/${id}/enroll`, { studentId }),
   unenroll: (id, studentId) => del(`/teacher/classrooms/${id}/students/${studentId}`),
@@ -77,14 +83,6 @@ export const adminApi = {
   auditLog: (id) => get(`/admin/audit-logs/${id}`),
   applyAuthMode: (payload) => post('/admin/users/apply-auth-mode', payload),
   dbStatus: () => get('/admin/system/db-status'),
-}
-
-export function auditExportUrl(params) {
-  const base = import.meta.env.VITE_API_BASE_URL || '/api/v1'
-  const qs = new URLSearchParams(
-    Object.entries(params || {}).filter(([, v]) => v !== undefined && v !== null && v !== ''),
-  ).toString()
-  return `${base}/admin/audit-logs/export${qs ? `?${qs}` : ''}`
 }
 
 /** Authenticated blob download (keeps the Authorization header, unlike a plain <a href>). */

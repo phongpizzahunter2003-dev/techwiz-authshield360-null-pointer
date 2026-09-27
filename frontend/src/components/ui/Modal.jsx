@@ -22,7 +22,7 @@ export function Modal({ open, title, onClose, children, footer, size = 'md' }) {
     if (panel && !panel.contains(document.activeElement)) {
       const firstControl =
         panel.querySelector('input:not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled])') ||
-        panel.querySelector('button:not([disabled]):not([aria-label="Đóng"])') ||
+        panel.querySelector('button:not([disabled]):not([aria-label="Close"])') ||
         panel
       firstControl.focus()
     }
@@ -53,7 +53,7 @@ export function Modal({ open, title, onClose, children, footer, size = 'md' }) {
           <button
             type="button"
             onClick={onClose}
-            aria-label="Đóng"
+            aria-label="Close"
             className="rounded-full p-2 text-ink-400 hover:bg-surface-muted hover:text-ink-600"
           >
             ✕

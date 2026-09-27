@@ -54,7 +54,7 @@ public class TeacherStudentService {
         User student = users.findById(studentId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
         if (student.getRole() != RoleType.STUDENT) {
-            throw new BusinessException(ErrorCode.NOT_FOUND, "Tài khoản này không phải học sinh.");
+            throw new BusinessException(ErrorCode.NOT_FOUND, "This account is not a student.");
         }
 
         // Classes the viewer may look into.

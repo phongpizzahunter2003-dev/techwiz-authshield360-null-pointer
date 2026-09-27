@@ -5,8 +5,7 @@ import com.authshield360.analytics.dto.ChartSeries;
 import com.authshield360.analytics.dto.ChartSlice;
 import com.authshield360.audit.AuditAction;
 import com.authshield360.audit.AuditLogRepository;
-import com.authshield360.auth.ConfigService;
-import com.authshield360.school.AssignmentRepository;
+import com.authshield360.school.AssignmentService;
 import com.authshield360.school.AssignmentSubmission;
 import com.authshield360.school.AssignmentSubmissionRepository;
 import com.authshield360.school.Classroom;
@@ -14,9 +13,9 @@ import com.authshield360.school.ClassroomRepository;
 import com.authshield360.school.EnrollmentRepository;
 import com.authshield360.school.ExamResultRepository;
 import com.authshield360.school.SubmissionStatus;
-import com.authshield360.school.AssignmentService;
 import com.authshield360.school.dto.AssignmentResponse;
 import com.authshield360.security.CurrentUser;
+import com.authshield360.security.SecurityUtils;
 import com.authshield360.user.RoleType;
 import com.authshield360.user.User;
 import com.authshield360.user.UserRepository;
@@ -32,8 +31,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Aggregations behind the clickable role dashboards.
- * Each chart slice carries the drill-down route the UI should open.
+ * Aggregations behind the clickable role dashboards. Every chart slice carries the drill-down
+ * route the UI should open.
  */
 @Service
 public class AnalyticsService {
@@ -43,21 +42,19 @@ public class AnalyticsService {
     private final UserRepository users;
     private final ClassroomRepository classrooms;
     private final EnrollmentRepository enrollments;
-    private final AssignmentRepository assignments;
     private final AssignmentSubmissionRepository submissions;
     private final ExamResultRepository examResults;
     private final AuditLogRepository auditLogs;
     private final AssignmentService assignmentService;
-    private final ConfigService configService;
+    private final com.authshield360.auth.ConfigService configService;
 
     public AnalyticsService(UserRepository users, ClassroomRepository classrooms, EnrollmentRepository enrollments,
-                            AssignmentRepository assignments, AssignmentSubmissionRepository submissions,
-                            ExamResultRepository examResults, AuditLogRepository auditLogs,
-                            AssignmentService assignmentService, ConfigService configService) {
+                            AssignmentSubmissionRepository submissions, ExamResultRepository examResults,
+                            AuditLogRepository auditLogs, AssignmentService assignmentService,
+                            com.authshield360.auth.ConfigService configService) {
         this.users = users;
         this.classrooms = classrooms;
         this.enrollments = enrollments;
-        this.assignments = assignments;
         this.submissions = submissions;
         this.examResults = examResults;
         this.auditLogs = auditLogs;
@@ -89,33 +86,32 @@ public class AnalyticsService {
             } else {
                 locked++;
             }
-            attempts.add(new ChartSlice("a" + a.id(), truncate(a.title()), a.yourAttempts() == null ? 0 : a.yourAttempts(),
-                    "sky", "/student/assignments/" + a.id()));
+            attempts.add(new ChartSlice("a" + a.id(), truncate(a.title()),
+                    a.yourAttempts() == null ? 0 : a.yourAttempts(), "sky", "/student/assignments/" + a.id()));
         }
 
-        ChartSeries statusChart = new ChartSeries("assignmentStatus", "Trạng thái bài tập", ChartSeries.PIE,
-                "bài tập", "Bấm vào một phần để xem danh sách bài tập tương ứng.",
+        ChartSeries statusChart = new ChartSeries("assignmentStatus", "Assignment status", ChartSeries.PIE,
+                "assignments", "Click a segment to open the matching assignment list.",
                 List.of(
-                        new ChartSlice("ON_TIME", "Đúng hạn", onTime, "accent", "/student/assignments?bucket=ON_TIME"),
-                        new ChartSlice("LATE", "Nộp muộn", late, "coral", "/student/assignments?bucket=LATE"),
-                        new ChartSlice("PENDING", "Cần nộp", pending, "sun", "/student/assignments?bucket=PENDING"),
-                        new ChartSlice("LOCKED", "Không thể nộp", locked, "brand", "/student/assignments?bucket=LOCKED")));
+                        new ChartSlice("ON_TIME", "Submitted on time", onTime, "accent", "/student/assignments?bucket=ON_TIME"),
+                        new ChartSlice("LATE", "Submitted late", late, "coral", "/student/assignments?bucket=LATE"),
+                        new ChartSlice("PENDING", "To submit", pending, "sun", "/student/assignments?bucket=PENDING"),
+                        new ChartSlice("LOCKED", "Locked", locked, "brand", "/student/assignments?bucket=LOCKED")));
 
         List<ChartSlice> scoreSlices = new ArrayList<>();
         examResults.findByStudentIdOrderByExamDateDesc(user.getId()).forEach(r ->
                 scoreSlices.add(new ChartSlice("r" + r.getId(),
                         truncate(r.getSubject() + " · " + r.getExamName()),
-                        (long) Math.round(r.getScore()), "sky",
-                        "/student/results")));
+                        (long) Math.round(r.getScore()), "sky", "/student/results")));
 
         List<ChartSeries> charts = new ArrayList<>();
         charts.add(statusChart);
-        charts.add(new ChartSeries("attemptsByAssignment", "Số lần nộp theo bài tập", ChartSeries.BAR,
-                "lần nộp", "Bấm vào cột để mở chi tiết bài tập.", attempts));
-        charts.add(new ChartSeries("scores", "Điểm theo bài thi", ChartSeries.BAR,
-                "điểm", "Bấm vào cột để xem toàn bộ kết quả thi.", scoreSlices));
+        charts.add(new ChartSeries("attemptsByAssignment", "Submissions per assignment", ChartSeries.BAR,
+                "submissions", "Click a bar to open the assignment.", attempts));
+        charts.add(new ChartSeries("scores", "Score per exam", ChartSeries.BAR,
+                "score", "Click a bar to view all exam results.", scoreSlices));
 
-        return new AnalyticsResponse("STUDENT", "Xin chào, " + displayName(user) + "!", charts);
+        return new AnalyticsResponse("STUDENT", "Welcome, " + displayName(user) + "!", charts);
     }
 
     // ---------------------------------------------------------------- TEACHER
@@ -144,24 +140,24 @@ public class AnalyticsService {
         }
 
         List<ChartSeries> charts = new ArrayList<>();
-        charts.add(new ChartSeries("submissionsByAssignment", "Bài nộp theo bài tập", ChartSeries.BAR,
-                "bài nộp", "Bấm vào cột để mở bài tập và chấm điểm.", byAssignment));
-        charts.add(new ChartSeries("gradingProgress", "Tiến độ chấm điểm", ChartSeries.PIE,
-                "bài nộp", "Bấm để mở danh sách bài tập cần chấm.",
+        charts.add(new ChartSeries("submissionsByAssignment", "Submissions per assignment", ChartSeries.BAR,
+                "submissions", "Click a bar to open the assignment and grade it.", byAssignment));
+        charts.add(new ChartSeries("gradingProgress", "Grading progress", ChartSeries.PIE,
+                "submissions", "Click to open the assignment list.",
                 List.of(
-                        new ChartSlice("GRADED", "Đã chấm", graded, "accent", "/teacher/assignments"),
-                        new ChartSlice("PENDING", "Chờ chấm", awaiting, "sun", "/teacher/assignments"))));
-        charts.add(new ChartSeries("studentsPerClass", "Học sinh theo lớp", ChartSeries.BAR,
-                "học sinh", "Bấm vào cột để xem chi tiết lớp.", perClass));
+                        new ChartSlice("GRADED", "Graded", graded, "accent", "/teacher/assignments"),
+                        new ChartSlice("PENDING", "Awaiting grade", awaiting, "sun", "/teacher/assignments"))));
+        charts.add(new ChartSeries("studentsPerClass", "Students per class", ChartSeries.BAR,
+                "students", "Click a bar to open the class.", perClass));
 
-        return new AnalyticsResponse("TEACHER", "Xin chào, " + displayName(user) + "!", charts);
+        return new AnalyticsResponse("TEACHER", "Welcome, " + displayName(user) + "!", charts);
     }
 
     // ------------------------------------------------------------------ ADMIN
 
     @Transactional(readOnly = true)
     public AnalyticsResponse admin() {
-        User user = currentAdmin();
+        User user = users.findById(SecurityUtils.current().userId()).orElseThrow();
 
         long[] modeTotals = new long[3];
         for (Object[] row : auditLogs.loginCountsByMode()) {
@@ -176,47 +172,47 @@ public class AnalyticsService {
         }
 
         List<ChartSeries> charts = new ArrayList<>();
-        charts.add(new ChartSeries("loginsByMode", "Đăng nhập thành công theo chế độ", ChartSeries.BAR,
-                "lượt đăng nhập", "Bấm vào cột để mở trang chi tiết của chế độ tương ứng.",
+        charts.add(new ChartSeries("loginsByMode", "Successful sign-ins by mode", ChartSeries.BAR,
+                "sign-ins", "Click a bar to open the mode detail page.",
                 List.of(
-                        new ChartSlice("S1", "S1 · Chỉ mật khẩu", modeTotals[0], "coral", "/admin/modes/S1"),
+                        new ChartSlice("S1", "S1 · Password only", modeTotals[0], "coral", "/admin/modes/S1"),
                         new ChartSlice("S2", "S2 · + Mobile OTP", modeTotals[1], "sun", "/admin/modes/S2"),
                         new ChartSlice("S3", "S3 · + Email OTP", modeTotals[2], "accent", "/admin/modes/S3"))));
 
-        charts.add(new ChartSeries("usersByRole", "Người dùng theo vai trò", ChartSeries.PIE,
-                "tài khoản", "Bấm để mở danh sách người dùng theo vai trò.",
+        charts.add(new ChartSeries("usersByRole", "Users by role", ChartSeries.PIE,
+                "accounts", "Click a segment to open the user list for that role.",
                 List.of(
-                        new ChartSlice("STUDENT", "Học sinh", users.countByRole(RoleType.STUDENT), "sky",
+                        new ChartSlice("STUDENT", "Students", users.countByRole(RoleType.STUDENT), "sky",
                                 "/admin/users?role=STUDENT"),
-                        new ChartSlice("TEACHER", "Giáo viên", users.countByRole(RoleType.TEACHER), "accent",
+                        new ChartSlice("TEACHER", "Teachers", users.countByRole(RoleType.TEACHER), "accent",
                                 "/admin/users?role=TEACHER"),
-                        new ChartSlice("ADMIN", "Quản trị viên", users.countByRole(RoleType.ADMIN), "brand",
+                        new ChartSlice("ADMIN", "Administrators", users.countByRole(RoleType.ADMIN), "brand",
                                 "/admin/users?role=ADMIN"))));
 
-        charts.add(new ChartSeries("securityEvents", "Sự kiện bảo mật", ChartSeries.BAR,
-                "sự kiện", "Bấm vào cột để xem các bản ghi tương ứng trong nhật ký.",
+        charts.add(new ChartSeries("securityEvents", "Security events", ChartSeries.BAR,
+                "events", "Click a bar to open the matching audit records.",
                 List.of(
-                        new ChartSlice("LOGIN_FAIL", "Đăng nhập thất bại",
+                        new ChartSlice("LOGIN_FAIL", "Failed sign-ins",
                                 auditLogs.countByEventAction(AuditAction.LOGIN_FAIL), "coral",
                                 "/admin/audit-logs?action=LOGIN_FAIL"),
-                        new ChartSlice("LOCKOUT_TRIGGERED", "Khóa tài khoản",
+                        new ChartSlice("LOCKOUT_TRIGGERED", "Account lockouts",
                                 auditLogs.countByEventAction(AuditAction.LOCKOUT_TRIGGERED), "sun",
                                 "/admin/audit-logs?action=LOCKOUT_TRIGGERED"),
-                        new ChartSlice("OTP_VERIFY_FAIL", "OTP sai",
+                        new ChartSlice("OTP_VERIFY_FAIL", "Wrong OTP",
                                 auditLogs.countByEventAction(AuditAction.OTP_VERIFY_FAIL), "sun",
                                 "/admin/audit-logs?action=OTP_VERIFY_FAIL"),
-                        new ChartSlice("PRIVILEGE_VIOLATION", "Vi phạm phân quyền",
+                        new ChartSlice("PRIVILEGE_VIOLATION", "Access violations",
                                 auditLogs.countByEventAction(AuditAction.PRIVILEGE_VIOLATION), "coral",
                                 "/admin/audit-logs?action=PRIVILEGE_VIOLATION"),
-                        new ChartSlice("SESSION_REPLAY_ATTEMPT", "Tái sử dụng phiên",
+                        new ChartSlice("SESSION_REPLAY_ATTEMPT", "Session replays",
                                 auditLogs.countByEventAction(AuditAction.SESSION_REPLAY_ATTEMPT), "coral",
                                 "/admin/audit-logs?action=SESSION_REPLAY_ATTEMPT"))));
 
-        charts.add(new ChartSeries("eventsByDay", "Sự kiện " + DAY_WINDOW + " ngày gần nhất", ChartSeries.LINE,
-                "sự kiện/ngày", "Bấm vào điểm để mở nhật ký trong ngày.",
+        charts.add(new ChartSeries("eventsByDay", "Events in the last " + DAY_WINDOW + " days", ChartSeries.LINE,
+                "events/day", "Click a point to open that day's audit records.",
                 eventsPerDay()));
 
-        return new AnalyticsResponse("ADMIN", "Xin chào, " + displayName(user) + "!", charts);
+        return new AnalyticsResponse("ADMIN", "Welcome, " + displayName(user) + "!", charts);
     }
 
     private List<ChartSlice> eventsPerDay() {
@@ -232,15 +228,10 @@ public class AnalyticsService {
         }
         List<ChartSlice> slices = new ArrayList<>();
         counts.forEach((day, count) -> slices.add(new ChartSlice(day.toString(),
-                day.getDayOfMonth() + "/" + day.getMonthValue(), count, "brand",
+                day.getMonthValue() + "/" + day.getDayOfMonth(), count, "brand",
                 "/admin/audit-logs?from=" + day.atStartOfDay(ZoneOffset.UTC).toInstant()
                         + "&to=" + day.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant())));
         return slices;
-    }
-
-    private User currentAdmin() {
-        Long id = com.authshield360.security.SecurityUtils.current().userId();
-        return users.findById(id).orElseThrow();
     }
 
     private String displayName(User user) {

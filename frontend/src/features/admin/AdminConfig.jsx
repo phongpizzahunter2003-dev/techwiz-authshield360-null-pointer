@@ -10,20 +10,20 @@ import { adminApi } from '../../api/endpoints.js'
 const MODE_CARDS = [
   {
     id: 'S1',
-    title: 'S1 — Chỉ mật khẩu',
-    desc: 'Baseline: chỉ cần username + mật khẩu.',
+    title: 'S1 — Password only',
+    desc: 'Baseline: users only need a username and password.',
     icon: '🔑',
   },
   {
     id: 'S2',
-    title: 'S2 — Mật khẩu + OTP',
-    desc: 'Yêu cầu thêm Mobile OTP (TOTP hoặc mô phỏng SMS).',
+    title: 'S2 — Password + OTP',
+    desc: 'Requires an additional Mobile OTP (TOTP or simulated SMS).',
     icon: '📱',
   },
   {
     id: 'S3',
-    title: 'S3 — Mật khẩu + Mobile OTP + Email OTP',
-    desc: 'Thêm lớp xác minh qua email trước khi cấp quyền.',
+    title: 'S3 — Password + Mobile OTP + Email OTP',
+    desc: 'Adds an email verification layer before granting access.',
     icon: '📧',
   },
 ]
@@ -80,7 +80,7 @@ export function AdminConfig() {
       const res = await adminApi.updateConfig(payload)
       setConfig(res.data)
       setSmtpPassword('')
-      toast.success('Cấu hình đã được lưu. Hệ thống sẽ áp dụng ở lần đăng nhập tiếp theo.')
+      toast.success('Configuration saved. The system will apply it on the next sign-in.')
     } catch (err) {
       toast.error(err.message)
     } finally {
@@ -95,7 +95,7 @@ export function AdminConfig() {
   const emailApplies = mode === 'S3'
 
   return (
-    <AppShell title="Cấu hình xác thực & MFA" subtitle="Chuyển đổi S1/S2/S3, tham số OTP, lockout và SMTP (UC-08)">
+    <AppShell title="Auth configuration & MFA" subtitle="Switch between S1/S2/S3, OTP parameters, lockout and SMTP (UC-08)">
       {loading ? <Spinner /> : null}
       {error ? <ErrorState message={error.message} /> : null}
 
@@ -103,12 +103,12 @@ export function AdminConfig() {
         <form onSubmit={save} className="space-y-6">
           <section>
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-              <h2 className="text-base font-bold text-ink-900">Chế độ xác thực</h2>
+              <h2 className="text-base font-bold text-ink-900">Authentication mode</h2>
               {mode ? (
                 <span className="text-xs text-ink-400">
-                  Đang chọn: <strong className="text-ink-900">{mode}</strong> ·{' '}
+                  Selected: <strong className="text-ink-900">{mode}</strong> ·{' '}
                   <Link className="font-semibold text-brand-600 hover:underline" to={`/admin/modes/${mode}`}>
-                    Xem chi tiết chế độ {mode} →
+                    View mode {mode} details →
                   </Link>
                 </span>
               ) : null}
@@ -128,7 +128,7 @@ export function AdminConfig() {
                         <span className="text-2xl" aria-hidden="true">
                           {m.icon}
                         </span>
-                        {active ? <span className="badge bg-brand-100 text-brand-700">Đang dùng</span> : null}
+                        {active ? <span className="badge bg-brand-100 text-brand-700">In use</span> : null}
                       </div>
                       <p className="mt-2 text-sm font-bold text-ink-900">{m.title}</p>
                       <p className="mt-1 text-xs text-ink-400">{m.desc}</p>
@@ -137,44 +137,44 @@ export function AdminConfig() {
                       to={`/admin/modes/${m.id}`}
                       className="mt-3 inline-block text-xs font-semibold text-brand-600 hover:underline"
                     >
-                      Chi tiết chế độ {m.id} →
+                      Mode {m.id} details →
                     </Link>
                   </div>
                 )
               })}
             </div>
             <p className="mt-3 rounded-xl bg-surface-soft px-3 py-2 text-xs text-ink-400">
-              Chế độ ở đây là <strong>mặc định toàn hệ thống</strong>. Muốn gán riêng cho từng người dùng hoặc
-              hàng loạt, vào <Link className="font-semibold text-brand-600 hover:underline" to="/admin/users">Người dùng &amp; vai trò</Link>.
+              The mode here is <strong>system-wide default</strong>. To assign it to individual users or
+              in bulk, go to <Link className="font-semibold text-brand-600 hover:underline" to="/admin/users">Users &amp; roles</Link>.
             </p>
           </section>
 
           <section className={`card transition ${otpApplies ? '' : 'opacity-60'}`}>
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 className="text-base font-bold text-ink-900">Tham số OTP</h2>
+              <h2 className="text-base font-bold text-ink-900">OTP parameters</h2>
               <Badge tone={otpApplies ? 'accent' : 'neutral'}>
-                {otpApplies ? 'Áp dụng cho chế độ ' + mode : 'Không áp dụng cho S1'}
+                {otpApplies ? 'Applies to ' + mode : 'Not applicable to S1'}
               </Badge>
             </div>
             {!otpApplies ? (
               <p className="mt-2 rounded-xl bg-sun-100/60 px-3 py-2 text-xs text-ink-600">
-                S1 chỉ dùng mật khẩu nên các tham số OTP bên dưới không có hiệu lực. Chọn S2 hoặc S3 để sử dụng.
+                S1 uses passwords only, so the OTP parameters below have no effect. Choose S2 or S3 to use them.
               </p>
             ) : null}
             <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <div>
                 <label className="label" htmlFor="otp-type">
-                  Loại OTP
+                  OTP type
                 </label>
                 <select id="otp-type" className="input" value={config.otpType} onChange={(e) => set('otpType', e.target.value)}>
-                  <option value="TOTP">TOTP (ứng dụng xác thực)</option>
-                  <option value="SMS_SIMULATED">SMS mô phỏng</option>
+                  <option value="TOTP">TOTP (authenticator app)</option>
+                  <option value="SMS_SIMULATED">Simulated SMS</option>
                   <option value="EMAIL">Email</option>
                 </select>
               </div>
               <div>
                 <label className="label" htmlFor="otp-len">
-                  Độ dài mã
+                  Code length
                 </label>
                 <input
                   id="otp-len"
@@ -188,7 +188,7 @@ export function AdminConfig() {
               </div>
               <div>
                 <label className="label" htmlFor="otp-valid">
-                  Thời gian hiệu lực (giây, 30–300)
+                  Validity (seconds, 30–300)
                 </label>
                 <input
                   id="otp-valid"
@@ -202,7 +202,7 @@ export function AdminConfig() {
               </div>
               <div>
                 <label className="label" htmlFor="otp-cooldown">
-                  Thời gian chờ gửi lại (giây)
+                  Resend cooldown (seconds)
                 </label>
                 <input
                   id="otp-cooldown"
@@ -216,7 +216,7 @@ export function AdminConfig() {
               </div>
               <div>
                 <label className="label" htmlFor="otp-maxresend">
-                  Số lần gửi lại tối đa
+                  Max resends
                 </label>
                 <input
                   id="otp-maxresend"
@@ -234,17 +234,17 @@ export function AdminConfig() {
                   checked={config.emailOtpEnabled}
                   onChange={(e) => set('emailOtpEnabled', e.target.checked)}
                 />
-                Bật Email OTP cho chế độ S3
+                Enable Email OTP for S3
               </label>
             </div>
           </section>
 
           <section className="card">
-            <h2 className="text-base font-bold text-ink-900">Chống dò mật khẩu (lockout)</h2>
+            <h2 className="text-base font-bold text-ink-900">Brute-force protection (lockout)</h2>
             <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div>
                 <label className="label" htmlFor="max-fail">
-                  Ngưỡng số lần sai
+                  Failed-attempt threshold
                 </label>
                 <input
                   id="max-fail"
@@ -258,7 +258,7 @@ export function AdminConfig() {
               </div>
               <div>
                 <label className="label" htmlFor="lock-ladder">
-                  Thời gian khóa (giây, phân tách bởi dấu phẩy)
+                  Lockout durations (seconds, comma separated)
                 </label>
                 <input
                   id="lock-ladder"
@@ -269,7 +269,7 @@ export function AdminConfig() {
               </div>
               <div>
                 <label className="label" htmlFor="captcha-after">
-                  Yêu cầu captcha sau N lần gửi OTP
+                  Require captcha after N OTP requests
                 </label>
                 <input
                   id="captcha-after"
@@ -288,24 +288,24 @@ export function AdminConfig() {
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h2 className="text-base font-bold text-ink-900">SMTP (Email OTP)</h2>
               <Badge tone={emailApplies ? 'accent' : 'neutral'}>
-                {emailApplies ? 'Áp dụng cho chế độ S3' : 'Chỉ dùng cho S3'}
+                {emailApplies ? 'Applies to S3' : 'Only used by S3'}
               </Badge>
             </div>
             <p className="mt-1 text-xs text-ink-400">
-              Đây là tài khoản của <strong>dịch vụ gửi thư</strong> dùng để gửi mã Email OTP ở bước 3 của chế độ S3
-              — không phải tài khoản đăng nhập portal. Mật khẩu được mã hóa AES-GCM khi lưu và không bao giờ trả về
-              qua API (BR-10).
+              This is the <strong>mail-sending service</strong> account used to send Email OTP codes at step 3 of mode S3
+              — not a portal sign-in account. The password is encrypted with AES-GCM when stored and is never returned
+              through the API (BR-10).
             </p>
             {!emailApplies ? (
               <p className="mt-2 rounded-xl bg-sun-100/60 px-3 py-2 text-xs text-ink-600">
-                Chỉ chế độ <strong>S3</strong> mới dùng Email OTP. Ở {mode}, phần cấu hình này được giữ lại nhưng
-                không có hiệu lực.
+                Only mode <strong>S3</strong> uses Email OTP. In {mode}, this configuration is kept but
+                has no effect.
               </p>
             ) : null}
             <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <div>
                 <label className="label" htmlFor="smtp-host">
-                  Máy chủ
+                  Host
                 </label>
                 <input
                   id="smtp-host"
@@ -316,7 +316,7 @@ export function AdminConfig() {
               </div>
               <div>
                 <label className="label" htmlFor="smtp-port">
-                  Cổng
+                  Port
                 </label>
                 <input
                   id="smtp-port"
@@ -328,41 +328,41 @@ export function AdminConfig() {
               </div>
               <div>
                 <label className="label" htmlFor="smtp-user">
-                  Tài khoản (SMTP username)
+                  Account (SMTP username)
                 </label>
                 <input
                   id="smtp-user"
                   className="input"
                   value={config.smtpUsername || ''}
                   onChange={(e) => set('smtpUsername', e.target.value)}
-                  placeholder="vd: 1a2b3c4d5e6f7g (Mailtrap)"
+                  placeholder="e.g. 1a2b3c4d5e6f7g (Mailtrap)"
                 />
                 <p className="mt-1 text-[11px] text-ink-400">
-                  Tài khoản do nhà cung cấp SMTP cấp, dùng để xác thực khi gửi thư. Phải cùng nhà cung cấp với
-                  “Máy chủ” ở trên.
+                  The account issued by your SMTP provider, used to authenticate when sending mail. It must be from
+                  the same provider as the “Host” above.
                 </p>
               </div>
               <div>
                 <label className="label" htmlFor="smtp-pass">
-                  Mật khẩu / API key
+                  Password / API key
                 </label>
                 <input
                   id="smtp-pass"
                   type="password"
                   className="input"
-                  placeholder={config.smtpPasswordSet ? '•••••••• (đã thiết lập — nhập để thay)' : '••••••••'}
+                  placeholder={config.smtpPasswordSet ? '•••••••• (already set — enter to replace)' : '••••••••'}
                   value={smtpPassword}
                   onChange={(e) => setSmtpPassword(e.target.value)}
                 />
                 <p className="mt-1 text-[11px] text-ink-400">
                   {config.smtpPasswordSet
-                    ? 'Đã có mật khẩu lưu sẵn (đã mã hóa). Để trống nếu không muốn thay đổi.'
-                    : 'Chưa thiết lập. Không thể xem lại sau khi lưu.'}
+                    ? 'A password is already saved (encrypted). Leave blank to keep it unchanged.'
+                    : 'Not set. It cannot be viewed again after saving.'}
                 </p>
               </div>
               <div className="sm:col-span-2">
                 <label className="label" htmlFor="smtp-from">
-                  Địa chỉ gửi
+                  From address
                 </label>
                 <input
                   id="smtp-from"
@@ -376,10 +376,10 @@ export function AdminConfig() {
 
           <div className="flex items-center justify-between gap-3">
             <p className="text-xs text-ink-400">
-              Cập nhật lần cuối bởi <strong>{config.updatedBy || '—'}</strong>
+              Last updated by <strong>{config.updatedBy || '—'}</strong>
             </p>
             <button type="submit" className="btn-primary" disabled={saving}>
-              {saving ? <InlineSpinner /> : '💾'} Lưu cấu hình
+              {saving ? <InlineSpinner /> : '💾'} Save configuration
             </button>
           </div>
         </form>

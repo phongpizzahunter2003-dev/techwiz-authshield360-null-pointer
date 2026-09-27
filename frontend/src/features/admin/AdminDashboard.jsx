@@ -26,7 +26,7 @@ export function AdminDashboard() {
   const navigate = useNavigate()
 
   return (
-    <AppShell title="Bảng điều khiển quản trị" subtitle={dashboard?.greeting || 'Giám sát hệ thống và bảo mật'}>
+    <AppShell title="Admin dashboard" subtitle={dashboard?.greeting || 'Monitor the system and security'}>
       {loading ? <Spinner /> : null}
       {error ? <ErrorState message={error.message} onRetry={reload} /> : null}
 
@@ -39,36 +39,36 @@ export function AdminDashboard() {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <Link to="/admin/users" className="card transition hover:shadow-glow">
               <p className="text-2xl" aria-hidden="true">👥</p>
-              <p className="mt-2 text-sm font-bold text-ink-900">Người dùng & vai trò</p>
+              <p className="mt-2 text-sm font-bold text-ink-900">Users & roles</p>
               <p className="text-xs text-ink-400">UC-07</p>
             </Link>
             <Link to="/admin/config" className="card transition hover:shadow-glow">
               <p className="text-2xl" aria-hidden="true">⚙️</p>
-              <p className="mt-2 text-sm font-bold text-ink-900">Cấu hình xác thực</p>
+              <p className="mt-2 text-sm font-bold text-ink-900">Auth configuration</p>
               <p className="text-xs text-ink-400">UC-08</p>
             </Link>
             <Link to="/admin/audit-logs" className="card transition hover:shadow-glow">
               <p className="text-2xl" aria-hidden="true">📜</p>
-              <p className="mt-2 text-sm font-bold text-ink-900">Nhật ký xác thực</p>
+              <p className="mt-2 text-sm font-bold text-ink-900">Audit log</p>
               <p className="text-xs text-ink-400">UC-11</p>
             </Link>
             <Link to="/admin/comparison" className="card transition hover:shadow-glow">
               <p className="text-2xl" aria-hidden="true">📈</p>
-              <p className="mt-2 text-sm font-bold text-ink-900">So sánh S1/S2/S3</p>
+              <p className="mt-2 text-sm font-bold text-ink-900">S1/S2/S3 comparison</p>
               <p className="text-xs text-ink-400">UC-15</p>
             </Link>
             <Link to="/admin/system" className="card transition hover:shadow-glow">
               <p className="text-2xl" aria-hidden="true">🗄️</p>
-              <p className="mt-2 text-sm font-bold text-ink-900">Hệ thống & dữ liệu</p>
-              <p className="text-xs text-ink-400">Kiểm tra CSDL</p>
+              <p className="mt-2 text-sm font-bold text-ink-900">System & data</p>
+              <p className="text-xs text-ink-400">Check the database</p>
             </Link>
           </div>
 
           <section>
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-base font-bold text-ink-900">Sự kiện bảo mật gần đây</h2>
+              <h2 className="text-base font-bold text-ink-900">Recent security events</h2>
               <Link className="text-sm font-semibold text-brand-600 hover:underline" to="/admin/audit-logs">
-                Xem tất cả
+                View all
               </Link>
             </div>
             {dashboard.recentEvents?.length ? (
@@ -76,15 +76,15 @@ export function AdminDashboard() {
                 <table className="table">
                   <thead>
                     <tr>
-                      <th>Thời điểm</th>
-                      <th>Hành động</th>
-                      <th>Kết quả</th>
-                      <th>Người dùng</th>
-                      <th>Vai trò</th>
-                      <th>Yếu tố</th>
-                      <th>Chế độ</th>
+                      <th>Time</th>
+                      <th>Action</th>
+                      <th>Result</th>
+                      <th>User</th>
+                      <th>Role</th>
+                      <th>Factor</th>
+                      <th>Mode</th>
                       <th>IP</th>
-                      <th className="text-right">Chi tiết</th>
+                      <th className="text-right">Details</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -110,7 +110,7 @@ export function AdminDashboard() {
                             className="text-sm font-semibold text-brand-600 hover:underline"
                             onClick={(ev) => ev.stopPropagation()}
                           >
-                            Xem →
+                            View →
                           </Link>
                         </td>
                       </tr>
@@ -119,7 +119,7 @@ export function AdminDashboard() {
                 </table>
               </div>
             ) : (
-              <EmptyState icon="📜" title="Chưa có sự kiện" description="Các sự kiện xác thực sẽ xuất hiện tại đây." />
+              <EmptyState icon="📜" title="No events yet" description="Authentication events will appear here." />
             )}
           </section>
         </div>

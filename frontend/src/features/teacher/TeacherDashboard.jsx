@@ -21,7 +21,7 @@ export function TeacherDashboard() {
   const dashboard = data?.data
 
   return (
-    <AppShell title="Bảng điều khiển giáo viên" subtitle={dashboard?.greeting || 'Quản lý lớp học và bài tập'}>
+    <AppShell title="Teacher dashboard" subtitle={dashboard?.greeting || 'Manage your classes and assignments'}>
       {loading ? <Spinner /> : null}
       {error ? <ErrorState message={error.message} onRetry={reload} /> : null}
 
@@ -34,9 +34,9 @@ export function TeacherDashboard() {
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <section>
               <div className="mb-3 flex items-center justify-between">
-                <h2 className="text-base font-bold text-ink-900">Lớp phụ trách</h2>
+                <h2 className="text-base font-bold text-ink-900">Classes taught</h2>
                 <Link className="text-sm font-semibold text-brand-600 hover:underline" to="/teacher/classes">
-                  Quản lý
+                  Manage
                 </Link>
               </div>
               {dashboard.classrooms?.length ? (
@@ -52,22 +52,22 @@ export function TeacherDashboard() {
                           <p className="text-xs text-ink-400">{c.code}</p>
                         </div>
                         <Badge tone="sky" icon="🎒">
-                          {c.studentCount} học sinh
+                          {c.studentCount} students
                         </Badge>
                       </Link>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <EmptyState icon="🏫" title="Chưa có lớp học" description="Tạo lớp học để bắt đầu giao bài." />
+                <EmptyState icon="🏫" title="No classes yet" description="Create a class to start assigning work." />
               )}
             </section>
 
             <section>
               <div className="mb-3 flex items-center justify-between">
-                <h2 className="text-base font-bold text-ink-900">Bài tập đã giao</h2>
+                <h2 className="text-base font-bold text-ink-900">Assignments given</h2>
                 <Link className="text-sm font-semibold text-brand-600 hover:underline" to="/teacher/assignments">
-                  Quản lý
+                  Manage
                 </Link>
               </div>
               {dashboard.assignments?.length ? (
@@ -80,7 +80,7 @@ export function TeacherDashboard() {
                       >
                         <div className="min-w-0">
                           <p className="truncate text-sm font-bold text-ink-900">{a.title}</p>
-                          <p className="text-xs text-ink-400">Hạn: {formatDateTime(a.dueAt)}</p>
+                          <p className="text-xs text-ink-400">Due: {formatDateTime(a.dueAt)}</p>
                         </div>
                         <Badge tone={statusTone(a.status)}>{a.status}</Badge>
                       </Link>
@@ -88,7 +88,7 @@ export function TeacherDashboard() {
                   ))}
                 </ul>
               ) : (
-                <EmptyState icon="📝" title="Chưa có bài tập" description="Tạo bài tập mới cho lớp của bạn." />
+                <EmptyState icon="📝" title="No assignments yet" description="Create a new assignment for your class." />
               )}
             </section>
           </div>

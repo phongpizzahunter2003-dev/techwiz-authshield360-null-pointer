@@ -32,7 +32,7 @@ export function TeacherClasses() {
     setSaving(true)
     try {
       await classroomApi.create(form)
-      toast.success('Tạo lớp học thành công.')
+      toast.success('Class created successfully.')
       setCreateOpen(false)
       setForm({ code: '', name: '', description: '' })
       await classrooms.reload()
@@ -48,7 +48,7 @@ export function TeacherClasses() {
     setEnrolling(true)
     try {
       await classroomApi.enroll(enrollTarget.id, Number(selectedStudent))
-      toast.success('Đã thêm học sinh vào lớp.')
+      toast.success('Student added to the class.')
       setEnrollTarget(null)
       setSelectedStudent('')
       await classrooms.reload()
@@ -63,7 +63,7 @@ export function TeacherClasses() {
     setDeleting(true)
     try {
       await classroomApi.remove(classroom.id)
-      toast.success('Đã xóa lớp học.')
+      toast.success('Class deleted.')
       setConfirmDelete(null)
       await classrooms.reload()
     } catch (err) {
@@ -75,11 +75,11 @@ export function TeacherClasses() {
 
   return (
     <AppShell
-      title="Lớp học"
-      subtitle="Tạo lớp và thêm học sinh vào lớp bạn phụ trách"
+      title="Classes"
+      subtitle="Create classes and add students to the classes you teach"
       actions={
         <button type="button" className="btn-primary" onClick={() => setCreateOpen(true)}>
-          ➕ Tạo lớp học
+          ➕ Create class
         </button>
       }
     >
@@ -87,7 +87,7 @@ export function TeacherClasses() {
       {classrooms.error ? <ErrorState message={classrooms.error.message} onRetry={classrooms.reload} /> : null}
 
       {!classrooms.loading && list.length === 0 ? (
-        <EmptyState icon="🏫" title="Chưa có lớp học" description="Tạo lớp học đầu tiên của bạn." />
+        <EmptyState icon="🏫" title="No classes yet" description="Create your first class." />
       ) : null}
 
       {list.length > 0 ? (
@@ -103,17 +103,17 @@ export function TeacherClasses() {
                 <Badge tone="sky">{c.code}</Badge>
               </div>
               {c.description ? <p className="mt-1 text-xs text-ink-400">{c.description}</p> : null}
-              <p className="mt-3 text-sm font-semibold text-ink-600">🎒 {c.studentCount} học sinh</p>
-              <p className="mt-1 text-xs text-ink-400">Giáo viên: {c.teacherName || '—'}</p>
+              <p className="mt-3 text-sm font-semibold text-ink-600">🎒 {c.studentCount} students</p>
+              <p className="mt-1 text-xs text-ink-400">Teacher: {c.teacherName || '—'}</p>
               <div className="mt-auto flex flex-wrap gap-2 pt-4">
                 <Link className="btn-ghost flex-1 whitespace-nowrap" to={`/teacher/classes/${c.id}`}>
-                  Chi tiết
+                  Details
                 </Link>
                 <button type="button" className="btn-accent flex-1 whitespace-nowrap" onClick={() => setEnrollTarget(c)}>
-                  Thêm học sinh
+                  Add student
                 </button>
                 <button type="button" className="btn-danger !px-3" onClick={() => setConfirmDelete(c)}>
-                  Xóa
+                  Delete
                 </button>
               </div>
             </article>
@@ -121,11 +121,11 @@ export function TeacherClasses() {
         </div>
       ) : null}
 
-      <Modal open={createOpen} onClose={() => setCreateOpen(false)} title="Tạo lớp học">
+      <Modal open={createOpen} onClose={() => setCreateOpen(false)} title="Create class">
         <form onSubmit={create} className="space-y-4">
           <div>
             <label className="label" htmlFor="cl-code">
-              Mã lớp
+              Class code
             </label>
             <input
               id="cl-code"
@@ -134,12 +134,12 @@ export function TeacherClasses() {
               maxLength={30}
               value={form.code}
               onChange={(e) => setForm({ ...form, code: e.target.value })}
-              placeholder="vd: CS102"
+              placeholder="e.g. CS102"
             />
           </div>
           <div>
             <label className="label" htmlFor="cl-name">
-              Tên lớp
+              Class name
             </label>
             <input
               id="cl-name"
@@ -147,12 +147,12 @@ export function TeacherClasses() {
               required
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              placeholder="vd: Lập trình nâng cao"
+              placeholder="e.g. Advanced Programming"
             />
           </div>
           <div>
             <label className="label" htmlFor="cl-desc">
-              Mô tả
+              Description
             </label>
             <textarea
               id="cl-desc"
@@ -163,21 +163,21 @@ export function TeacherClasses() {
           </div>
           <div className="flex justify-end gap-2">
             <button type="button" className="btn-ghost" onClick={() => setCreateOpen(false)}>
-              Hủy
+              Cancel
             </button>
             <button type="submit" className="btn-primary" disabled={saving}>
-              {saving ? <InlineSpinner /> : '💾'} Lưu
+              {saving ? <InlineSpinner /> : '💾'} Save
             </button>
           </div>
         </form>
       </Modal>
 
-      <Modal open={Boolean(enrollTarget)} onClose={() => setEnrollTarget(null)} title={`Thêm học sinh — ${enrollTarget?.name || ''}`}>
+      <Modal open={Boolean(enrollTarget)} onClose={() => setEnrollTarget(null)} title={`Add student — ${enrollTarget?.name || ''}`}>
         <label className="label" htmlFor="enroll-student">
-          Chọn học sinh
+          Select a student
         </label>
         <select id="enroll-student" className="input" value={selectedStudent} onChange={(e) => setSelectedStudent(e.target.value)}>
-          <option value="">-- Chọn học sinh --</option>
+          <option value="">-- Select a student --</option>
           {studentList.map((s) => (
             <option key={s.id} value={s.id}>
               {s.fullName || s.username} ({s.username})
@@ -186,10 +186,10 @@ export function TeacherClasses() {
         </select>
         <div className="mt-4 flex justify-end gap-2">
           <button type="button" className="btn-ghost" onClick={() => setEnrollTarget(null)}>
-            Hủy
+            Cancel
           </button>
           <button type="button" className="btn-accent" onClick={enroll} disabled={!selectedStudent || enrolling}>
-            {enrolling ? <InlineSpinner /> : '➕'} Thêm vào lớp
+            {enrolling ? <InlineSpinner /> : '➕'} Add to class
           </button>
         </div>
       </Modal>
@@ -198,24 +198,24 @@ export function TeacherClasses() {
       <Modal
         open={Boolean(confirmDelete)}
         onClose={() => setConfirmDelete(null)}
-        title="Xác nhận xóa lớp học"
+        title="Confirm class deletion"
         size="sm"
         footer={
           <>
             <button type="button" className="btn-ghost" onClick={() => setConfirmDelete(null)}>
-              Hủy
+              Cancel
             </button>
             <button type="button" className="btn-danger" onClick={() => remove(confirmDelete)} disabled={deleting}>
-              {deleting ? <InlineSpinner /> : '🗑'} Xóa lớp
+              {deleting ? <InlineSpinner /> : '🗑'} Delete class
             </button>
           </>
         }
       >
         <p className="text-sm text-ink-600">
-          Bạn sắp xóa lớp <strong className="text-ink-900">{confirmDelete?.name}</strong> ({confirmDelete?.code}).
+          You are about to delete the class <strong className="text-ink-900">{confirmDelete?.name}</strong> ({confirmDelete?.code}).
         </p>
         <p className="mt-2 rounded-xl bg-coral-100/50 px-3 py-2 text-xs text-ink-600">
-          Toàn bộ ghi danh học sinh trong lớp sẽ bị gỡ. Bài tập và nhật ký kiểm toán vẫn được giữ lại.
+          All student enrollments in this class will be removed. Assignments and the audit log are kept.
         </p>
       </Modal>
     </AppShell>

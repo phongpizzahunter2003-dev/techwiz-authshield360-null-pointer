@@ -37,28 +37,28 @@ public final class SubmissionPolicy {
                                       java.time.Instant now) {
         // A closed assignment locks everything, regardless of resubmission settings (UC-A3).
         if (assignment.getStatus() == AssignmentStatus.CLOSED) {
-            return Evaluation.blocked("SUBMISSION_LOCKED", "Bài tập đã đóng. Bạn không thể cập nhật bài nộp.");
+            return Evaluation.blocked("SUBMISSION_LOCKED", "This assignment is closed. You cannot update your submission.");
         }
 
         if (existingAttempts > 0) {
             if (!assignment.isAllowResubmission()) {
-                return Evaluation.blocked("RESUBMISSION_NOT_ALLOWED", "Bài tập này không cho phép nộp lại.");
+                return Evaluation.blocked("RESUBMISSION_NOT_ALLOWED", "Resubmission is not allowed for this assignment.");
             }
             if (graded) {
-                return Evaluation.blocked("RESUBMISSION_NOT_ALLOWED", "Bài đã được chấm điểm, không thể nộp lại.");
+                return Evaluation.blocked("RESUBMISSION_NOT_ALLOWED", "This submission has been graded and can no longer be resubmitted.");
             }
             if (existingAttempts >= assignment.getMaxAttempts()) {
-                return Evaluation.blocked("MAX_ATTEMPTS_REACHED", "Bạn đã đạt số lần nộp tối đa.");
+                return Evaluation.blocked("MAX_ATTEMPTS_REACHED", "You have reached the maximum number of submissions.");
             }
         }
 
         boolean isLate = now.isAfter(assignment.getDueAt());
         if (isLate) {
             if (!assignment.isAllowLate()) {
-                return Evaluation.blocked("LATE_NOT_ALLOWED", "Đã quá hạn nộp bài. Hệ thống không nhận bài muộn.");
+                return Evaluation.blocked("LATE_NOT_ALLOWED", "The deadline has passed. Late submissions are not accepted.");
             }
             if (assignment.getLateCutoffAt() != null && now.isAfter(assignment.getLateCutoffAt())) {
-                return Evaluation.blocked("LATE_NOT_ALLOWED", "Đã quá thời hạn nộp muộn cho phép.");
+                return Evaluation.blocked("LATE_NOT_ALLOWED", "The late submission window has closed.");
             }
             return Evaluation.late();
         }

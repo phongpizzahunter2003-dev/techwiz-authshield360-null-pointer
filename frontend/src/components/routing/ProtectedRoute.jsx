@@ -10,7 +10,7 @@ export function ProtectedRoute({ roles, children }) {
   if (!ready) {
     return (
       <div className="grid min-h-screen place-items-center">
-        <Spinner label="Đang kiểm tra phiên làm việc..." />
+        <Spinner label="Checking your session..." />
       </div>
     )
   }

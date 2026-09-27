@@ -16,12 +16,12 @@ export function AdminSystem() {
 
   return (
     <DetailShell
-      title="Hệ thống & dữ liệu"
-      subtitle="Kiểm tra kết nối cơ sở dữ liệu và số bản ghi thực tế trong từng bảng"
+      title="System & data"
+      subtitle="Check the database connection and the actual row count in each table"
       fallback="/admin"
       actions={
         <button type="button" className="btn-ghost" onClick={reload} disabled={loading}>
-          {loading ? <InlineSpinner /> : '🔄'} Làm mới
+          {loading ? <InlineSpinner /> : '🔄'} Refresh
         </button>
       }
     >
@@ -31,12 +31,12 @@ export function AdminSystem() {
       {status ? (
         <div className="space-y-6">
           <section className="card">
-            <h2 className="text-base font-bold text-ink-900">Kết nối cơ sở dữ liệu</h2>
+            <h2 className="text-base font-bold text-ink-900">Database connection</h2>
             <div className="mt-3 flex flex-wrap gap-2">
               <Badge tone="brand">{status.databaseProduct}</Badge>
               <Badge tone="neutral">v{status.databaseVersion}</Badge>
               <Badge tone={status.persistent ? 'accent' : 'sun'}>
-                {status.persistent ? 'Lưu trữ bền vững' : 'Trong bộ nhớ (mất khi khởi động lại)'}
+                {status.persistent ? 'Durable storage' : 'In memory (lost on restart)'}
               </Badge>
               <Badge tone="sky">Profile: {status.activeProfiles || 'default'}</Badge>
             </div>
@@ -48,32 +48,32 @@ export function AdminSystem() {
                 </dd>
               </div>
               <div className="flex justify-between gap-4 border-b border-brand-50 pb-2">
-                <dt className="text-ink-400">Tổng số bản ghi</dt>
+                <dt className="text-ink-400">Total rows</dt>
                 <dd className="font-semibold text-ink-900">{status.totalRows}</dd>
               </div>
               <div className="flex justify-between gap-4">
-                <dt className="text-ink-400">Kiểm tra lúc</dt>
+                <dt className="text-ink-400">Checked at</dt>
                 <dd className="font-semibold text-ink-900">{formatDateTime(status.checkedAt)}</dd>
               </div>
             </dl>
             {!status.persistent ? (
               <p className="mt-3 rounded-xl border border-sun-400 bg-sun-100/60 px-3 py-2 text-xs text-ink-600">
-                Đang chạy profile <strong>dev</strong> với H2 trong bộ nhớ: dữ liệu <strong>có</strong> được ghi vào
-                CSDL nhưng sẽ mất khi khởi động lại. Muốn dữ liệu tồn tại lâu dài, hãy chạy với profile
-                <strong> mysql</strong> (xem README.md §3).
+                Running profile <strong>dev</strong> with in-memory H2: data <strong>is</strong> written to
+                the database but will be lost on restart. To keep data long-term, run with the
+                <strong> mysql</strong> profile (see README.md §3).
               </p>
             ) : null}
           </section>
 
           <section className="card">
-            <h2 className="text-base font-bold text-ink-900">Số bản ghi theo bảng</h2>
+            <h2 className="text-base font-bold text-ink-900">Rows per table</h2>
             <div className="table-wrap mt-3">
               <table className="table">
                 <thead>
                   <tr>
-                    <th>Bảng</th>
-                    <th>Số bản ghi</th>
-                    <th>Trạng thái</th>
+                    <th>Table</th>
+                    <th>Rows</th>
+                    <th>Status</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -83,11 +83,11 @@ export function AdminSystem() {
                       <td className="font-bold">{t.rows < 0 ? '—' : t.rows}</td>
                       <td>
                         {t.rows < 0 ? (
-                          <Badge tone="coral">Chưa có bảng</Badge>
+                          <Badge tone="coral">Table missing</Badge>
                         ) : t.rows === 0 ? (
-                          <Badge tone="neutral">Trống</Badge>
+                          <Badge tone="neutral">Empty</Badge>
                         ) : (
-                          <Badge tone="accent">Có dữ liệu</Badge>
+                          <Badge tone="accent">Has data</Badge>
                         )}
                       </td>
                     </tr>
@@ -96,8 +96,8 @@ export function AdminSystem() {
               </table>
             </div>
             <p className="mt-2 text-xs text-ink-400">
-              Số bản ghi được đọc trực tiếp bằng SQL trên kết nối đang hoạt động — đây là bằng chứng dữ liệu đã
-              vào tới CSDL.
+              Row counts are read directly with SQL on the active connection — this is proof the data made it
+              into the database.
             </p>
           </section>
         </div>

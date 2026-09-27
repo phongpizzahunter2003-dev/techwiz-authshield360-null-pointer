@@ -257,3 +257,19 @@ CREATE TABLE IF NOT EXISTS auth_config (
   updated_at               DATETIME(6) NULL,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB;
+
+-- -------------------------------------------------------- notifications ---
+CREATE TABLE IF NOT EXISTS notifications (
+  id             BIGINT       NOT NULL AUTO_INCREMENT,
+  user_id        BIGINT       NOT NULL,
+  recipient_role VARCHAR(20)  NULL,
+  type           VARCHAR(40)  NOT NULL,
+  title          VARCHAR(200) NOT NULL,
+  message        VARCHAR(1000) NOT NULL,
+  target_url     VARCHAR(255) NULL,
+  is_read        BIT(1)       NOT NULL DEFAULT b'0',
+  read_at        DATETIME(6)  NULL,
+  created_at     DATETIME(6)  NOT NULL,
+  PRIMARY KEY (id),
+  KEY ix_notifications_user (user_id, is_read, created_at)
+) ENGINE=InnoDB;

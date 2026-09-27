@@ -26,7 +26,7 @@ public class AdminConfigController {
 
     @PutMapping
     public ApiResponse<AuthConfigResponse> update(@Valid @RequestBody UpdateConfigRequest request) {
-        return ApiResponse.ok("Cấu hình đã được lưu. Hệ thống sẽ áp dụng ở lần đăng nhập tiếp theo.",
+        return ApiResponse.ok("Configuration saved. It will apply to the next sign-in.",
                 configService.update(request));
     }
 }

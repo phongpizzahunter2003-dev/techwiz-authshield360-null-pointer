@@ -7,12 +7,12 @@ export function ForbiddenPage() {
         <p className="text-5xl" aria-hidden="true">
           🚫
         </p>
-        <h1 className="mt-3 text-2xl font-extrabold text-ink-900">403 — Không có quyền truy cập</h1>
+        <h1 className="mt-3 text-2xl font-extrabold text-ink-900">403 — Access denied</h1>
         <p className="mt-2 text-sm text-ink-400">
-          Bạn không có quyền truy cập vào tài nguyên này. Hành vi vi phạm đã được ghi nhận.
+          You do not have permission to access this resource. This attempt has been logged.
         </p>
         <Link className="btn-primary mt-5" to="/">
-          Về trang chủ
+          Back to home
         </Link>
       </div>
     </div>
@@ -26,10 +26,10 @@ export function NotFoundPage() {
         <p className="text-5xl" aria-hidden="true">
           🧭
         </p>
-        <h1 className="mt-3 text-2xl font-extrabold text-ink-900">404 — Không tìm thấy trang</h1>
-        <p className="mt-2 text-sm text-ink-400">Đường dẫn bạn truy cập không tồn tại.</p>
+        <h1 className="mt-3 text-2xl font-extrabold text-ink-900">404 — Page not found</h1>
+        <p className="mt-2 text-sm text-ink-400">The path you accessed does not exist.</p>
         <Link className="btn-primary mt-5" to="/">
-          Về trang chủ
+          Back to home
         </Link>
       </div>
     </div>

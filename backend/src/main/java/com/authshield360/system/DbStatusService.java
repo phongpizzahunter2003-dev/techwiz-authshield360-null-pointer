@@ -36,6 +36,7 @@ public class DbStatusService {
             "sessions",
             "otp_tokens",
             "login_attempts",
+            "notifications",
             "auth_config");
 
     private final JdbcTemplate jdbcTemplate;

@@ -16,7 +16,7 @@ import java.time.Duration;
 import java.time.Instant;
 
 /**
- * Failed-login protection with exponential backoff (UC-10, BR-04, VĐ-04).
+ * Failed-login protection with exponential backoff (UC-10, BR-04, VD-04).
  * {@code recordFailure} never throws, so the attempt counter and audit row always commit;
  * the caller decides which HTTP error to return.
  */
@@ -45,11 +45,11 @@ public class LockoutService {
         if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(Instant.now())) {
             long remaining = Duration.between(Instant.now(), user.getLockedUntil()).toSeconds();
             throw new BusinessException(ErrorCode.ACCOUNT_LOCKED,
-                    ErrorCode.ACCOUNT_LOCKED.message() + " Vui lòng thử lại sau " + format(remaining) + ".");
+                    ErrorCode.ACCOUNT_LOCKED.message() + " Please try again in " + format(remaining) + ".");
         }
     }
 
-    /** Registers a failed attempt (wrong password OR wrong OTP — VĐ-04). Returns lockout info if triggered. */
+    /** Registers a failed attempt (wrong password OR wrong OTP - VD-04). Returns lockout info if triggered. */
     @Transactional
     public LockoutInfo recordFailure(User user, String reason, String factor) {
         attempts.save(new LoginAttempt(user.getUsername(), WebUtils.clientIp(), Instant.now(), false, reason));

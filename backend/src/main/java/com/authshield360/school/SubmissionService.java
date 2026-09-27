@@ -5,6 +5,7 @@ import com.authshield360.audit.AuditEvent;
 import com.authshield360.audit.AuditService;
 import com.authshield360.common.BusinessException;
 import com.authshield360.common.ErrorCode;
+import com.authshield360.notification.NotificationService;
 import com.authshield360.school.dto.GradeRequest;
 import com.authshield360.school.dto.SubmissionResponse;
 import com.authshield360.security.CurrentUser;
@@ -31,10 +32,12 @@ public class SubmissionService {
     private final FileStorageService fileStorage;
     private final SchoolMapper mapper;
     private final AuditService audit;
+    private final NotificationService notifications;
 
     public SubmissionService(AssignmentRepository assignments, AssignmentSubmissionRepository submissions,
                              EnrollmentRepository enrollments, AssignmentService assignmentService,
-                             FileStorageService fileStorage, SchoolMapper mapper, AuditService audit) {
+                             FileStorageService fileStorage, SchoolMapper mapper, AuditService audit,
+                             NotificationService notifications) {
         this.assignments = assignments;
         this.submissions = submissions;
         this.enrollments = enrollments;
@@ -42,6 +45,7 @@ public class SubmissionService {
         this.fileStorage = fileStorage;
         this.mapper = mapper;
         this.audit = audit;
+        this.notifications = notifications;
     }
 
     public record SubmissionDownload(Resource resource, String filename, String contentType) { }
@@ -91,6 +95,10 @@ public class SubmissionService {
                 .detail("assignmentId", assignmentId).detail("attempt", saved.getAttemptNumber())
                 .detail("status", saved.getSubmissionStatus().name()));
 
+        // Notify the teacher who owns the assignment (late vs on time).
+        notifications.submissionReceived(assignment, mapper.nameOf(student.userId()),
+                saved.getSubmissionStatus() == SubmissionStatus.LATE, saved.getAttemptNumber());
+
         return mapper.toSubmission(saved, assignment, student.username(), true);
     }
 
@@ -132,7 +140,7 @@ public class SubmissionService {
         assignmentService.assertCanManage(assignment, viewer);
         if (req.score() > assignment.getMaxScore()) {
             throw new BusinessException(ErrorCode.VALIDATION_ERROR,
-                    "Điểm không được vượt quá điểm tối đa (" + assignment.getMaxScore() + ").");
+                    "The score cannot exceed the maximum score (" + assignment.getMaxScore() + ").");
         }
         submission.setScore(req.score());
         submission.setFeedback(req.feedback());
@@ -142,6 +150,7 @@ public class SubmissionService {
         audit.record(AuditEvent.action(AuditAction.SUBMISSION_GRADE).success()
                 .user(viewer.username()).role(viewer.role())
                 .detail("submissionId", saved.getId()).detail("score", req.score()));
+        notifications.submissionGraded(assignment, saved.getStudentId(), saved.getScore(), assignment.getMaxScore());
         return mapper.toSubmission(saved, assignment, mapper.nameOf(saved.getStudentId()), true);
     }
 

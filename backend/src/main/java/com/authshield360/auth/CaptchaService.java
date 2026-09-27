@@ -13,7 +13,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Lightweight bot challenge (functional spec UC-02/UC-03: "captcha khi request OTP liên tục").
+ * Lightweight bot challenge (functional spec UC-02/UC-03: "captcha when OTP is requested repeatedly").
  * Tracks rapid OTP requests per identifier; when the configured threshold is exceeded, the caller
  * must solve an arithmetic challenge before a new OTP is issued.
  */
@@ -67,7 +67,7 @@ public class CaptchaService {
         int a = 3 + random.nextInt(9);
         int b = 2 + random.nextInt(8);
         String id = UUID.randomUUID().toString();
-        String question = "Hãy tính: " + a + " + " + b + " = ?";
+        String question = "Solve: " + a + " + " + b + " = ?";
         Instant expiresAt = Instant.now().plusSeconds(CHALLENGE_TTL_SECONDS);
         challenges.put(id, new Stored(String.valueOf(a + b), expiresAt));
         return new Challenge(id, question, expiresAt);

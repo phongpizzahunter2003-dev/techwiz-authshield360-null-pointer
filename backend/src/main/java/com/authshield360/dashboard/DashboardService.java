@@ -1,18 +1,17 @@
 package com.authshield360.dashboard;
 
+import com.authshield360.audit.AuditAction;
 import com.authshield360.audit.AuditFilter;
 import com.authshield360.audit.AuditLogRepository;
 import com.authshield360.audit.AuditQueryService;
-import com.authshield360.audit.AuditAction;
 import com.authshield360.auth.AuthMode;
 import com.authshield360.dashboard.dto.*;
 import com.authshield360.school.AssignmentRepository;
+import com.authshield360.school.AssignmentService;
 import com.authshield360.school.AssignmentSubmissionRepository;
 import com.authshield360.school.Classroom;
 import com.authshield360.school.ClassroomRepository;
 import com.authshield360.school.EnrollmentRepository;
-import com.authshield360.school.SubmissionService;
-import com.authshield360.school.AssignmentService;
 import com.authshield360.school.SchoolMapper;
 import com.authshield360.school.dto.AssignmentResponse;
 import com.authshield360.school.dto.StatCard;
@@ -41,22 +40,20 @@ public class DashboardService {
     private final AssignmentRepository assignments;
     private final AssignmentSubmissionRepository submissions;
     private final AssignmentService assignmentService;
-    private final SubmissionService submissionService;
     private final SchoolMapper mapper;
     private final AuditQueryService auditQueryService;
     private final AuditLogRepository auditLogs;
 
     public DashboardService(UserRepository users, ClassroomRepository classrooms, EnrollmentRepository enrollments,
                             AssignmentRepository assignments, AssignmentSubmissionRepository submissions,
-                            AssignmentService assignmentService, SubmissionService submissionService,
-                            SchoolMapper mapper, AuditQueryService auditQueryService, AuditLogRepository auditLogs) {
+                            AssignmentService assignmentService, SchoolMapper mapper,
+                            AuditQueryService auditQueryService, AuditLogRepository auditLogs) {
         this.users = users;
         this.classrooms = classrooms;
         this.enrollments = enrollments;
         this.assignments = assignments;
         this.submissions = submissions;
         this.assignmentService = assignmentService;
-        this.submissionService = submissionService;
         this.mapper = mapper;
         this.auditQueryService = auditQueryService;
         this.auditLogs = auditLogs;
@@ -71,11 +68,12 @@ public class DashboardService {
         long pending = items.stream().filter(a -> Boolean.TRUE.equals(a.canSubmit())).count();
 
         List<StatCard> stats = List.of(
-                new StatCard("classes", "Lớp đang học", String.valueOf(enrollments.findByStudentId(viewer.userId()).size()), "brand"),
-                new StatCard("assignments", "Tổng bài tập", String.valueOf(items.size()), "sky"),
-                new StatCard("submitted", "Đã nộp", String.valueOf(submitted), "accent"),
-                new StatCard("pending", "Cần nộp", String.valueOf(pending), "sun"),
-                new StatCard("late", "Nộp muộn", String.valueOf(late), "coral"));
+                new StatCard("classes", "Enrolled classes",
+                        String.valueOf(enrollments.findByStudentId(viewer.userId()).size()), "brand"),
+                new StatCard("assignments", "Total assignments", String.valueOf(items.size()), "sky"),
+                new StatCard("submitted", "Submitted", String.valueOf(submitted), "accent"),
+                new StatCard("pending", "To submit", String.valueOf(pending), "sun"),
+                new StatCard("late", "Late submissions", String.valueOf(late), "coral"));
 
         return new StudentDashboardResponse(greeting(user), user.getFullName(), stats, items);
     }
@@ -95,10 +93,10 @@ public class DashboardService {
                 .count();
 
         List<StatCard> stats = List.of(
-                new StatCard("classes", "Lớp phụ trách", String.valueOf(owned.size()), "brand"),
-                new StatCard("students", "Học sinh", String.valueOf(studentCount), "sky"),
-                new StatCard("assignments", "Bài tập", String.valueOf(items.size()), "accent"),
-                new StatCard("toGrade", "Chờ chấm", String.valueOf(toGrade), "sun"));
+                new StatCard("classes", "Classes taught", String.valueOf(owned.size()), "brand"),
+                new StatCard("students", "Students", String.valueOf(studentCount), "sky"),
+                new StatCard("assignments", "Assignments", String.valueOf(items.size()), "accent"),
+                new StatCard("toGrade", "Awaiting grade", String.valueOf(toGrade), "sun"));
 
         return new TeacherDashboardResponse(greeting(user), user.getFullName(), stats, classroomResponses, items);
     }
@@ -107,22 +105,18 @@ public class DashboardService {
     public AdminDashboardResponse admin(CurrentUser viewer) {
         User user = users.findById(viewer.userId()).orElseThrow();
 
-        long totalUsers = users.count();
-        long students = users.countByRole(RoleType.STUDENT);
-        long teachers = users.countByRole(RoleType.TEACHER);
-        long lockouts = auditLogs.countByEventAction(AuditAction.LOCKOUT_TRIGGERED);
-        long loginFailures = auditLogs.countByEventAction(AuditAction.LOGIN_FAIL);
-        long privilegeViolations = auditLogs.countByEventAction(AuditAction.PRIVILEGE_VIOLATION);
-
         List<StatCard> stats = List.of(
-                new StatCard("users", "Tổng người dùng", String.valueOf(totalUsers), "brand"),
-                new StatCard("students", "Học sinh", String.valueOf(students), "sky"),
-                new StatCard("teachers", "Giáo viên", String.valueOf(teachers), "accent"),
-                new StatCard("assignments", "Bài tập", String.valueOf(assignments.count()), "sun"),
-                new StatCard("submissions", "Lượt nộp bài", String.valueOf(submissions.count()), "brand"),
-                new StatCard("lockouts", "Lần khóa tài khoản", String.valueOf(lockouts), "coral"),
-                new StatCard("loginFailures", "Đăng nhập thất bại", String.valueOf(loginFailures), "coral"),
-                new StatCard("privilegeViolations", "Vi phạm phân quyền", String.valueOf(privilegeViolations), "coral"));
+                new StatCard("users", "Total users", String.valueOf(users.count()), "brand"),
+                new StatCard("students", "Students", String.valueOf(users.countByRole(RoleType.STUDENT)), "sky"),
+                new StatCard("teachers", "Teachers", String.valueOf(users.countByRole(RoleType.TEACHER)), "accent"),
+                new StatCard("assignments", "Assignments", String.valueOf(assignments.count()), "sun"),
+                new StatCard("submissions", "Submissions", String.valueOf(submissions.count()), "brand"),
+                new StatCard("lockouts", "Account lockouts",
+                        String.valueOf(auditLogs.countByEventAction(AuditAction.LOCKOUT_TRIGGERED)), "coral"),
+                new StatCard("loginFailures", "Failed sign-ins",
+                        String.valueOf(auditLogs.countByEventAction(AuditAction.LOGIN_FAIL)), "coral"),
+                new StatCard("privilegeViolations", "Access violations",
+                        String.valueOf(auditLogs.countByEventAction(AuditAction.PRIVILEGE_VIOLATION)), "coral"));
 
         var recent = auditQueryService
                 .list(AuditFilter.empty(), PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "eventTime")))
@@ -133,7 +127,7 @@ public class DashboardService {
 
     @Transactional(readOnly = true)
     public ComparisonResponse comparison() {
-        Map<String, long[]> byMode = new HashMap<>(); // [successes, failures]
+        Map<String, long[]> byMode = new HashMap<>();
         for (Object[] row : auditLogs.loginCountsByMode()) {
             String mode = (String) row[0];
             String status = (String) row[1];
@@ -151,16 +145,16 @@ public class DashboardService {
         }
 
         List<ModeComparison> modes = new ArrayList<>();
-        modes.add(buildComparison(AuthMode.S1, "Chỉ mật khẩu",
-                "Thấp – trung bình", "Rất dễ", "Không có lớp bảo vệ nếu lộ mật khẩu", byMode, otpFailures));
-        modes.add(buildComparison(AuthMode.S2, "Mật khẩu + OTP",
-                "Trung bình – cao", "Dễ – trung bình", "Lộ mật khẩu đơn lẻ là không đủ", byMode, otpFailures));
-        modes.add(buildComparison(AuthMode.S3, "Mật khẩu + Mobile OTP + Email OTP",
-                "Cao hơn", "Trung bình; phụ thuộc truy cập email",
-                "Thêm rào chắn nếu email chưa bị chiếm", byMode, otpFailures));
+        modes.add(buildComparison(AuthMode.S1, "Password only",
+                "Low – medium", "Very easy", "No protection if the password leaks", byMode, otpFailures));
+        modes.add(buildComparison(AuthMode.S2, "Password + Mobile OTP",
+                "Medium – high", "Easy – medium", "A leaked password alone is not enough", byMode, otpFailures));
+        modes.add(buildComparison(AuthMode.S3, "Password + Mobile OTP + Email OTP",
+                "High", "Medium; depends on email access", "Adds a barrier unless the email is compromised",
+                byMode, otpFailures));
 
         return new ComparisonResponse(modes, Instant.now(),
-                "Số liệu tổng hợp từ audit_logs theo chế độ xác thực. BR-09 yêu cầu tối thiểu 3 lần chạy mỗi chế độ.");
+                "Figures aggregated from audit_logs per authentication mode. BR-09 requires at least 3 runs per mode.");
     }
 
     private ModeComparison buildComparison(AuthMode mode, String name, String security, String usability,
@@ -173,6 +167,6 @@ public class DashboardService {
     private String greeting(User user) {
         String name = (user.getFullName() == null || user.getFullName().isBlank())
                 ? user.getUsername() : user.getFullName();
-        return "Xin chào, " + name + "!";
+        return "Welcome, " + name + "!";
     }
 }

@@ -10,10 +10,10 @@ import { assignmentApi, submissionApi } from '../../api/endpoints.js'
 import { formatBytes, formatDateTime } from '../../utils/format.js'
 
 const LOCK_MESSAGES = {
-  SUBMISSION_LOCKED: 'Bài tập đã đóng. Bạn không thể cập nhật bài nộp.',
-  RESUBMISSION_NOT_ALLOWED: 'Bài tập này không cho phép nộp lại (có thể đã được chấm điểm).',
-  MAX_ATTEMPTS_REACHED: 'Bạn đã đạt số lần nộp tối đa.',
-  LATE_NOT_ALLOWED: 'Đã quá hạn nộp bài. Hệ thống không nhận bài muộn.',
+  SUBMISSION_LOCKED: 'This assignment is closed. You cannot update your submission.',
+  RESUBMISSION_NOT_ALLOWED: 'Resubmission is not allowed for this assignment.',
+  MAX_ATTEMPTS_REACHED: 'You have reached the maximum number of submissions.',
+  LATE_NOT_ALLOWED: 'The deadline has passed. Late submissions are not accepted.',
 }
 
 /** UC-A1..A4 detail view: full assignment info, submit/resubmit panel and attempt history. */
@@ -30,7 +30,7 @@ export function StudentAssignmentDetail() {
   const assignment = data?.data
   const history = assignment?.submissions || []
 
-  // Arrived via the "Nộp bài" button → jump straight to the upload panel.
+  // Arrived via the "Submit" button → jump straight to the upload panel.
   useEffect(() => {
     if (assignment && searchParams.get('action') === 'submit' && submitRef.current) {
       submitRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
@@ -42,8 +42,8 @@ export function StudentAssignmentDetail() {
     setUploading(true)
     try {
       const res = await submissionApi.submit(id, file)
-      const status = res.data.submissionStatus === 'LATE' ? 'nộp muộn' : 'đúng hạn'
-      toast.success(`Nộp bài thành công (${status}), lần nộp #${res.data.attemptNumber}.`)
+      const status = res.data.submissionStatus === 'LATE' ? 'late' : 'on time'
+      toast.success(`Submitted successfully (${status}), attempt #${res.data.attemptNumber}.`)
       setFile(null)
       if (fileRef.current) fileRef.current.value = ''
       await reload()
@@ -56,7 +56,7 @@ export function StudentAssignmentDetail() {
 
   return (
     <DetailShell
-      title={assignment?.title || 'Chi tiết bài tập'}
+      title={assignment?.title || 'Assignment details'}
       subtitle={assignment?.classroomName}
       fallback="/student/assignments"
     >
@@ -66,12 +66,12 @@ export function StudentAssignmentDetail() {
       {assignment ? (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <section className="card lg:col-span-2">
-            <h2 className="text-base font-bold text-ink-900">Thông tin bài tập</h2>
+            <h2 className="text-base font-bold text-ink-900">Assignment information</h2>
             <div className="mt-3 flex flex-wrap gap-2">
-              <Badge tone={statusTone(assignment.status)}>Trạng thái: {assignment.status}</Badge>
-              <Badge tone="sun" icon="⏰">Hạn nộp: {formatDateTime(assignment.dueAt)}</Badge>
+              <Badge tone={statusTone(assignment.status)}>Status: {assignment.status}</Badge>
+              <Badge tone="sun" icon="⏰">Due date: {formatDateTime(assignment.dueAt)}</Badge>
               <Badge tone="sky" icon="🎒">{assignment.classroomName}</Badge>
-              <Badge tone="neutral">Điểm tối đa: {assignment.maxScore}</Badge>
+              <Badge tone="neutral">Max score: {assignment.maxScore}</Badge>
             </div>
             {assignment.description ? (
               <p className="mt-4 whitespace-pre-line text-sm text-ink-600">{assignment.description}</p>
@@ -79,23 +79,23 @@ export function StudentAssignmentDetail() {
 
             <dl className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="rounded-xl bg-surface-soft p-3">
-                <dt className="text-xs font-bold uppercase text-ink-400">Số lần đã nộp</dt>
+                <dt className="text-xs font-bold uppercase text-ink-400">Attempts made</dt>
                 <dd className="text-lg font-extrabold text-ink-900">
                   {assignment.yourAttempts ?? 0}/{assignment.maxAttempts}
                 </dd>
               </div>
               <div className="rounded-xl bg-surface-soft p-3">
-                <dt className="text-xs font-bold uppercase text-ink-400">Nộp muộn</dt>
+                <dt className="text-xs font-bold uppercase text-ink-400">Late</dt>
                 <dd className="text-lg font-extrabold text-ink-900">
-                  {assignment.allowLate ? `Được phép (trừ ${assignment.latePenaltyPct}%)` : 'Không cho phép'}
+                  {assignment.allowLate ? `Allowed (${assignment.latePenaltyPct}% penalty)` : 'Not allowed'}
                 </dd>
               </div>
               <div className="rounded-xl bg-surface-soft p-3">
-                <dt className="text-xs font-bold uppercase text-ink-400">Cho phép nộp lại</dt>
-                <dd className="text-lg font-extrabold text-ink-900">{assignment.allowResubmission ? 'Có' : 'Không'}</dd>
+                <dt className="text-xs font-bold uppercase text-ink-400">Allow resubmission</dt>
+                <dd className="text-lg font-extrabold text-ink-900">{assignment.allowResubmission ? 'Yes' : 'No'}</dd>
               </div>
               <div className="rounded-xl bg-surface-soft p-3">
-                <dt className="text-xs font-bold uppercase text-ink-400">Giáo viên giao bài</dt>
+                <dt className="text-xs font-bold uppercase text-ink-400">Assigned by</dt>
                 <dd className="text-sm font-semibold text-ink-900">{assignment.createdByName || '—'}</dd>
               </div>
             </dl>
@@ -108,15 +108,15 @@ export function StudentAssignmentDetail() {
             <h2 className="text-base font-bold text-ink-900">
               {assignment.canSubmit
                 ? assignment.yourAttempts > 0
-                  ? 'Cập nhật bài nộp (UC-A4)'
-                  : 'Nộp bài (UC-A1/A2)'
-                : 'Không thể nộp (UC-A3)'}
+                  ? 'Update submission (UC-A4)'
+                  : 'Submit (UC-A1/A2)'
+                : 'Cannot submit (UC-A3)'}
             </h2>
 
             {assignment.canSubmit ? (
               <>
                 <p className="mt-1 text-xs text-ink-400">
-                  Định dạng: pdf, doc(x), ppt(x), xls(x), txt, zip, ảnh · tối đa 10MB.
+                  Formats: pdf, doc(x), ppt(x), xls(x), txt, zip, images · up to 10MB.
                 </p>
                 <input
                   ref={fileRef}
@@ -126,32 +126,32 @@ export function StudentAssignmentDetail() {
                 />
                 <button type="button" className="btn-primary mt-3 w-full" onClick={upload} disabled={!file || uploading}>
                   {uploading ? <InlineSpinner /> : '⬆️'}
-                  {assignment.yourAttempts > 0 ? 'Nộp lại (tạo lần nộp mới)' : 'Nộp bài'}
+                  {assignment.yourAttempts > 0 ? 'Resubmit (creates a new attempt)' : 'Submit'}
                 </button>
               </>
             ) : (
               <p className="mt-2 rounded-xl border border-coral-100 bg-coral-100/40 p-3 text-sm text-ink-900">
-                {LOCK_MESSAGES[assignment.lockReason] || 'Bài tập hiện không cho phép nộp.'}
+                {LOCK_MESSAGES[assignment.lockReason] || 'This assignment does not allow submissions right now.'}
               </p>
             )}
           </section>
 
           <section className="card lg:col-span-3">
-            <h2 className="text-base font-bold text-ink-900">Lịch sử nộp bài</h2>
+            <h2 className="text-base font-bold text-ink-900">Submission history</h2>
             {history.length === 0 ? (
-              <EmptyState icon="📥" title="Chưa nộp lần nào" description="Bạn chưa nộp bài cho bài tập này." />
+              <EmptyState icon="📥" title="No submissions yet" description="You have not submitted anything for this assignment." />
             ) : (
               <div className="table-wrap mt-3">
                 <table className="table">
                   <thead>
                     <tr>
-                      <th>Lần</th>
-                      <th>Tệp</th>
-                      <th>Dung lượng</th>
-                      <th>Thời điểm</th>
-                      <th>Trạng thái</th>
-                      <th>Điểm</th>
-                      <th>Nhận xét</th>
+                      <th>Attempt</th>
+                      <th>File</th>
+                      <th>Size</th>
+                      <th>Submitted at</th>
+                      <th>Status</th>
+                      <th>Score</th>
+                      <th>Feedback</th>
                       <th></th>
                     </tr>
                   </thead>
@@ -159,7 +159,7 @@ export function StudentAssignmentDetail() {
                     {history.map((h) => (
                       <tr key={h.id}>
                         <td>
-                          #{h.attemptNumber} {h.current ? <Badge tone="brand">Đang dùng</Badge> : null}
+                          #{h.attemptNumber} {h.current ? <Badge tone="brand">Current</Badge> : null}
                         </td>
                         <td className="max-w-[200px] truncate">{h.originalName}</td>
                         <td>{formatBytes(h.sizeBytes)}</td>
@@ -176,7 +176,7 @@ export function StudentAssignmentDetail() {
                             target="_blank"
                             rel="noreferrer"
                           >
-                            Tải
+                            Download
                           </a>
                         </td>
                       </tr>

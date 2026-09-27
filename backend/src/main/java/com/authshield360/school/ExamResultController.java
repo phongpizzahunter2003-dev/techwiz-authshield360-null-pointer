@@ -36,6 +36,6 @@ public class ExamResultController {
     @PostMapping("/teacher/results")
     @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
     public ApiResponse<ExamResultResponse> upsert(@Valid @RequestBody UpsertExamResultRequest request) {
-        return ApiResponse.ok("Đã lưu kết quả thi.", examResultService.upsert(request, SecurityUtils.current()));
+        return ApiResponse.ok("Exam result saved.", examResultService.upsert(request, SecurityUtils.current()));
     }
 }

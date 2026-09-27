@@ -5,7 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
  * Prefers real browser history; falls back to a safe route when the page was opened
  * directly (no previous entry), so the user is never stranded.
  */
-export function BackButton({ fallback = '/', label = 'Quay lại' }) {
+export function BackButton({ fallback = '/', label = 'Back' }) {
   const navigate = useNavigate()
   const location = useLocation()
 

@@ -49,7 +49,7 @@ export function ChartCard({ series }) {
       <header className="mb-1 flex items-start justify-between gap-3">
         <div>
           <h3 className="text-sm font-bold text-ink-900">{series.title}</h3>
-          <p className="text-[11px] text-ink-400">Đơn vị: {series.valueLabel}</p>
+          <p className="text-[11px] text-ink-400">Unit: {series.valueLabel}</p>
         </div>
         <span className="badge bg-surface-muted text-ink-600">{series.type}</span>
       </header>
@@ -57,14 +57,14 @@ export function ChartCard({ series }) {
 
       {noSlices ? (
         <div className="grid h-52 place-items-center text-sm text-ink-400">
-          Chưa có dữ liệu để hiển thị.
+          No data to display.
         </div>
       ) : (
         <>
           {allZero ? (
             <p className="mb-1 rounded-lg bg-surface-soft px-2.5 py-1.5 text-[11px] text-ink-400">
-              Chưa phát sinh dữ liệu — tất cả giá trị hiện bằng 0. Biểu đồ đọc trực tiếp từ CSDL nên sẽ tự cập nhật
-              khi có giao dịch.
+              No data yet — all values are currently 0. The chart reads directly from the database and updates
+              automatically when transactions occur.
             </p>
           ) : null}
 
@@ -131,7 +131,7 @@ export function ChartCard({ series }) {
           <ul className="mt-2 flex flex-wrap gap-1.5">
             {slices.map((s, i) => (
               <li key={s.key}>
-                <button type="button" onClick={() => drill(s)} className="chip" title={`Xem chi tiết: ${s.label}`}>
+                <button type="button" onClick={() => drill(s)} className="chip" title={`View details: ${s.label}`}>
                   <span
                     className="inline-block h-2.5 w-2.5 rounded-full"
                     style={{ backgroundColor: colorOf(s, i) }}

@@ -289,7 +289,7 @@ public class AuthService {
 
     private BusinessException lockedException(long seconds) {
         return new BusinessException(ErrorCode.ACCOUNT_LOCKED,
-                ErrorCode.ACCOUNT_LOCKED.message() + " Vui lòng thử lại sau " + LockoutService.format(seconds) + ".");
+                ErrorCode.ACCOUNT_LOCKED.message() + " Please try again in " + LockoutService.format(seconds) + ".");
     }
 
     public static UserSummary summary(User user) {

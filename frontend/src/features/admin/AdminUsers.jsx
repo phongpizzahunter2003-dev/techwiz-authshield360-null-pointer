@@ -7,17 +7,10 @@ import { Spinner, InlineSpinner } from '../../components/ui/Spinner.jsx'
 import { Modal } from '../../components/ui/Modal.jsx'
 import { useToast } from '../../components/ui/Toast.jsx'
 import { adminApi } from '../../api/endpoints.js'
-import { ROLE_LABEL } from '../../i18n/messages.js'
+import { AUTH_MODE_LABEL, ROLE_LABEL } from '../../i18n/messages.js'
 import { formatDateTime } from '../../utils/format.js'
 
 const EMPTY_FORM = { username: '', email: '', phone: '', fullName: '', password: '', role: 'STUDENT', authMode: 'INHERIT' }
-
-const AUTH_MODE_LABEL = {
-  S1: 'S1 · Chỉ mật khẩu',
-  S2: 'S2 · Mật khẩu + Mobile OTP',
-  S3: 'S3 · Mật khẩu + Mobile + Email OTP',
-  INHERIT: 'Theo cấu hình chung',
-}
 
 export function AdminUsers() {
   const toast = useToast()
@@ -38,6 +31,7 @@ export function AdminUsers() {
   const [bulkSaving, setBulkSaving] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(null)
   const [deleting, setDeleting] = useState(false)
+  const [busyId, setBusyId] = useState(null)
 
   const load = async (next = filters) => {
     setLoading(true)
@@ -94,10 +88,10 @@ export function AdminUsers() {
         }
         if (form.password) payload.password = form.password
         await adminApi.updateUser(editing.id, payload)
-        toast.success('Cập nhật tài khoản thành công.')
+        toast.success('Account updated successfully.')
       } else {
         await adminApi.createUser({ ...form, authMode: form.authMode })
-        toast.success('Tạo tài khoản thành công.')
+        toast.success('Account created successfully.')
       }
       setEditorOpen(false)
       await load()
@@ -112,7 +106,7 @@ export function AdminUsers() {
     setDeleting(true)
     try {
       await adminApi.deleteUser(u.id)
-      toast.success('Đã xóa tài khoản.')
+      toast.success('Account deleted.')
       setConfirmDelete(null)
       await load()
     } catch (err) {
@@ -123,12 +117,16 @@ export function AdminUsers() {
   }
 
   const resetMfa = async (u) => {
+    if (busyId) return
+    setBusyId(u.id)
     try {
       await adminApi.resetMfa(u.id)
-      toast.success(`Đã đặt lại MFA cho ${u.username}.`)
+      toast.success(`MFA reset for ${u.username}.`)
       await load()
     } catch (err) {
       toast.error(err.message)
+    } finally {
+      setBusyId(null)
     }
   }
 
@@ -152,15 +150,15 @@ export function AdminUsers() {
 
   return (
     <AppShell
-      title="Người dùng & vai trò"
-      subtitle="Quản lý tài khoản, gán vai trò và đặt lại MFA"
+      title="Users & roles"
+      subtitle="Manage accounts, assign roles, and reset MFA"
       actions={
         <>
           <button type="button" className="btn-accent" onClick={() => setBulkOpen(true)}>
-            🛡️ Áp dụng S1/S2/S3 hàng loạt
+            🛡️ Apply S1/S2/S3 in bulk
           </button>
           <button type="button" className="btn-primary" onClick={openCreate}>
-            ➕ Thêm người dùng
+            ➕ Add user
           </button>
         </>
       }
@@ -168,12 +166,12 @@ export function AdminUsers() {
       <div className="mb-4 flex flex-wrap items-end gap-3">
         <div className="min-w-[220px] flex-1">
           <label className="label" htmlFor="user-search">
-            Tìm kiếm
+            Search
           </label>
           <input
             id="user-search"
             className="input"
-            placeholder="Tên đăng nhập, email, họ tên..."
+            placeholder="Username, email, full name..."
             value={filters.q}
             onChange={(e) => setFilters({ ...filters, q: e.target.value })}
             onKeyDown={(e) => {
@@ -183,7 +181,7 @@ export function AdminUsers() {
         </div>
         <div>
           <label className="label" htmlFor="user-role">
-            Vai trò
+            Role
           </label>
           <select
             id="user-role"
@@ -191,14 +189,14 @@ export function AdminUsers() {
             value={filters.role}
             onChange={(e) => load({ ...filters, role: e.target.value, page: 0 })}
           >
-            <option value="">Tất cả</option>
-            <option value="STUDENT">Học sinh</option>
-            <option value="TEACHER">Giáo viên</option>
-            <option value="ADMIN">Quản trị viên</option>
+            <option value="">All</option>
+            <option value="STUDENT">Student</option>
+            <option value="TEACHER">Teacher</option>
+            <option value="ADMIN">Administrator</option>
           </select>
         </div>
         <button type="button" className="btn-ghost" onClick={() => load({ ...filters, page: 0 })}>
-          🔍 Lọc
+          🔍 Filter
         </button>
       </div>
 
@@ -206,7 +204,7 @@ export function AdminUsers() {
       {error ? <ErrorState message={error.message} onRetry={() => load()} /> : null}
 
       {!loading && !error && items.length === 0 ? (
-        <EmptyState icon="👥" title="Không tìm thấy người dùng" description="Thử thay đổi bộ lọc hoặc tạo tài khoản mới." />
+        <EmptyState icon="👥" title="No users found" description="Try changing the filters or create a new account." />
       ) : null}
 
       {!loading && items.length > 0 ? (
@@ -215,14 +213,14 @@ export function AdminUsers() {
             <table className="table min-w-[880px]">
               <thead>
                 <tr>
-                  <th>Tên đăng nhập</th>
+                  <th>Username</th>
                   <th>Email</th>
-                  <th>Họ tên</th>
-                  <th>Vai trò</th>
-                  <th>Trạng thái</th>
-                  <th>Bảo mật</th>
-                  <th>Sai liên tiếp</th>
-                  <th className="text-right">Thao tác</th>
+                  <th>Full name</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th>Security</th>
+                  <th>Failed attempts</th>
+                  <th className="text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -250,33 +248,38 @@ export function AdminUsers() {
                             {u.authModeOverride}
                           </Badge>
                         ) : (
-                          <span className="text-xs text-ink-400">Theo cấu hình</span>
+                          <span className="text-xs text-ink-400">Global config</span>
                         )}
                         <span className="text-xs text-ink-400">·</span>
                         <span className="text-xs text-ink-600">
-                          {u.mfaEnrolled ? '✅ MFA đã đăng ký' : u.mfaEnabled ? '⏳ Chưa đăng ký' : '— MFA tắt'}
+                          {u.mfaEnrolled ? '✅ MFA enrolled' : u.mfaEnabled ? '⏳ Not enrolled' : '— MFA off'}
                         </span>
                       </div>
                     </td>
                     <td className="whitespace-nowrap">
                       {u.failedAttempts}
                       {u.lockedUntil ? (
-                        <span className="ml-1 text-xs text-coral-600">(khóa đến {formatDateTime(u.lockedUntil)})</span>
+                        <span className="ml-1 text-xs text-coral-600">(locked until {formatDateTime(u.lockedUntil)})</span>
                       ) : null}
                     </td>
                     <td>
                       <div className="table-actions">
                         <Link className="btn-xs btn-ghost" to={`/admin/users/${u.id}`}>
-                          Chi tiết
+                          Details
                         </Link>
                         <button type="button" className="btn-xs btn-ghost" onClick={() => openEdit(u)}>
-                          Sửa
+                          Edit
                         </button>
-                        <button type="button" className="btn-xs btn-ghost" onClick={() => resetMfa(u)}>
-                          Reset MFA
+                        <button
+                          type="button"
+                          className="btn-xs btn-ghost"
+                          onClick={() => resetMfa(u)}
+                          disabled={busyId === u.id}
+                        >
+                          {busyId === u.id ? <InlineSpinner /> : null} Reset MFA
                         </button>
                         <button type="button" className="btn-xs btn-danger" onClick={() => setConfirmDelete(u)}>
-                          Xóa
+                          Delete
                         </button>
                       </div>
                     </td>
@@ -288,7 +291,7 @@ export function AdminUsers() {
 
           <div className="mt-4 flex items-center justify-between text-sm text-ink-400">
             <span>
-              Tổng {data.totalElements} bản ghi · Trang {data.page + 1}/{Math.max(totalPages, 1)}
+              {data.totalElements} total · Page {data.page + 1}/{Math.max(totalPages, 1)}
             </span>
             <div className="flex gap-2">
               <button
@@ -297,7 +300,7 @@ export function AdminUsers() {
                 disabled={data.page <= 0}
                 onClick={() => load({ ...filters, page: data.page - 1 })}
               >
-                ← Trước
+                ← Previous
               </button>
               <button
                 type="button"
@@ -305,19 +308,19 @@ export function AdminUsers() {
                 disabled={data.page + 1 >= totalPages}
                 onClick={() => load({ ...filters, page: data.page + 1 })}
               >
-                Sau →
+                Next →
               </button>
             </div>
           </div>
         </>
       ) : null}
 
-      <Modal open={editorOpen} onClose={() => setEditorOpen(false)} title={editing ? 'Sửa tài khoản' : 'Thêm người dùng'}>
+      <Modal open={editorOpen} onClose={() => setEditorOpen(false)} title={editing ? 'Edit account' : 'Add user'}>
         <form onSubmit={save} className="space-y-4">
           {!editing ? (
             <div>
               <label className="label" htmlFor="u-username">
-                Tên đăng nhập
+                Username
               </label>
               <input
                 id="u-username"
@@ -345,7 +348,7 @@ export function AdminUsers() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="label" htmlFor="u-fullname">
-                Họ tên
+                Full name
               </label>
               <input
                 id="u-fullname"
@@ -356,7 +359,7 @@ export function AdminUsers() {
             </div>
             <div>
               <label className="label" htmlFor="u-phone">
-                Số điện thoại
+                Phone number
               </label>
               <input
                 id="u-phone"
@@ -369,7 +372,7 @@ export function AdminUsers() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="label" htmlFor="u-role">
-                Vai trò
+                Role
               </label>
               <select
                 id="u-role"
@@ -377,15 +380,15 @@ export function AdminUsers() {
                 value={form.role}
                 onChange={(e) => setForm({ ...form, role: e.target.value })}
               >
-                <option value="STUDENT">Học sinh</option>
-                <option value="TEACHER">Giáo viên</option>
-                <option value="ADMIN">Quản trị viên</option>
+                <option value="STUDENT">Student</option>
+                <option value="TEACHER">Teacher</option>
+                <option value="ADMIN">Administrator</option>
               </select>
             </div>
             {editing ? (
               <div>
                 <label className="label" htmlFor="u-status">
-                  Trạng thái
+                  Status
                 </label>
                 <select
                   id="u-status"
@@ -402,7 +405,7 @@ export function AdminUsers() {
           </div>
           <div>
             <label className="label" htmlFor="u-password">
-              {editing ? 'Mật khẩu mới (để trống nếu không đổi)' : 'Mật khẩu khởi tạo'}
+              {editing ? 'New password (leave blank to keep)' : 'Initial password'}
             </label>
             <input
               id="u-password"
@@ -417,7 +420,7 @@ export function AdminUsers() {
 
           <div>
             <label className="label" htmlFor="u-authmode">
-              Chế độ xác thực áp dụng cho tài khoản
+              Authentication mode for this account
             </label>
             <select
               id="u-authmode"
@@ -432,17 +435,17 @@ export function AdminUsers() {
               ))}
             </select>
             <p className="mt-1 text-xs text-ink-400">
-              S1 không yêu cầu MFA · S2 yêu cầu Mobile OTP · S3 yêu cầu Mobile + Email OTP. Chọn "Theo cấu hình
-              chung" để dùng chế độ ở trang Cấu hình xác thực.
+              S1 does not require MFA · S2 requires Mobile OTP · S3 requires Mobile + Email OTP. Choose "Use global
+              configuration" to use the mode on the Authentication configuration page.
             </p>
           </div>
 
           <div className="flex justify-end gap-2">
             <button type="button" className="btn-ghost" onClick={() => setEditorOpen(false)}>
-              Hủy
+              Cancel
             </button>
             <button type="submit" className="btn-primary" disabled={saving}>
-              {saving ? <InlineSpinner /> : '💾'} Lưu
+              {saving ? <InlineSpinner /> : '💾'} Save
             </button>
           </div>
         </form>
@@ -452,18 +455,18 @@ export function AdminUsers() {
       <Modal
         open={bulkOpen}
         onClose={() => setBulkOpen(false)}
-        title="Áp dụng chế độ xác thực hàng loạt"
+        title="Apply authentication mode in bulk"
       >
         <form onSubmit={applyBulk} className="space-y-4">
           <p className="rounded-xl bg-surface-soft px-3 py-2 text-xs text-ink-400">
-            Chức năng dành cho quản trị viên: gán chế độ xác thực (S1/S2/S3) cho nhiều tài khoản cùng lúc.
-            Việc <strong>đăng ký</strong> yếu tố MFA vẫn do từng người dùng tự thực hiện (UC-09) — quản trị viên
-            không tạo QR thay họ.
+            Administrator feature: assign an authentication mode (S1/S2/S3) to multiple accounts at once.
+            <strong>Enrolling</strong> MFA factors is still done by each user individually (UC-09) — administrators
+            do not create QR codes on their behalf.
           </p>
 
           <div>
             <label className="label" htmlFor="bulk-mode">
-              Chế độ xác thực
+              Authentication mode
             </label>
             <select
               id="bulk-mode"
@@ -481,7 +484,7 @@ export function AdminUsers() {
 
           <div>
             <label className="label" htmlFor="bulk-role">
-              Phạm vi áp dụng
+              Scope
             </label>
             <select
               id="bulk-role"
@@ -489,55 +492,55 @@ export function AdminUsers() {
               value={bulkForm.role}
               onChange={(e) => setBulkForm({ ...bulkForm, role: e.target.value })}
             >
-              <option value="">Tất cả người dùng</option>
-              <option value="STUDENT">Chỉ Học sinh</option>
-              <option value="TEACHER">Chỉ Giáo viên</option>
-              <option value="ADMIN">Chỉ Quản trị viên</option>
+              <option value="">All users</option>
+              <option value="STUDENT">Students only</option>
+              <option value="TEACHER">Teachers only</option>
+              <option value="ADMIN">Administrators only</option>
             </select>
           </div>
 
           <div className="rounded-xl border border-sun-400 bg-sun-100/60 px-3 py-2 text-xs text-ink-600">
             {bulkForm.mode === 'S1'
-              ? 'S1: tắt yêu cầu MFA cho các tài khoản trong phạm vi.'
+              ? 'S1: disables the MFA requirement for accounts in scope.'
               : bulkForm.mode === 'INHERIT'
-                ? 'Các tài khoản sẽ dùng chế độ chung ở trang Cấu hình xác thực.'
-                : `${bulkForm.mode}: bật yêu cầu MFA. Người dùng sẽ được nhắc đăng ký ở lần đăng nhập kế tiếp.`}
+                ? 'Accounts will use the global mode on the Authentication configuration page.'
+                : `${bulkForm.mode}: enables the MFA requirement. Users will be prompted to enroll at their next sign-in.`}
           </div>
 
           <div className="flex justify-end gap-2">
             <button type="button" className="btn-ghost" onClick={() => setBulkOpen(false)}>
-              Hủy
+              Cancel
             </button>
             <button type="submit" className="btn-accent" disabled={bulkSaving}>
-              {bulkSaving ? <InlineSpinner /> : '🛡️'} Áp dụng
+              {bulkSaving ? <InlineSpinner /> : '🛡️'} Apply
             </button>
           </div>
         </form>
       </Modal>
 
-      {/* Destructive action guard: Xóa deletes immediately, so confirm first */}
+      {/* Destructive action guard: Delete deletes immediately, so confirm first */}
       <Modal
         open={Boolean(confirmDelete)}
         onClose={() => setConfirmDelete(null)}
-        title="Xác nhận xóa tài khoản"
+        title="Confirm account deletion"
         size="sm"
         footer={
           <>
             <button type="button" className="btn-ghost" onClick={() => setConfirmDelete(null)}>
-              Hủy
+              Cancel
             </button>
             <button type="button" className="btn-danger" onClick={() => remove(confirmDelete)} disabled={deleting}>
-              {deleting ? <InlineSpinner /> : '🗑'} Xóa tài khoản
+              {deleting ? <InlineSpinner /> : '🗑'} Delete account
             </button>
           </>
         }
       >
         <p className="text-sm text-ink-600">
-          Bạn sắp xóa vĩnh viễn tài khoản <strong className="text-ink-900">{confirmDelete?.username}</strong>
+          You are about to permanently delete the account <strong className="text-ink-900">{confirmDelete?.username}</strong>
           {confirmDelete?.fullName ? ` (${confirmDelete.fullName})` : ''}.
         </p>
         <p className="mt-2 rounded-xl bg-coral-100/50 px-3 py-2 text-xs text-ink-600">
-          Hành động này không thể hoàn tác. Nhật ký kiểm toán (audit log) của tài khoản vẫn được giữ lại theo BR-07.
+          This action cannot be undone. The account audit log is still retained per BR-07.
         </p>
       </Modal>
     </AppShell>

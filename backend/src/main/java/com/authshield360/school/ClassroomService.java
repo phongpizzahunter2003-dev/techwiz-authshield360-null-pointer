@@ -20,13 +20,16 @@ public class ClassroomService {
     private final EnrollmentRepository enrollments;
     private final UserRepository users;
     private final SchoolMapper mapper;
+    private final com.authshield360.notification.NotificationService notifications;
 
     public ClassroomService(ClassroomRepository classrooms, EnrollmentRepository enrollments,
-                            UserRepository users, SchoolMapper mapper) {
+                            UserRepository users, SchoolMapper mapper,
+                            com.authshield360.notification.NotificationService notifications) {
         this.classrooms = classrooms;
         this.enrollments = enrollments;
         this.users = users;
         this.mapper = mapper;
+        this.notifications = notifications;
     }
 
     @Transactional(readOnly = true)
@@ -66,7 +69,7 @@ public class ClassroomService {
     @Transactional
     public ClassroomResponse create(CreateClassroomRequest req, CurrentUser viewer) {
         if (classrooms.existsByCode(req.code())) {
-            throw new BusinessException(ErrorCode.CONFLICT, "Mã lớp đã tồn tại.");
+            throw new BusinessException(ErrorCode.CONFLICT, "That class code already exists.");
         }
         Classroom classroom = new Classroom();
         classroom.setCode(req.code().trim());
@@ -103,10 +106,11 @@ public class ClassroomService {
         Classroom classroom = assertCanManage(classroomId, viewer);
         var student = users.findById(studentId).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
         if (student.getRole() != RoleType.STUDENT) {
-            throw new BusinessException(ErrorCode.CONFLICT, "Chỉ có thể thêm học sinh vào lớp.");
+            throw new BusinessException(ErrorCode.CONFLICT, "Only student accounts can be added to a class.");
         }
         if (!enrollments.existsByClassroomIdAndStudentId(classroom.getId(), studentId)) {
             enrollments.save(new Enrollment(classroom.getId(), studentId));
+            notifications.enrolled(studentId, classroom);
         }
     }
 

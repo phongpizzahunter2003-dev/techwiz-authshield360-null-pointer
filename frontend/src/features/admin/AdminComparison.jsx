@@ -14,7 +14,7 @@ export function AdminComparison() {
   const modes = comparison?.modes || []
 
   return (
-    <AppShell title="So sánh 3 chế độ xác thực" subtitle="Bảo mật và trải nghiệm người dùng theo S1 / S2 / S3 (UC-15)">
+    <AppShell title="Comparing the 3 authentication modes" subtitle="Security and user experience across S1 / S2 / S3 (UC-15)">
       {loading ? <Spinner /> : null}
       {error ? <ErrorState message={error.message} onRetry={reload} /> : null}
 
@@ -26,7 +26,7 @@ export function AdminComparison() {
                 key={m.mode}
                 to={`/admin/modes/${m.mode}`}
                 className="card transition hover:shadow-glow"
-                title={`Xem chi tiết chế độ ${m.mode}`}
+                title={`View mode ${m.mode} details`}
               >
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-extrabold text-ink-900">{m.mode}</h2>
@@ -44,33 +44,33 @@ export function AdminComparison() {
                 </div>
                 <dl className="mt-4 space-y-3 text-sm">
                   <div>
-                    <dt className="text-xs font-bold uppercase text-ink-400">Mức bảo mật</dt>
+                    <dt className="text-xs font-bold uppercase text-ink-400">Security level</dt>
                     <dd className="text-ink-900">{m.security}</dd>
                   </div>
                   <div>
-                    <dt className="text-xs font-bold uppercase text-ink-400">Khả năng sử dụng</dt>
+                    <dt className="text-xs font-bold uppercase text-ink-400">Usability</dt>
                     <dd className="text-ink-900">{m.usability}</dd>
                   </div>
                   <div>
-                    <dt className="text-xs font-bold uppercase text-ink-400">Rủi ro được giảm</dt>
+                    <dt className="text-xs font-bold uppercase text-ink-400">Risk reduced</dt>
                     <dd className="text-ink-900">{m.riskReduced}</dd>
                   </div>
                 </dl>
                 <div className="mt-4 grid grid-cols-3 gap-2 text-center">
                   <div className="rounded-xl bg-accent-100 p-2">
                     <p className="text-lg font-extrabold text-accent-600">{m.loginSuccesses}</p>
-                    <p className="text-[11px] text-ink-600">Thành công</p>
+                    <p className="text-[11px] text-ink-600">Success</p>
                   </div>
                   <div className="rounded-xl bg-coral-100 p-2">
                     <p className="text-lg font-extrabold text-coral-600">{m.loginFailures}</p>
-                    <p className="text-[11px] text-ink-600">Thất bại</p>
+                    <p className="text-[11px] text-ink-600">Failures</p>
                   </div>
                   <div className="rounded-xl bg-sun-100 p-2">
                     <p className="text-lg font-extrabold text-sun-600">{m.otpFailures}</p>
-                    <p className="text-[11px] text-ink-600">Lỗi OTP</p>
+                    <p className="text-[11px] text-ink-600">OTP errors</p>
                   </div>
                 </div>
-                <p className="mt-3 text-sm font-semibold text-brand-600">Xem chi tiết chế độ {m.mode} →</p>
+                <p className="mt-3 text-sm font-semibold text-brand-600">View mode {m.mode} details →</p>
               </Link>
             ))}
           </div>
@@ -79,7 +79,7 @@ export function AdminComparison() {
             <table className="table">
               <thead>
                 <tr>
-                  <th>Tiêu chí</th>
+                  <th>Criterion</th>
                   {modes.map((m) => (
                     <th key={m.mode}>{m.mode}</th>
                   ))}
@@ -87,25 +87,25 @@ export function AdminComparison() {
               </thead>
               <tbody>
                 <tr>
-                  <td className="font-semibold text-ink-900">Mức bảo mật</td>
+                  <td className="font-semibold text-ink-900">Security level</td>
                   {modes.map((m) => (
                     <td key={m.mode}>{m.security}</td>
                   ))}
                 </tr>
                 <tr>
-                  <td className="font-semibold text-ink-900">Khả năng sử dụng</td>
+                  <td className="font-semibold text-ink-900">Usability</td>
                   {modes.map((m) => (
                     <td key={m.mode}>{m.usability}</td>
                   ))}
                 </tr>
                 <tr>
-                  <td className="font-semibold text-ink-900">Rủi ro được giảm</td>
+                  <td className="font-semibold text-ink-900">Risk reduced</td>
                   {modes.map((m) => (
                     <td key={m.mode}>{m.riskReduced}</td>
                   ))}
                 </tr>
                 <tr>
-                  <td className="font-semibold text-ink-900">Đăng nhập thành công</td>
+                  <td className="font-semibold text-ink-900">Successful sign-ins</td>
                   {modes.map((m) => (
                     <td key={m.mode}>
                       <strong>{m.loginSuccesses}</strong>
@@ -113,7 +113,7 @@ export function AdminComparison() {
                   ))}
                 </tr>
                 <tr>
-                  <td className="font-semibold text-ink-900">Đăng nhập thất bại</td>
+                  <td className="font-semibold text-ink-900">Failed sign-ins</td>
                   {modes.map((m) => (
                     <td key={m.mode}>
                       <strong>{m.loginFailures}</strong>
@@ -121,7 +121,7 @@ export function AdminComparison() {
                   ))}
                 </tr>
                 <tr>
-                  <td className="font-semibold text-ink-900">Lỗi OTP</td>
+                  <td className="font-semibold text-ink-900">OTP errors</td>
                   {modes.map((m) => (
                     <td key={m.mode}>
                       <strong>{m.otpFailures}</strong>
@@ -133,7 +133,7 @@ export function AdminComparison() {
           </div>
 
           <p className="text-xs text-ink-400">
-            {comparison.note} · Tổng hợp lúc {formatDateTime(comparison.generatedAt)}.
+            {comparison.note} · Aggregated at {formatDateTime(comparison.generatedAt)}.
           </p>
         </div>
       ) : null}

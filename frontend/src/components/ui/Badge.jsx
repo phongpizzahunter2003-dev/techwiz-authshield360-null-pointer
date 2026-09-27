@@ -37,7 +37,7 @@ export function statusTone(status) {
 }
 
 export function SubmissionStatusBadge({ status }) {
-  if (status === 'ON_TIME') return <Badge tone="accent" icon="⏱">Đúng hạn</Badge>
-  if (status === 'LATE') return <Badge tone="coral" icon="🐢">Nộp muộn</Badge>
+  if (status === 'ON_TIME') return <Badge tone="accent" icon="⏱">On time</Badge>
+  if (status === 'LATE') return <Badge tone="coral" icon="🐢">Late</Badge>
   return <Badge tone="neutral">{status}</Badge>
 }

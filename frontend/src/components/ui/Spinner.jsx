@@ -1,4 +1,4 @@
-export function Spinner({ label = 'Đang tải...', size = 'md' }) {
+export function Spinner({ label = 'Loading...', size = 'md' }) {
   const dim = size === 'sm' ? 'h-4 w-4 border-2' : 'h-8 w-8 border-[3px]'
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-10 text-ink-400" role="status">

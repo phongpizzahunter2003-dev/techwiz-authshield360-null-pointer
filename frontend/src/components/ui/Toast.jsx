@@ -59,7 +59,7 @@ export function ToastProvider({ children }) {
                 type="button"
                 onClick={() => remove(toast.id)}
                 className="text-ink-400 hover:text-ink-600"
-                aria-label="Đóng thông báo"
+                aria-label="Close notification"
               >
                 ✕
               </button>

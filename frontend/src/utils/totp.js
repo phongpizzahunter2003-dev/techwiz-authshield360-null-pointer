@@ -1,5 +1,5 @@
 // Minimal RFC 6238 TOTP generator for the lab UI.
-// Lets a tester complete MFA enrollment / login where no phone is available (VĐ-06).
+// Lets a tester complete MFA enrollment / login where no phone is available (VD-06).
 // Clearly labelled as a test-only convenience in the UI.
 
 const BASE32 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'

@@ -20,8 +20,8 @@ export function TeacherClassDetail() {
 
   return (
     <DetailShell
-      title={classroom?.name || 'Chi tiết lớp học'}
-      subtitle={classroom ? `${classroom.code} · ${roster.length} học sinh` : undefined}
+      title={classroom?.name || 'Class details'}
+      subtitle={classroom ? `${classroom.code} · ${roster.length} students` : undefined}
       fallback="/teacher/classes"
     >
       {classrooms.loading || students.loading ? <Spinner /> : null}
@@ -31,32 +31,32 @@ export function TeacherClassDetail() {
       {classroom ? (
         <div className="space-y-6">
           <section className="card">
-            <h2 className="text-base font-bold text-ink-900">Thông tin lớp</h2>
+            <h2 className="text-base font-bold text-ink-900">Class information</h2>
             <div className="mt-3 flex flex-wrap gap-2">
               <Badge tone="sky" icon="🏫">{classroom.code}</Badge>
-              <Badge tone="accent" icon="🎒">{roster.length} học sinh</Badge>
-              <Badge tone="neutral">Giáo viên: {classroom.teacherName || '—'}</Badge>
+              <Badge tone="accent" icon="🎒">{roster.length} students</Badge>
+              <Badge tone="neutral">Teacher: {classroom.teacherName || '—'}</Badge>
             </div>
             {classroom.description ? <p className="mt-3 text-sm text-ink-600">{classroom.description}</p> : null}
           </section>
 
           <section className="card">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 className="text-base font-bold text-ink-900">Danh sách học sinh</h2>
-              <span className="text-xs text-ink-400">Bấm vào học sinh để xem chi tiết</span>
+              <h2 className="text-base font-bold text-ink-900">Student list</h2>
+              <span className="text-xs text-ink-400">Click a student to see details</span>
             </div>
             {roster.length === 0 ? (
-              <EmptyState icon="🧑‍🎓" title="Lớp chưa có học sinh" description="Thêm học sinh từ trang Lớp học." />
+              <EmptyState icon="🧑‍🎓" title="No students in this class" description="Add students from the Classes page." />
             ) : (
               <div className="table-wrap mt-3">
                 <table className="table min-w-[760px]">
                   <thead>
                     <tr>
-                      <th>Tên đăng nhập</th>
-                      <th>Họ tên</th>
+                      <th>Username</th>
+                      <th>Full name</th>
                       <th>Email</th>
-                      <th>Số điện thoại</th>
-                      <th className="text-right">Thao tác</th>
+                      <th>Phone number</th>
+                      <th className="text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -73,7 +73,7 @@ export function TeacherClassDetail() {
                         <td>
                           <div className="table-actions">
                             <Link className="btn-xs btn-ghost" to={`/teacher/students/${s.id}`}>
-                              Chi tiết
+                              Details
                             </Link>
                           </div>
                         </td>
@@ -87,22 +87,22 @@ export function TeacherClassDetail() {
 
           <section className="card">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 className="text-base font-bold text-ink-900">Kết quả thi của lớp</h2>
-              <span className="text-xs text-ink-400">Bấm vào học sinh để xem chi tiết</span>
+              <h2 className="text-base font-bold text-ink-900">Class exam results</h2>
+              <span className="text-xs text-ink-400">Click a student to see details</span>
             </div>
             {scores.length === 0 ? (
-              <EmptyState icon="📊" title="Chưa có kết quả" description="Chưa có kết quả thi nào cho lớp này." />
+              <EmptyState icon="📊" title="No results yet" description="There are no exam results for this class yet." />
             ) : (
               <div className="table-wrap mt-3">
                 <table className="table min-w-[760px]">
                   <thead>
                     <tr>
-                      <th>Học sinh</th>
-                      <th>Môn</th>
-                      <th>Bài thi</th>
-                      <th>Ngày</th>
-                      <th>Điểm</th>
-                      <th className="text-right">Thao tác</th>
+                      <th>Student</th>
+                      <th>Subject</th>
+                      <th>Exam</th>
+                      <th>Date</th>
+                      <th>Score</th>
+                      <th className="text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -122,7 +122,7 @@ export function TeacherClassDetail() {
                         <td>
                           <div className="table-actions">
                             <Link className="btn-xs btn-ghost" to={`/teacher/students/${r.studentId}`}>
-                              Chi tiết
+                              Details
                             </Link>
                           </div>
                         </td>

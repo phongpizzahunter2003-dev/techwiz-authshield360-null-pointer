@@ -4,11 +4,11 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
 public record OtpVerifyRequest(
-        @NotBlank(message = "Phiên xác minh không hợp lệ.")
+        @NotBlank(message = "The verification session is invalid.")
         String challengeToken,
 
-        @NotBlank(message = "Mã OTP không được để trống.")
-        @Pattern(regexp = "[0-9]{6}", message = "Mã OTP phải bao gồm 6 chữ số.")
+        @NotBlank(message = "The OTP code is required.")
+        @Pattern(regexp = "[0-9]{6}", message = "The OTP must be exactly 6 digits.")
         String code
 ) {
 }

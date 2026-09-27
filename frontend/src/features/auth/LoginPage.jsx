@@ -7,9 +7,9 @@ import { useCountdown } from '../../hooks/useCountdown.js'
 import { M } from '../../i18n/messages.js'
 
 const DEMO_ACCOUNTS = [
-  { user: 'student01', pass: 'student123', role: 'Học sinh' },
-  { user: 'teacher01', pass: 'teacher123', role: 'Giáo viên' },
-  { user: 'admin01', pass: 'admin123', role: 'Quản trị viên' },
+  { user: 'student01', pass: 'student123', role: 'Student' },
+  { user: 'teacher01', pass: 'teacher123', role: 'Teacher' },
+  { user: 'admin01', pass: 'admin123', role: 'Administrator' },
 ]
 
 function parseLockSeconds(message) {
@@ -61,7 +61,7 @@ export function LoginPage() {
     otpCountdown.restart(data.expiresIn || 90)
     resendCountdown.restart(restarted ? 60 : 60)
     if (data.deliveryCode) {
-      toast.info(`Mã OTP (môi trường thử nghiệm): ${data.deliveryCode}`)
+      toast.info(`Test-environment OTP code: ${data.deliveryCode}`)
     }
   }
 
@@ -127,7 +127,7 @@ export function LoginPage() {
         if (seconds > 0) lockCountdown.restart(seconds)
         setError(err.message)
       } else if (err.code === 'INVALID_CHALLENGE') {
-        resetToCredentials('Phiên xác minh đã hết hạn. Vui lòng đăng nhập lại.')
+        resetToCredentials('Verification session has expired. Please sign in again.')
       } else if (err.code === 'CAPTCHA_REQUIRED' && err.fields) {
         setCaptcha({
           challengeId: err.fields.captchaChallengeId,
@@ -195,18 +195,18 @@ export function LoginPage() {
             </div>
           </div>
           <h1 className="text-3xl font-extrabold leading-tight text-ink-900 sm:text-4xl">
-            Cổng trường học an toàn với <span className="text-brand-500">xác thực đa lớp</span>
+            A school portal secured with <span className="text-brand-500">multi-layer authentication</span>
           </h1>
           <p className="mt-3 max-w-md text-sm text-ink-600">
-            Ba chế độ xác thực <strong>S1</strong>, <strong>S2</strong>, <strong>S3</strong> giúp so sánh mức độ bảo mật
-            và trải nghiệm người dùng: mật khẩu, Mobile OTP và Email OTP.
+            Three authentication modes <strong>S1</strong>, <strong>S2</strong>, <strong>S3</strong> let you compare
+            security levels and user experience: password, Mobile OTP and Email OTP.
           </p>
 
           <div className="mt-5 grid grid-cols-3 gap-2">
             <div className="card !p-3 text-center">
               <p className="text-xl">🔑</p>
               <p className="mt-1 text-xs font-bold text-ink-900">S1</p>
-              <p className="text-[11px] text-ink-400">Mật khẩu</p>
+              <p className="text-[11px] text-ink-400">Password</p>
             </div>
             <div className="card !p-3 text-center">
               <p className="text-xl">📱</p>
@@ -221,7 +221,7 @@ export function LoginPage() {
           </div>
 
           <div className="mt-6 rounded-2xl border border-brand-100 bg-white/70 p-4">
-            <p className="text-xs font-bold uppercase tracking-wide text-ink-600">Tài khoản thử nghiệm</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-ink-600">Test accounts</p>
             <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-3">
               {DEMO_ACCOUNTS.map((acc) => (
                 <button
@@ -246,13 +246,13 @@ export function LoginPage() {
           <div className="card animate-fade-in mx-auto w-full max-w-md !p-6">
             {step === 'credentials' ? (
               <form onSubmit={onSubmitCredentials} noValidate>
-                <h2 className="text-xl font-extrabold text-ink-900">Đăng nhập</h2>
-                <p className="mt-1 text-xs text-ink-400">Sử dụng tài khoản giả lập của hệ thống.</p>
+                <h2 className="text-xl font-extrabold text-ink-900">Sign in</h2>
+                <p className="mt-1 text-xs text-ink-400">Use the system's simulated account.</p>
 
                 <div className="mt-5 space-y-4">
                   <div>
                     <label className="label" htmlFor="txt-username">
-                      Tên đăng nhập
+                      Username
                     </label>
                     <input
                       id="txt-username"
@@ -264,12 +264,12 @@ export function LoginPage() {
                       required
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      placeholder="vd: student01"
+                      placeholder="e.g. student01"
                     />
                   </div>
                   <div>
                     <label className="label" htmlFor="txt-password">
-                      Mật khẩu
+                      Password
                     </label>
                     <input
                       id="txt-password"
@@ -288,7 +288,7 @@ export function LoginPage() {
                   {captcha ? (
                     <div className="rounded-xl border border-sun-400 bg-sun-100/60 p-3">
                       <label className="label" htmlFor="txt-captcha">
-                        Xác thực chống robot
+                        Bot verification
                       </label>
                       <p className="mb-2 text-sm font-semibold text-ink-900">{captcha.question}</p>
                       <input
@@ -313,7 +313,7 @@ export function LoginPage() {
 
                 {lockCountdown.active ? (
                   <p className="mt-2 rounded-xl bg-coral-100 px-3 py-2 text-sm font-semibold text-coral-600">
-                    Tài khoản đang bị khóa. Vui lòng thử lại sau {lockCountdown.label}.
+                    Account is locked. Please try again in {lockCountdown.label}.
                   </p>
                 ) : null}
 
@@ -324,7 +324,7 @@ export function LoginPage() {
                   disabled={busy || lockCountdown.active}
                 >
                   {busy ? <InlineSpinner /> : <span aria-hidden="true">→</span>}
-                  Đăng nhập
+                  Sign in
                 </button>
               </form>
             ) : (
@@ -334,37 +334,37 @@ export function LoginPage() {
                   onClick={() => resetToCredentials('')}
                   className="mb-3 text-xs font-semibold text-brand-600 hover:underline"
                 >
-                  ← Quay lại
+                  ← Back
                 </button>
                 <h2 className="text-xl font-extrabold text-ink-900">
-                  {isEmailStep ? 'Xác thực Email OTP' : 'Xác thực hai yếu tố'}
+                  {isEmailStep ? 'Email OTP verification' : 'Two-factor authentication'}
                 </h2>
                 <p className="mt-1 text-sm text-ink-600">
                   {isEmailStep
-                    ? 'Xác thực Mobile OTP thành công. Một mã xác minh đã được gửi đến email của bạn.'
+                    ? 'Mobile OTP verification succeeded. A verification code has been sent to your email.'
                     : challenge?.totpBased
-                      ? 'Mở ứng dụng xác thực và nhập mã 6 chữ số.'
-                      : 'Vui lòng nhập mã OTP đã được gửi đến thiết bị của bạn.'}
+                      ? 'Open your authenticator app and enter the 6-digit code.'
+                      : 'Please enter the OTP code sent to your device.'}
                 </p>
 
                 <div className="mt-3 flex items-center justify-between rounded-xl bg-surface-soft px-3 py-2 text-xs">
                   <span className="text-ink-400">
-                    Kênh: <strong className="text-ink-600">{challenge?.deliveryChannel || '—'}</strong>
+                    Channel: <strong className="text-ink-600">{challenge?.deliveryChannel || '—'}</strong>
                   </span>
                   <span id={countdownId} className="font-semibold text-brand-600" aria-live="polite">
-                    Hết hạn sau {otpCountdown.label}
+                    Expires in {otpCountdown.label}
                   </span>
                 </div>
 
                 {challenge?.deliveryCode ? (
                   <p className="mt-2 rounded-xl bg-accent-100 px-3 py-2 text-xs text-accent-600">
-                    Mã OTP môi trường thử nghiệm: <strong>{challenge.deliveryCode}</strong>
+                    Test-environment OTP code: <strong>{challenge.deliveryCode}</strong>
                   </p>
                 ) : null}
 
                 <div className="mt-4">
                   <label className="label" htmlFor={otpFieldId}>
-                    Mã xác minh (6 chữ số)
+                    Verification code (6 digits)
                   </label>
                   <input
                     id={otpFieldId}
@@ -390,7 +390,7 @@ export function LoginPage() {
 
                 <button id={verifyBtnId} type="submit" className="btn-primary mt-4 w-full" disabled={busy || code.length !== 6}>
                   {busy ? <InlineSpinner /> : <span aria-hidden="true">✓</span>}
-                  Xác nhận
+                  Confirm
                 </button>
 
                 <div className="mt-3 flex items-center justify-between gap-2">
@@ -402,7 +402,7 @@ export function LoginPage() {
                     disabled={resending || resendCountdown.active || resendLimitHit || challenge?.totpBased}
                   >
                     {resending ? <InlineSpinner /> : '🔄'}
-                    {resendCountdown.active ? `Gửi lại mã (${resendCountdown.seconds}s)` : 'Gửi lại mã'}
+                    {resendCountdown.active ? `Resend code (${resendCountdown.seconds}s)` : 'Resend code'}
                   </button>
                   <button
                     id={isEmailStep ? 'btn-email-otp-restart' : 'btn-mobile-otp-back'}
@@ -410,13 +410,13 @@ export function LoginPage() {
                     className="btn-ghost !px-3"
                     onClick={() => resetToCredentials('')}
                   >
-                    Bắt đầu lại
+                    Start over
                   </button>
                 </div>
 
                 {challenge?.totpBased ? (
                   <p className="mt-3 text-xs text-ink-400">
-                    Với ứng dụng xác thực (TOTP), mã thay đổi mỗi 30 giây — không cần gửi lại.
+                    With an authenticator app (TOTP), the code changes every 30 seconds — no resend needed.
                   </p>
                 ) : null}
               </form>

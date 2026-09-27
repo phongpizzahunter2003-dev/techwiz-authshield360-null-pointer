@@ -1,4 +1,4 @@
-export function EmptyState({ icon = '📭', title = 'Chưa có dữ liệu', description, action }) {
+export function EmptyState({ icon = '📭', title = 'No data', description, action }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-brand-100 bg-white px-6 py-12 text-center">
       <span className="text-4xl" aria-hidden="true">
@@ -17,10 +17,10 @@ export function ErrorState({ message, onRetry }) {
       <p className="text-3xl" aria-hidden="true">
         🚧
       </p>
-      <p className="mt-2 text-sm font-semibold text-ink-900">{message || 'Không thể tải dữ liệu.'}</p>
+      <p className="mt-2 text-sm font-semibold text-ink-900">{message || 'Unable to load data.'}</p>
       {onRetry ? (
         <button type="button" className="btn-ghost mt-4" onClick={onRetry}>
-          Thử lại
+          Try again
         </button>
       ) : null}
     </div>

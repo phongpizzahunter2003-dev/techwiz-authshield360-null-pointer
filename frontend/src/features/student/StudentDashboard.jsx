@@ -24,8 +24,8 @@ export function StudentDashboard() {
 
   return (
     <AppShell
-      title="Bảng điều khiển học sinh"
-      subtitle={dashboard?.greeting || 'Theo dõi bài tập và kết quả học tập của bạn'}
+      title="Student dashboard"
+      subtitle={dashboard?.greeting || 'Track your assignments and results'}
     >
       {loading ? <Spinner /> : null}
       {error ? <ErrorState message={error.message} onRetry={reload} /> : null}
@@ -38,9 +38,9 @@ export function StudentDashboard() {
 
           <section>
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-base font-bold text-ink-900">Bài tập gần đây</h2>
+              <h2 className="text-base font-bold text-ink-900">Recent assignments</h2>
               <Link className="text-sm font-semibold text-brand-600 hover:underline" to="/student/assignments">
-                Xem tất cả
+                View all
               </Link>
             </div>
             {dashboard.assignments?.length ? (
@@ -53,21 +53,21 @@ export function StudentDashboard() {
                     </div>
                     <p className="mt-1 text-xs text-ink-400">{a.classroomName}</p>
                     <p className="mt-3 text-xs text-ink-600">
-                      Hạn nộp: <strong>{formatDateTime(a.dueAt)}</strong>
+                      Due date: <strong>{formatDateTime(a.dueAt)}</strong>
                     </p>
                     <div className="mt-3 flex flex-wrap items-center gap-2">
                       {a.latestSubmission ? <SubmissionStatusBadge status={a.latestSubmission.submissionStatus} /> : null}
                       {a.lockReason ? <Badge tone="coral" icon="🔒">{a.lockReason}</Badge> : null}
-                      {a.canSubmit ? <Badge tone="accent" icon="✍️">Có thể nộp</Badge> : null}
+                      {a.canSubmit ? <Badge tone="accent" icon="✍️">Can submit</Badge> : null}
                     </div>
                     <Link className="btn-ghost mt-4 w-full" to={`/student/assignments/${a.id}`}>
-                      Xem chi tiết
+                      View details
                     </Link>
                   </article>
                 ))}
               </div>
             ) : (
-              <EmptyState icon="📚" title="Chưa có bài tập" description="Giáo viên chưa giao bài tập nào cho lớp của bạn." />
+              <EmptyState icon="📚" title="No assignments yet" description="Your teacher has not assigned any assignments to your class." />
             )}
           </section>
         </div>

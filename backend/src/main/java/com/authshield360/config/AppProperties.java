@@ -29,7 +29,7 @@ public class AppProperties {
     /** Allowed CORS origins. */
     private List<String> corsAllowedOrigins = List.of("http://localhost:5173", "http://127.0.0.1:5173");
 
-    /** Development convenience: expose generated OTP in API responses / logs (VĐ-06). */
+    /** Development convenience: expose the generated OTP in API responses / logs (VD-06). */
     private boolean exposeOtp = true;
 
     public String getSigningKey() { return signingKey; }

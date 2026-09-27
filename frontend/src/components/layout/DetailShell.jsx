@@ -10,7 +10,7 @@ export function DetailShell({ title, subtitle, fallback = '/', actions, children
     <AppShell title={title} subtitle={subtitle} actions={actions}>
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <BackButton fallback={fallback} />
-        <span className="text-xs text-ink-400">Bạn có thể quay lại trang trước bất cứ lúc nào.</span>
+        <span className="text-xs text-ink-400">You can return to the previous page at any time.</span>
       </div>
       {children}
     </AppShell>

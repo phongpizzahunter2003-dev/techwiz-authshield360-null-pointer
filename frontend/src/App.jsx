@@ -23,6 +23,7 @@ import { AdminAuditDetail } from './features/admin/AdminAuditDetail.jsx'
 import { AdminComparison } from './features/admin/AdminComparison.jsx'
 import { AdminAuthMode } from './features/admin/AdminAuthMode.jsx'
 import { AdminSystem } from './features/admin/AdminSystem.jsx'
+import { NotificationsPage } from './features/notifications/NotificationsPage.jsx'
 import { Spinner } from './components/ui/Spinner.jsx'
 
 function HomeRedirect() {
@@ -30,7 +31,7 @@ function HomeRedirect() {
   if (!ready) {
     return (
       <div className="grid min-h-screen place-items-center">
-        <Spinner label="Đang tải..." />
+        <Spinner label="Loading..." />
       </div>
     )
   }
@@ -204,6 +205,15 @@ export default function App() {
         element={
           <ProtectedRoute roles={['STUDENT', 'TEACHER', 'ADMIN']}>
             <ProfilePage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/notifications"
+        element={
+          <ProtectedRoute roles={['STUDENT', 'TEACHER', 'ADMIN']}>
+            <NotificationsPage />
           </ProtectedRoute>
         }
       />

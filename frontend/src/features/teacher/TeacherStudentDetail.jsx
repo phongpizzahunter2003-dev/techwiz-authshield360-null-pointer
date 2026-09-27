@@ -21,12 +21,12 @@ export function TeacherStudentDetail() {
 
   return (
     <DetailShell
-      title={student ? student.fullName || student.username : 'Chi tiết học sinh'}
+      title={student ? student.fullName || student.username : 'Student details'}
       subtitle={student ? `${student.studentCode || student.username} · ${student.className || ''}` : undefined}
       fallback="/teacher/classes"
       actions={
         <Link className="btn-ghost" to="/teacher/assignments">
-          📚 Quản lý bài tập
+          📚 Manage assignments
         </Link>
       }
     >
@@ -36,15 +36,15 @@ export function TeacherStudentDetail() {
       {student ? (
         <div className="space-y-6">
           <section className="card">
-            <h2 className="text-base font-bold text-ink-900">Thông tin học sinh</h2>
+            <h2 className="text-base font-bold text-ink-900">Student information</h2>
             <dl className="mt-4 grid grid-cols-1 gap-x-8 gap-y-3 text-sm sm:grid-cols-2">
               {[
-                ['Tên đăng nhập', student.username],
-                ['Họ tên', student.fullName || '—'],
-                ['Mã học sinh', student.studentCode || '—'],
-                ['Lớp', student.className || '—'],
+                ['Username', student.username],
+                ['Full name', student.fullName || '—'],
+                ['Student code', student.studentCode || '—'],
+                ['Class', student.className || '—'],
                 ['Email', student.email || '—'],
-                ['Số điện thoại', student.phone || '—'],
+                ['Phone number', student.phone || '—'],
               ].map(([label, value]) => (
                 <div key={label} className="flex justify-between gap-4 border-b border-brand-50 pb-2">
                   <dt className="text-ink-400">{label}</dt>
@@ -56,40 +56,40 @@ export function TeacherStudentDetail() {
             </dl>
             {student.classrooms?.length ? (
               <div className="mt-3 flex flex-wrap items-center gap-2">
-                <span className="text-xs text-ink-400">Lớp bạn phụ trách có học sinh này:</span>
+                <span className="text-xs text-ink-400">Your classes that include this student:</span>
                 {student.classrooms.map((name) => (
                   <Badge key={name} tone="sky">
                     {name}
                   </Badge>
                 ))}
-                {avg !== null ? <Badge tone="accent">Điểm TB: {avg.toFixed(1)}/10</Badge> : null}
+                {avg !== null ? <Badge tone="accent">Average score: {avg.toFixed(1)}/10</Badge> : null}
               </div>
             ) : null}
           </section>
 
           <section className="card">
             <h2 className="text-base font-bold text-ink-900">
-              Bài nộp trong lớp bạn phụ trách ({submissions.length})
+              Submissions in your classes ({submissions.length})
             </h2>
             {submissions.length === 0 ? (
               <EmptyState
                 icon="📥"
-                title="Chưa có bài nộp"
-                description="Học sinh chưa nộp bài nào thuộc lớp bạn phụ trách."
+                title="No submissions yet"
+                description="The student has not submitted anything for your classes."
               />
             ) : (
               <div className="table-wrap mt-3">
                 <table className="table min-w-[820px]">
                   <thead>
                     <tr>
-                      <th>Bài tập</th>
-                      <th>Lần</th>
-                      <th>Thời điểm</th>
-                      <th>Trạng thái</th>
-                      <th>Tệp</th>
-                      <th>Điểm</th>
-                      <th>Nhận xét</th>
-                      <th className="text-right">Thao tác</th>
+                      <th>Assignment</th>
+                      <th>Attempt</th>
+                      <th>Submitted at</th>
+                      <th>Status</th>
+                      <th>File</th>
+                      <th>Score</th>
+                      <th>Feedback</th>
+                      <th className="text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -99,7 +99,7 @@ export function TeacherStudentDetail() {
                         <td>#{s.attemptNumber}</td>
                         <td className="whitespace-nowrap">{formatDateTime(s.submittedAt)}</td>
                         <td className="whitespace-nowrap">
-                          <Badge tone={s.late ? 'coral' : 'accent'}>{s.late ? 'Nộp muộn' : 'Đúng hạn'}</Badge>
+                          <Badge tone={s.late ? 'coral' : 'accent'}>{s.late ? 'Late' : 'On time'}</Badge>
                         </td>
                         <td className="max-w-[180px] truncate">{s.originalName}</td>
                         <td className="font-bold">{s.score ?? '—'}</td>
@@ -112,10 +112,10 @@ export function TeacherStudentDetail() {
                               target="_blank"
                               rel="noreferrer"
                             >
-                              Tải tệp
+                              Download file
                             </a>
                             <Link className="btn-xs btn-ghost" to={`/teacher/assignments/${s.assignmentId}`}>
-                              Chấm điểm
+                              Grade
                             </Link>
                           </div>
                         </td>
@@ -128,19 +128,19 @@ export function TeacherStudentDetail() {
           </section>
 
           <section className="card">
-            <h2 className="text-base font-bold text-ink-900">Kết quả thi ({results.length})</h2>
+            <h2 className="text-base font-bold text-ink-900">Exam results ({results.length})</h2>
             {results.length === 0 ? (
-              <EmptyState icon="📊" title="Chưa có kết quả" description="Chưa có kết quả thi nào cho học sinh này." />
+              <EmptyState icon="📊" title="No results yet" description="There are no exam results for this student yet." />
             ) : (
               <div className="table-wrap mt-3">
                 <table className="table min-w-[700px]">
                   <thead>
                     <tr>
-                      <th>Môn</th>
-                      <th>Bài thi</th>
-                      <th>Ngày</th>
-                      <th>Điểm</th>
-                      <th>Xếp loại</th>
+                      <th>Subject</th>
+                      <th>Exam</th>
+                      <th>Date</th>
+                      <th>Score</th>
+                      <th>Rating</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -156,7 +156,7 @@ export function TeacherStudentDetail() {
                           </td>
                           <td className="whitespace-nowrap">
                             <Badge tone={ratio >= 0.8 ? 'accent' : ratio >= 0.5 ? 'sun' : 'coral'}>
-                              {ratio >= 0.8 ? 'Tốt' : ratio >= 0.5 ? 'Đạt' : 'Cần cố gắng'}
+                              {ratio >= 0.8 ? 'Good' : ratio >= 0.5 ? 'Pass' : 'Needs improvement'}
                             </Badge>
                           </td>
                         </tr>
