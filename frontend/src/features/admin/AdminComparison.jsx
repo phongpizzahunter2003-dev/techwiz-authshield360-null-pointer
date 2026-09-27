@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { AppShell } from '../../components/layout/AppShell.jsx'
 import { ErrorState } from '../../components/ui/EmptyState.jsx'
 import { Spinner } from '../../components/ui/Spinner.jsx'
@@ -21,7 +22,12 @@ export function AdminComparison() {
         <div className="space-y-6">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {modes.map((m) => (
-              <article key={m.mode} className="card">
+              <Link
+                key={m.mode}
+                to={`/admin/modes/${m.mode}`}
+                className="card transition hover:shadow-glow"
+                title={`Xem chi tiết chế độ ${m.mode}`}
+              >
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-extrabold text-ink-900">{m.mode}</h2>
                   <span
@@ -64,7 +70,8 @@ export function AdminComparison() {
                     <p className="text-[11px] text-ink-600">Lỗi OTP</p>
                   </div>
                 </div>
-              </article>
+                <p className="mt-3 text-sm font-semibold text-brand-600">Xem chi tiết chế độ {m.mode} →</p>
+              </Link>
             ))}
           </div>
 

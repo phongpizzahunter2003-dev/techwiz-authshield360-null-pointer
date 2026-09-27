@@ -177,11 +177,11 @@ public class AnalyticsService {
 
         List<ChartSeries> charts = new ArrayList<>();
         charts.add(new ChartSeries("loginsByMode", "Đăng nhập thành công theo chế độ", ChartSeries.BAR,
-                "lượt đăng nhập", "Bấm vào cột để lọc nhật ký theo chế độ " + configService.current().getMode(),
+                "lượt đăng nhập", "Bấm vào cột để mở trang chi tiết của chế độ tương ứng.",
                 List.of(
-                        new ChartSlice("S1", "S1 · Chỉ mật khẩu", modeTotals[0], "coral", "/admin/audit-logs?mode=S1"),
-                        new ChartSlice("S2", "S2 · + Mobile OTP", modeTotals[1], "sun", "/admin/audit-logs?mode=S2"),
-                        new ChartSlice("S3", "S3 · + Email OTP", modeTotals[2], "accent", "/admin/audit-logs?mode=S3"))));
+                        new ChartSlice("S1", "S1 · Chỉ mật khẩu", modeTotals[0], "coral", "/admin/modes/S1"),
+                        new ChartSlice("S2", "S2 · + Mobile OTP", modeTotals[1], "sun", "/admin/modes/S2"),
+                        new ChartSlice("S3", "S3 · + Email OTP", modeTotals[2], "accent", "/admin/modes/S3"))));
 
         charts.add(new ChartSeries("usersByRole", "Người dùng theo vai trò", ChartSeries.PIE,
                 "tài khoản", "Bấm để mở danh sách người dùng theo vai trò.",

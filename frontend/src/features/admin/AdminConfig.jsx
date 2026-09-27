@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { AppShell } from '../../components/layout/AppShell.jsx'
+import { Badge } from '../../components/ui/Badge.jsx'
 import { ErrorState } from '../../components/ui/EmptyState.jsx'
 import { Spinner, InlineSpinner } from '../../components/ui/Spinner.jsx'
 import { useToast } from '../../components/ui/Toast.jsx'
@@ -28,6 +30,7 @@ const MODE_CARDS = [
 
 export function AdminConfig() {
   const toast = useToast()
+  const [searchParams] = useSearchParams()
   const [config, setConfig] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -39,13 +42,18 @@ export function AdminConfig() {
     adminApi
       .config()
       .then((res) => {
-        if (mounted) setConfig(res.data)
+        if (!mounted) return
+        const loaded = res.data
+        const preselect = (searchParams.get('mode') || '').toUpperCase()
+        if (['S1', 'S2', 'S3'].includes(preselect)) loaded.mode = preselect
+        setConfig(loaded)
       })
       .catch((err) => mounted && setError(err))
       .finally(() => mounted && setLoading(false))
     return () => {
       mounted = false
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const save = async (event) => {
@@ -82,6 +90,10 @@ export function AdminConfig() {
 
   const set = (key, value) => setConfig((c) => ({ ...c, [key]: value }))
 
+  const mode = config?.mode
+  const otpApplies = mode !== 'S1'
+  const emailApplies = mode === 'S3'
+
   return (
     <AppShell title="Cấu hình xác thực & MFA" subtitle="Chuyển đổi S1/S2/S3, tham số OTP, lockout và SMTP (UC-08)">
       {loading ? <Spinner /> : null}
@@ -90,35 +102,65 @@ export function AdminConfig() {
       {config ? (
         <form onSubmit={save} className="space-y-6">
           <section>
-            <h2 className="mb-3 text-base font-bold text-ink-900">Chế độ xác thực</h2>
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-base font-bold text-ink-900">Chế độ xác thực</h2>
+              {mode ? (
+                <span className="text-xs text-ink-400">
+                  Đang chọn: <strong className="text-ink-900">{mode}</strong> ·{' '}
+                  <Link className="font-semibold text-brand-600 hover:underline" to={`/admin/modes/${mode}`}>
+                    Xem chi tiết chế độ {mode} →
+                  </Link>
+                </span>
+              ) : null}
+            </div>
             <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
               {MODE_CARDS.map((m) => {
                 const active = config.mode === m.id
                 return (
-                  <button
+                  <div
                     key={m.id}
-                    type="button"
-                    onClick={() => set('mode', m.id)}
-                    className={`card text-left transition ${
+                    className={`card transition ${
                       active ? 'ring-2 ring-brand-500 shadow-glow' : 'hover:shadow-soft'
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="text-2xl" aria-hidden="true">
-                        {m.icon}
-                      </span>
-                      {active ? <span className="badge bg-brand-100 text-brand-700">Đang dùng</span> : null}
-                    </div>
-                    <p className="mt-2 text-sm font-bold text-ink-900">{m.title}</p>
-                    <p className="mt-1 text-xs text-ink-400">{m.desc}</p>
-                  </button>
+                    <button type="button" onClick={() => set('mode', m.id)} className="w-full text-left">
+                      <div className="flex items-center justify-between">
+                        <span className="text-2xl" aria-hidden="true">
+                          {m.icon}
+                        </span>
+                        {active ? <span className="badge bg-brand-100 text-brand-700">Đang dùng</span> : null}
+                      </div>
+                      <p className="mt-2 text-sm font-bold text-ink-900">{m.title}</p>
+                      <p className="mt-1 text-xs text-ink-400">{m.desc}</p>
+                    </button>
+                    <Link
+                      to={`/admin/modes/${m.id}`}
+                      className="mt-3 inline-block text-xs font-semibold text-brand-600 hover:underline"
+                    >
+                      Chi tiết chế độ {m.id} →
+                    </Link>
+                  </div>
                 )
               })}
             </div>
+            <p className="mt-3 rounded-xl bg-surface-soft px-3 py-2 text-xs text-ink-400">
+              Chế độ ở đây là <strong>mặc định toàn hệ thống</strong>. Muốn gán riêng cho từng người dùng hoặc
+              hàng loạt, vào <Link className="font-semibold text-brand-600 hover:underline" to="/admin/users">Người dùng &amp; vai trò</Link>.
+            </p>
           </section>
 
-          <section className="card">
-            <h2 className="text-base font-bold text-ink-900">Tham số OTP</h2>
+          <section className={`card transition ${otpApplies ? '' : 'opacity-60'}`}>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-base font-bold text-ink-900">Tham số OTP</h2>
+              <Badge tone={otpApplies ? 'accent' : 'neutral'}>
+                {otpApplies ? 'Áp dụng cho chế độ ' + mode : 'Không áp dụng cho S1'}
+              </Badge>
+            </div>
+            {!otpApplies ? (
+              <p className="mt-2 rounded-xl bg-sun-100/60 px-3 py-2 text-xs text-ink-600">
+                S1 chỉ dùng mật khẩu nên các tham số OTP bên dưới không có hiệu lực. Chọn S2 hoặc S3 để sử dụng.
+              </p>
+            ) : null}
             <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <div>
                 <label className="label" htmlFor="otp-type">
@@ -242,11 +284,22 @@ export function AdminConfig() {
             </div>
           </section>
 
-          <section className="card">
-            <h2 className="text-base font-bold text-ink-900">SMTP (Email OTP)</h2>
+          <section className={`card transition ${emailApplies ? '' : 'opacity-60'}`}>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-base font-bold text-ink-900">SMTP (Email OTP)</h2>
+              <Badge tone={emailApplies ? 'accent' : 'neutral'}>
+                {emailApplies ? 'Áp dụng cho chế độ S3' : 'Chỉ dùng cho S3'}
+              </Badge>
+            </div>
             <p className="mt-1 text-xs text-ink-400">
               Mật khẩu SMTP được mã hóa AES-GCM khi lưu và không bao giờ trả về qua API (BR-10).
             </p>
+            {!emailApplies ? (
+              <p className="mt-2 rounded-xl bg-sun-100/60 px-3 py-2 text-xs text-ink-600">
+                Chỉ chế độ <strong>S3</strong> mới dùng Email OTP. Ở {mode}, phần cấu hình này được giữ lại nhưng
+                không có hiệu lực.
+              </p>
+            ) : null}
             <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <div>
                 <label className="label" htmlFor="smtp-host">
