@@ -13,7 +13,6 @@ used to **compare three authentication modes** (S1 / S2 / S3), exercise **RBAC**
 | Database | MySQL 8 (primary) · H2 (profile `dev`, runs with no database install) |
 | Security | BCrypt (cost 12), HMAC tokens, server-side session registry, AES-GCM secret storage, server-enforced RBAC |
 
----
 
 ## 1. Repository layout
 
@@ -133,13 +132,6 @@ Convenient accounts for demonstrations:
 The system starts in **S1 (password only)** so you can sign in immediately. Switch to **S2** (adds
 Mobile OTP) or **S3** (adds Email OTP) in **Admin → Auth configuration**.
 
-> In the `dev` environment the OTP code is returned in the API response and shown in the UI so no
-> real SMS/email is needed (VD-06). With the `mysql` profile, `authshield.expose-otp` defaults to
-> `false` — set `AUTHSHIELD_EXPOSE_OTP=true` to see the code in the UI, otherwise read it from the
-> backend log line `[SIMULATED-SMS] … code=123456`.
->
-> Seeding runs only when the `users` table is empty, and hashing 41 passwords with BCrypt (cost 12)
-> takes roughly 15-20 seconds on first start.
 
 ---
 
@@ -244,9 +236,7 @@ user re-enrols.
 | `qa-rules.md` | Test strategy, TC-01..TC-12, TC-A1..A4, TC-D*, TC-M*, TC-P*, evidence rules |
 | `use-cases.md` | Detailed use cases and FR ↔ UC traceability |
 
-> The governance documents are written in Vietnamese because they trace back to the Vietnamese SRS
-> and are reviewed by the BA/judges. The **application** (UI, API responses, validation messages,
-> error catalogue, seed data and logs) is entirely English.
+
 
 ---
 
