@@ -96,7 +96,12 @@ export function TeacherAssignmentDetail() {
                     <li key={s.id} className="rounded-2xl border border-brand-100 p-3">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-bold text-ink-900">{s.studentName}</p>
+                          <Link
+                            to={`/teacher/students/${s.studentId}`}
+                            className="truncate text-sm font-bold text-ink-900 hover:underline"
+                          >
+                            {s.studentName}
+                          </Link>
                           <p className="truncate text-xs text-ink-400">
                             Lần #{s.attemptNumber} · {s.originalName} · {formatBytes(s.sizeBytes)} ·{' '}
                             {formatDateTime(s.submittedAt)}

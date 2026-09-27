@@ -13,6 +13,7 @@ import { TeacherAssignments } from './features/teacher/TeacherAssignments.jsx'
 import { TeacherAssignmentDetail } from './features/teacher/TeacherAssignmentDetail.jsx'
 import { TeacherClasses } from './features/teacher/TeacherClasses.jsx'
 import { TeacherClassDetail } from './features/teacher/TeacherClassDetail.jsx'
+import { TeacherStudentDetail } from './features/teacher/TeacherStudentDetail.jsx'
 import { AdminDashboard } from './features/admin/AdminDashboard.jsx'
 import { AdminUsers } from './features/admin/AdminUsers.jsx'
 import { AdminUserDetail } from './features/admin/AdminUserDetail.jsx'
@@ -113,6 +114,14 @@ export default function App() {
         element={
           <ProtectedRoute roles={['TEACHER']}>
             <TeacherClassDetail />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/teacher/students/:id"
+        element={
+          <ProtectedRoute roles={['TEACHER']}>
+            <TeacherStudentDetail />
           </ProtectedRoute>
         }
       />

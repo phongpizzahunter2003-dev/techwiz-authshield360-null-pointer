@@ -50,6 +50,7 @@ export const classroomApi = {
   list: () => get('/classrooms'),
   students: () => get('/teacher/students'),
   studentsInClass: (id) => get(`/teacher/classrooms/${id}/students`),
+  studentDetail: (studentId) => get(`/teacher/students/${studentId}`),
   create: (payload) => post('/teacher/classrooms', payload),
   update: (id, payload) => put(`/teacher/classrooms/${id}`, payload),
   remove: (id) => del(`/teacher/classrooms/${id}`),
