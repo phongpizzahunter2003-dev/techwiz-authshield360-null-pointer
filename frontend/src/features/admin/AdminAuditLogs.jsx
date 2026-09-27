@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { AppShell } from '../../components/layout/AppShell.jsx'
 import { Badge, statusTone } from '../../components/ui/Badge.jsx'
 import { EmptyState, ErrorState } from '../../components/ui/EmptyState.jsx'
@@ -7,7 +8,7 @@ import { Modal } from '../../components/ui/Modal.jsx'
 import { useToast } from '../../components/ui/Toast.jsx'
 import { adminApi, downloadAuditExport } from '../../api/endpoints.js'
 import { M } from '../../i18n/messages.js'
-import { formatDateTime } from '../../utils/format.js'
+import { formatDateTime, toLocalInputValue } from '../../utils/format.js'
 
 const EXPORT_LIMIT = 10000
 
@@ -26,7 +27,17 @@ const EMPTY_FILTERS = { q: '', action: '', status: '', role: '', mode: '', from:
 
 export function AdminAuditLogs() {
   const toast = useToast()
-  const [filters, setFilters] = useState(EMPTY_FILTERS)
+  const [searchParams] = useSearchParams()
+  // Support drill-down from dashboard charts / stat cards via query params.
+  const [filters, setFilters] = useState({
+    q: searchParams.get('q') || '',
+    action: searchParams.get('action') || '',
+    status: searchParams.get('status') || '',
+    role: searchParams.get('role') || '',
+    mode: searchParams.get('mode') || '',
+    from: searchParams.get('from') ? toLocalInputValue(searchParams.get('from')) : '',
+    to: searchParams.get('to') ? toLocalInputValue(searchParams.get('to')) : '',
+  })
   const [page, setPage] = useState(0)
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -71,9 +82,17 @@ export function AdminAuditLogs() {
   }
 
   useEffect(() => {
-    load(0, EMPTY_FILTERS)
+    load(0, {
+      q: searchParams.get('q') || '',
+      action: searchParams.get('action') || '',
+      status: searchParams.get('status') || '',
+      role: searchParams.get('role') || '',
+      mode: searchParams.get('mode') || '',
+      from: searchParams.get('from') ? toLocalInputValue(searchParams.get('from')) : '',
+      to: searchParams.get('to') ? toLocalInputValue(searchParams.get('to')) : '',
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [searchParams])
 
   const runExport = async (format) => {
     setExporting(true)
@@ -263,11 +282,12 @@ export function AdminAuditLogs() {
                   <th>Chế độ</th>
                   <th>IP</th>
                   <th>Lý do</th>
+                  <th className="text-right">Chi tiết</th>
                 </tr>
               </thead>
               <tbody>
                 {items.map((row) => (
-                  <tr key={row.id}>
+                  <tr key={row.id} className="transition hover:bg-surface-soft">
                     <td className="whitespace-nowrap">{formatDateTime(row.eventTime)}</td>
                     <td className="font-semibold text-ink-900">{row.eventAction}</td>
                     <td>
@@ -279,6 +299,14 @@ export function AdminAuditLogs() {
                     <td>{row.authMode || '—'}</td>
                     <td>{row.clientIp || '—'}</td>
                     <td className="max-w-[180px] truncate text-xs text-ink-400">{row.failureReason || '—'}</td>
+                    <td className="text-right">
+                      <Link
+                        to={`/admin/audit-logs/${row.id}`}
+                        className="text-sm font-semibold text-brand-600 hover:underline"
+                      >
+                        Xem →
+                      </Link>
+                    </td>
                   </tr>
                 ))}
               </tbody>

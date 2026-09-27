@@ -57,6 +57,12 @@ public class AuditController {
         return ApiResponse.ok(PageResult.of(result, queryService::toResponse));
     }
 
+    /** Single audit row for the detail view (drill-down from the dashboard chart). */
+    @GetMapping("/{id}")
+    public ApiResponse<AuditLogResponse> get(@PathVariable Long id) {
+        return ApiResponse.ok(queryService.toResponse(queryService.byId(id)));
+    }
+
     @GetMapping("/export")
     public ResponseEntity<byte[]> export(
             @RequestParam(defaultValue = "csv") String format,

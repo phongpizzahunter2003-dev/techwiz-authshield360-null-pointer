@@ -98,7 +98,32 @@ real gate. Unauthorized direct URL access shows a friendly 403 page, never the p
 /admin/*                   ADMIN (users, config, audit, comparison)
 ```
 
-## 8. Data & state
+## 8. Charts & drill-down navigation (added after review)
+
+Every dashboard shows **role-specific, clickable charts**; every displayed item is navigable.
+
+### 8.1 Rules
+
+1. Each role has its **own chart logic** — the charts must not be a generic copy:
+   | Role | Charts | Drill-down target |
+   |---|---|---|
+   | Student | PIE assignment status (on-time / late / pending / locked); BAR attempts per assignment; BAR score per exam | `/student/assignments?bucket=…`, `/student/assignments/:id`, `/student/results` |
+   | Teacher | BAR submissions per assignment; PIE grading progress (graded vs awaiting); BAR students per class | `/teacher/assignments/:id`, `/teacher/classes/:id` |
+   | Admin | BAR successful logins by mode S1/S2/S3; PIE users by role; BAR security events (login failures, lockouts, OTP failures, privilege violations, session replay); LINE events over the last 7 days | `/admin/audit-logs?mode=…&action=…&from=…&to=…`, `/admin/users?role=…` |
+2. A chart element (bar / pie slice / line point) **and** its legend chip must be clickable and navigate to the matching detail view. Legend chips are the keyboard-accessible equivalent (colour is never the only signal).
+3. Charts are **not animated on mount** (`isAnimationActive={false}`) so they render deterministically and respect `prefers-reduced-motion`.
+4. Charts must render loading / empty / error states; an all-zero series shows an explicit "Chưa có dữ liệu" message.
+5. Chart data comes from the API (`/api/v1/analytics/{student|teacher|admin}`) so drill links stay consistent with server-side authorisation.
+
+### 8.2 Detail page & back button contract
+
+- Every detail view is wrapped in `DetailShell`, which always renders a **Back button**.
+- `BackButton` uses `navigate(-1)` when real history exists, otherwise a deterministic fallback route (`fallback` prop) so a directly-opened URL is never a dead end.
+- Detail routes: `/student/assignments/:id`, `/teacher/assignments/:id`, `/teacher/classes/:id`, `/admin/users/:id`, `/admin/audit-logs/:id`.
+- List pages accept drill-down **query params** (`?bucket=`, `?role=`, `?action=`, `?mode=`, `?from=`, `?to=`) so a chart click lands on a pre-filtered view.
+- Never rely on the client filter for authorisation — the detail endpoints re-check the role server-side (BR-05).
+
+## 9. Data & state
 
 - Server state via small fetch hooks + Axios; no global cache library required.
 - Auth state in `AuthContext` (user, role, token) hydrated from `sessionStorage`.

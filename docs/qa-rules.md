@@ -10,8 +10,8 @@
 |---|---|---|
 | Unit | services, policies (lockout, OTP window, submission policy) | JUnit 5, Mockito |
 | Integration | controllers + DB + security filters | Spring Boot Test, MockMvc |
-| E2E/UI | login flows, dashboards, submissions | manual + Playwright-ready |
-| Security | BAC matrix, session replay, tampering | Burp/ZAP/DevTools (UC-12) |
+| E2E/UI | login flows, dashboards, chart drill-down, submissions | manual + Playwright-ready |
+| Security | BAC matrix (incl. `/analytics/*`), session replay, tampering | Burp/ZAP/DevTools (UC-12) |
 | Performance | < 5 s log visibility, export cap | stopwatch, seed data |
 
 ## 2. Mandatory test cases (SRS §8) — must all be executed
@@ -46,6 +46,26 @@
 | TC-A4b | Resubmit beyond `max_attempts` | `409 MAX_ATTEMPTS_REACHED` | UC-A4 |
 | TC-A4c | Resubmit attempt history preserved | all attempts retrievable, ordered | UC-A4 |
 | TC-A4d | Student A resubmits student B's row | `403/404` + log | UC-A4/BR-05 |
+
+## 3.1 Dashboard analytics, drill-down & MFA ownership (added after review)
+
+| TC | Action | Expected | UC |
+|---|---|---|---|
+| TC-D1 | Student opens dashboard | 3 role-specific charts render (assignment status PIE, attempts BAR, scores BAR) | UC-05 |
+| TC-D2 | Student clicks a pie slice / legend chip | Navigates to `/student/assignments?bucket=<bucket>` pre-filtered to the matching items | UC-A1..A4 |
+| TC-D3 | Click **Quay lại** on the filtered list | Returns to the previous page (`/student`) | C-04 |
+| TC-D4 | Teacher opens dashboard | Charts differ from student/admin (submissions per assignment, grading progress, students per class) | UC-05 |
+| TC-D5 | Teacher clicks a class column | Navigates to `/teacher/classes/:id` showing the roster and results | UC-05 |
+| TC-D6 | Admin opens dashboard | 4 charts render (logins by mode, users by role, security events, 7-day line) | UC-11 |
+| TC-D7 | Admin clicks a security-event bar | Navigates to `/admin/audit-logs?action=<ACTION>` with the action filter applied | UC-11 |
+| TC-D8 | Admin clicks a chart legend chip on "events per day" | Audit log filtered to that day's `from`/`to` window | UC-11 |
+| TC-D9 | Any role clicks a stat card / table row | Opens the matching detail page (`/admin/users/:id`, `/admin/audit-logs/:id`, `/student/assignments/:id`, `/teacher/assignments/:id`) | C-03 |
+| TC-D10 | Non-admin calls `/api/v1/analytics/admin` | `403` + `PRIVILEGE_VIOLATION` log | BR-05 |
+| TC-D11 | Student calls `/api/v1/analytics/teacher` | `403` + log | BR-05 |
+| TC-M1 | User with `mfaEnabled && !mfaEnrolled` logs in (S2/S3) | UC-09 enrolment prompt appears after the password step | UC-09 |
+| TC-M2 | User completes enrolment from the prompt | QR + secret shown to the **user**; confirming a valid TOTP sets `mfaEnrolled=true`, logs `MFA_ENROLL_SUCCESS` | UC-09 |
+| TC-M3 | Admin resets a user's MFA | `mfaEnrolled=false`, old factor invalidated, `MFA_RESET` logged, user must re-enrol | UC-16 |
+| TC-M4 | Verify admin has no "create QR for user" capability | Only self-scoped `/auth/mfa/enroll*` endpoints exist; admin path is reset-only | C-01 |
 
 ## 4. Negative & abuse tests
 

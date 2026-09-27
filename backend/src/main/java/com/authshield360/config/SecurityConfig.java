@@ -72,7 +72,11 @@ public class SecurityConfig {
                                 "/uploads/**").permitAll()
                         // Defense in depth: coarse URL guard on top of @PreAuthorize (BR-05).
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/analytics/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/analytics/teacher/**").hasAnyRole("TEACHER", "ADMIN")
+                        .requestMatchers("/api/v1/analytics/student/**").hasRole("STUDENT")
                         .requestMatchers("/api/v1/teacher/**").hasAnyRole("TEACHER", "ADMIN")
+                        .requestMatchers("/api/v1/student/**").hasRole("STUDENT")
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

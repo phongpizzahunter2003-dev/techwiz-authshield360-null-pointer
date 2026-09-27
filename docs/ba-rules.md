@@ -34,6 +34,15 @@
 | **VĐ-07** | OTP-failure behaviour differs S2 vs S3. | Per mode: **S2** allows resend up to 3× then restart; **S3** same for Mobile, and Email resend up to 3× then restart from step 1. |
 | **VĐ-08** | "Provided portal" ambiguity. | Self-hosted lab portal (this repo); no third-party dependency. |
 
+## 2.1 Binding clarifications added after review
+
+| # | Question | Decision |
+|---|---|---|
+| **C-01** | Does the admin configure the MFA QR for users, or does each role do it themselves? | **Each portal user (Student / Teacher / Admin) enrols their own MFA.** Source: UC-09 *Tác nhân chính* = "Người dùng portal"; §9.1 shows the enrolment page appearing after the user's first successful password login. The **Administrator only** enables/parameters MFA at platform level (UC-08) and may reset a user's factor (UC-16, logs `MFA_RESET`). The admin never sees or creates a user's secret. |
+| **C-02** | When must the enrolment prompt appear? | After a successful password login when `mfaEnabled && !mfaEnrolled` (UC-09 trigger: "lần đăng nhập đầu tiên sau khi bật MFA"). Implemented as a post-login modal; "Để sau" defers it for the browser session. |
+| **C-03** | Are dashboards purely informational? | No. All three role dashboards expose **role-specific charts** (S1/S2/S3 logins, users by role, security events, events per day for admin; submission/grading/roster for teacher; assignment-status/attempts/scores for student). Every chart element, stat card and table row is a **drill-down** into an authorised detail page. |
+| **C-04** | Navigation contract for drill-downs | Every detail view must offer a **Back** control that returns to the previous page (browser history `navigate(-1)`, with a deterministic fallback route when the page was opened directly). Detail routes are role-scoped and re-checked server-side. |
+
 ## 3. Access matrix (BA proposal — confirmed)
 
 | Module / function | Student | Teacher | Administrator |

@@ -35,6 +35,13 @@ public class ClassroomController {
         return ApiResponse.ok(classroomService.listStudents());
     }
 
+    /** Students enrolled in a specific class (drill-down detail page). */
+    @GetMapping("/teacher/classrooms/{id}/students")
+    @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
+    public ApiResponse<List<com.authshield360.user.dto.UserResponse>> classroomStudents(@PathVariable Long id) {
+        return ApiResponse.ok(classroomService.listStudentsInClassroom(id, SecurityUtils.current()));
+    }
+
     @PostMapping("/teacher/classrooms")
     @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
     public ApiResponse<ClassroomResponse> create(@Valid @RequestBody CreateClassroomRequest request) {

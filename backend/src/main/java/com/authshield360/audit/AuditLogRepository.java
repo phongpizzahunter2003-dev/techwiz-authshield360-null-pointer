@@ -3,6 +3,7 @@ package com.authshield360.audit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -20,4 +21,8 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long>, JpaSp
             + "where a.eventAction in ('OTP_VERIFY_FAIL','EMAIL_OTP_FAILED','OTP_EXPIRED','EMAIL_OTP_EXPIRED') "
             + "and a.authMode is not null group by a.authMode")
     List<Object[]> otpFailuresByMode();
+
+    /** Lightweight projection for the "events per day" chart. */
+    @Query("select a.eventTime from AuditLog a where a.eventTime >= :after")
+    List<java.time.Instant> findEventTimesAfter(@Param("after") java.time.Instant after);
 }

@@ -196,7 +196,7 @@ public class AuthService {
         var session = sessionService.find(cu.sessionId()).orElseThrow(() -> new BusinessException(ErrorCode.UNAUTHENTICATED));
         return new SessionResponse(user.getId(), user.getUsername(), user.getFullName(), user.getEmail(),
                 user.getRole().name(), session.getSessionId(), session.getAuthMethod(),
-                session.getIssuedAt(), session.getExpiresAt());
+                user.isMfaEnabled(), user.isMfaEnrolled(), session.getIssuedAt(), session.getExpiresAt());
     }
 
     // ------------------------------------------------------------------ UC-09

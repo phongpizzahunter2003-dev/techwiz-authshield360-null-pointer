@@ -17,7 +17,7 @@
 | UC-06 | Logout & session end | all portal users | S1–S3 | revoke + clear client + history invalidation (BR-08) |
 | UC-07 | User & role management | Admin | prep | create/edit users, assign roles, unique validation |
 | UC-08 | Auth & MFA configuration | Admin | prep | choose S1/S2/S3, OTP params, SMTP; no plaintext secret |
-| UC-09 | MFA enrollment | all portal users | S2,S3 | QR/secret + confirm code |
+| UC-09 | MFA enrollment | **any portal user (self-service)** | S2,S3 | after first password login the user scans the QR/secret and confirms a code; **admin never creates the QR** |
 | UC-10 | Failed-login protection | system/Admin | S1–S3 | 5 fails → exponential lockout (BR-04, VĐ-04) |
 | UC-11 | Auth log viewer | Admin, judges | S1–S3 | filter, paginate ≤50, masked export ≤10k |
 | UC-12 | Authorized security assessment | team | S1–S3 | ethical testing, lab-only (BR-11) |
@@ -45,6 +45,19 @@ retry (≤3) or restart (VĐ-07); SMTP error ⇒ resend allowed + test note.
 
 **UC-10** count failures/user/window → threshold ⇒ lock (1→5→15 min) → log; correct password during
 lock still denied; release ⇒ `LOCKOUT_RELEASED`.
+
+### Who owns MFA enrollment and reset? (UC-08 / UC-09 / UC-16) — **binding clarification**
+
+| Question | Answer from the source specs |
+|---|---|
+| Who creates the QR code? | **The user themselves.** UC-09 *Tác nhân chính* = "Người dùng portal"; §9.1 = "Trang Đăng ký MFA (hiển thị sau khi đăng nhập mật khẩu thành công lần đầu)". Every role (Student / Teacher / Administrator) enrols its **own** second factor. |
+| What does the Admin do? | UC-08: enables/configures the authentication mode, OTP parameters and SMTP at platform level (Đội thi / Administrator). The admin **does not** enrol MFA on behalf of a user and never sees the user's secret. |
+| Can MFA be reset? | UC-16 (optional): *Tác nhân chính* = "Người dùng portal; Administrator" — the system **or** an admin may reset the factor, after which the user must re-enrol (UC-09). Reset is logged as `MFA_RESET`. |
+| When is enrolment prompted? | UC-09 precondition "MFA đã được bật; người dùng chưa đăng ký yếu tố" + trigger "Lần đăng nhập đầu tiên sau khi bật MFA" ⇒ after a successful password login, if `mfaEnabled && !mfaEnrolled`, the portal prompts the user to enrol (implemented as a post-login modal, dismissible for the session; strict blocking can be enabled by policy). |
+
+**Implementation mapping:** `POST /api/v1/auth/mfa/enroll` (start) and
+`POST /api/v1/auth/mfa/enroll/confirm` (confirm) are self-scoped and require only an authenticated
+session — no admin role. `POST /api/v1/admin/users/{id}/reset-mfa` is the admin reset path.
 
 ## Part B — NEW: Student assignment use cases (project extension)
 

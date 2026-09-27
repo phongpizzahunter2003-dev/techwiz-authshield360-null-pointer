@@ -11,6 +11,8 @@ public record SessionResponse(
         String role,
         String sessionId,
         String authMethod,
+        boolean mfaEnabled,
+        boolean mfaEnrolled,
         Instant issuedAt,
         Instant expiresAt
 ) {

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { AppShell } from '../../components/layout/AppShell.jsx'
 import { Badge, statusTone } from '../../components/ui/Badge.jsx'
 import { EmptyState, ErrorState } from '../../components/ui/EmptyState.jsx'
@@ -13,7 +14,9 @@ const EMPTY_FORM = { username: '', email: '', phone: '', fullName: '', password:
 
 export function AdminUsers() {
   const toast = useToast()
-  const [filters, setFilters] = useState({ q: '', role: '', page: 0 })
+  const [searchParams] = useSearchParams()
+  const initialRole = searchParams.get('role') || ''
+  const [filters, setFilters] = useState({ q: '', role: initialRole, page: 0 })
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -38,9 +41,9 @@ export function AdminUsers() {
   }
 
   useEffect(() => {
-    load({ q: '', role: '', page: 0 })
+    load({ q: '', role: initialRole, page: 0 })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [initialRole])
 
   const openCreate = () => {
     setEditing(null)
@@ -185,8 +188,12 @@ export function AdminUsers() {
               </thead>
               <tbody>
                 {items.map((u) => (
-                  <tr key={u.id}>
-                    <td className="font-semibold text-ink-900">{u.username}</td>
+                  <tr key={u.id} className="transition hover:bg-surface-soft">
+                    <td className="font-semibold text-ink-900">
+                      <Link to={`/admin/users/${u.id}`} className="hover:underline">
+                        {u.username}
+                      </Link>
+                    </td>
                     <td>{u.email}</td>
                     <td>{u.fullName || '—'}</td>
                     <td>
@@ -204,6 +211,9 @@ export function AdminUsers() {
                     </td>
                     <td>
                       <div className="flex flex-wrap justify-end gap-2">
+                        <Link className="btn-ghost !px-3 !py-1.5" to={`/admin/users/${u.id}`}>
+                          Chi tiết
+                        </Link>
                         <button type="button" className="btn-ghost !px-3 !py-1.5" onClick={() => openEdit(u)}>
                           Sửa
                         </button>

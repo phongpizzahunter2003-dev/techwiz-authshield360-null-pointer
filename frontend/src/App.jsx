@@ -6,14 +6,19 @@ import { LoginPage } from './features/auth/LoginPage.jsx'
 import { ProfilePage } from './features/profile/ProfilePage.jsx'
 import { StudentDashboard } from './features/student/StudentDashboard.jsx'
 import { StudentAssignments } from './features/student/StudentAssignments.jsx'
+import { StudentAssignmentDetail } from './features/student/StudentAssignmentDetail.jsx'
 import { StudentResults } from './features/student/StudentResults.jsx'
 import { TeacherDashboard } from './features/teacher/TeacherDashboard.jsx'
 import { TeacherAssignments } from './features/teacher/TeacherAssignments.jsx'
+import { TeacherAssignmentDetail } from './features/teacher/TeacherAssignmentDetail.jsx'
 import { TeacherClasses } from './features/teacher/TeacherClasses.jsx'
+import { TeacherClassDetail } from './features/teacher/TeacherClassDetail.jsx'
 import { AdminDashboard } from './features/admin/AdminDashboard.jsx'
 import { AdminUsers } from './features/admin/AdminUsers.jsx'
+import { AdminUserDetail } from './features/admin/AdminUserDetail.jsx'
 import { AdminConfig } from './features/admin/AdminConfig.jsx'
 import { AdminAuditLogs } from './features/admin/AdminAuditLogs.jsx'
+import { AdminAuditDetail } from './features/admin/AdminAuditDetail.jsx'
 import { AdminComparison } from './features/admin/AdminComparison.jsx'
 import { Spinner } from './components/ui/Spinner.jsx'
 
@@ -60,6 +65,14 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/student/assignments/:id"
+        element={
+          <ProtectedRoute roles={['STUDENT']}>
+            <StudentAssignmentDetail />
+          </ProtectedRoute>
+        }
+      />
 
       <Route
         path="/teacher"
@@ -82,6 +95,22 @@ export default function App() {
         element={
           <ProtectedRoute roles={['TEACHER']}>
             <TeacherClasses />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/teacher/assignments/:id"
+        element={
+          <ProtectedRoute roles={['TEACHER']}>
+            <TeacherAssignmentDetail />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/teacher/classes/:id"
+        element={
+          <ProtectedRoute roles={['TEACHER']}>
+            <TeacherClassDetail />
           </ProtectedRoute>
         }
       />
@@ -123,6 +152,22 @@ export default function App() {
         element={
           <ProtectedRoute roles={['ADMIN']}>
             <AdminComparison />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/users/:id"
+        element={
+          <ProtectedRoute roles={['ADMIN']}>
+            <AdminUserDetail />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/audit-logs/:id"
+        element={
+          <ProtectedRoute roles={['ADMIN']}>
+            <AdminAuditDetail />
           </ProtectedRoute>
         }
       />

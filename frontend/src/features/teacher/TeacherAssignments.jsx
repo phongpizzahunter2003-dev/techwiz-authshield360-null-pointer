@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { AppShell } from '../../components/layout/AppShell.jsx'
 import { Badge, statusTone } from '../../components/ui/Badge.jsx'
 import { EmptyState, ErrorState } from '../../components/ui/EmptyState.jsx'
@@ -181,6 +182,9 @@ export function TeacherAssignments() {
                   </td>
                   <td>
                     <div className="flex flex-wrap justify-end gap-2">
+                      <Link className="btn-ghost !px-3 !py-1.5" to={`/teacher/assignments/${a.id}`}>
+                        Chi tiết
+                      </Link>
                       <button type="button" className="btn-ghost !px-3 !py-1.5" onClick={() => openGrading(a)}>
                         Chấm điểm
                       </button>

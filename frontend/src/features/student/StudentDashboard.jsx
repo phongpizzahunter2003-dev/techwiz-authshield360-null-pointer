@@ -4,15 +4,22 @@ import { StatGrid } from '../../components/ui/StatCard.jsx'
 import { Badge, statusTone, SubmissionStatusBadge } from '../../components/ui/Badge.jsx'
 import { EmptyState, ErrorState } from '../../components/ui/EmptyState.jsx'
 import { Spinner } from '../../components/ui/Spinner.jsx'
-import { useAuth } from '../../context/AuthContext.jsx'
+import { ChartBoard } from '../../components/charts/ChartBoard.jsx'
 import { useAsync } from '../../hooks/useAsync.js'
 import { dashboardApi } from '../../api/endpoints.js'
 import { formatDateTime } from '../../utils/format.js'
 
-export function StudentDashboard() {
-  const { session } = useAuth()
-  const { data, loading, error, reload } = useAsync(() => dashboardApi.student(), [])
+// Each stat card drills into the matching filtered view.
+const STAT_LINKS = {
+  classes: '/student/assignments',
+  assignments: '/student/assignments',
+  submitted: '/student/assignments?bucket=ON_TIME',
+  pending: '/student/assignments?bucket=PENDING',
+  late: '/student/assignments?bucket=LATE',
+}
 
+export function StudentDashboard() {
+  const { data, loading, error, reload } = useAsync(() => dashboardApi.student(), [])
   const dashboard = data?.data
 
   return (
@@ -25,7 +32,9 @@ export function StudentDashboard() {
 
       {dashboard ? (
         <div className="space-y-6">
-          <StatGrid stats={dashboard.stats} />
+          <StatGrid stats={dashboard.stats} linkFor={(key) => STAT_LINKS[key]} />
+
+          <ChartBoard role="STUDENT" />
 
           <section>
             <div className="mb-3 flex items-center justify-between">
@@ -51,8 +60,8 @@ export function StudentDashboard() {
                       {a.lockReason ? <Badge tone="coral" icon="🔒">{a.lockReason}</Badge> : null}
                       {a.canSubmit ? <Badge tone="accent" icon="✍️">Có thể nộp</Badge> : null}
                     </div>
-                    <Link className="btn-ghost mt-4 w-full" to="/student/assignments">
-                      Chi tiết
+                    <Link className="btn-ghost mt-4 w-full" to={`/student/assignments/${a.id}`}>
+                      Xem chi tiết
                     </Link>
                   </article>
                 ))}

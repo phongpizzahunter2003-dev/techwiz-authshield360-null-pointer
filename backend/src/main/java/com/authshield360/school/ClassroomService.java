@@ -128,4 +128,16 @@ public class ClassroomService {
                 .map(com.authshield360.user.UserService::toResponse)
                 .toList();
     }
+
+    /** Students enrolled in a class the teacher owns (drill-down detail page). */
+    @Transactional(readOnly = true)
+    public List<com.authshield360.user.dto.UserResponse> listStudentsInClassroom(Long classroomId, CurrentUser viewer) {
+        assertCanManage(classroomId, viewer);
+        List<Long> ids = enrollments.findByClassroomId(classroomId).stream()
+                .map(Enrollment::getStudentId).toList();
+        if (ids.isEmpty()) return List.of();
+        return users.findAllById(ids).stream()
+                .map(com.authshield360.user.UserService::toResponse)
+                .toList();
+    }
 }

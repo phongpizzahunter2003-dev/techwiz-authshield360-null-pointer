@@ -36,6 +36,13 @@ public class AuditQueryService {
         return repository.count(specification(filter));
     }
 
+    @Transactional(readOnly = true)
+    public AuditLog byId(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new com.authshield360.common.BusinessException(
+                        com.authshield360.common.ErrorCode.NOT_FOUND));
+    }
+
     public AuditLogResponse toResponse(AuditLog log) {
         return new AuditLogResponse(log.getId(), log.getEventTime(), log.getEventId(), log.getEventAction(),
                 log.getStatus(), log.getAuthFactor(), log.getAuthMode(), log.getUserIdentifier(), log.getRole(),

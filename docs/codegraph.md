@@ -69,6 +69,16 @@ AdminUserController ──► UserService ──► UserRepository, PasswordEnco
 AdminConfigController ──► ConfigService ──► AuthConfigRepository, CryptoService, MailGateway
 ```
 
+### 2.4 Analytics / dashboards
+```
+AnalyticsController
+ ├─ AnalyticsService ──► AssignmentService, AssignmentSubmissionRepository,
+ │                       ClassroomRepository, EnrollmentRepository,
+ │                       ExamResultRepository, AuditLogRepository, UserRepository
+ └─ DTOs (AnalyticsResponse, ChartSeries, ChartSlice with drill route)
+DashboardController ──► DashboardService (stat cards + recent events)
+```
+
 ## 3. Frontend component graph
 
 ```
@@ -77,11 +87,17 @@ App
      └─ Router
         ├─ /login ── LoginPage ── StepPassword / StepMobileOtp / StepEmailOtp / LockoutTimer
         ├─ ProtectedRoute(role)
-        │   ├─ AppShell ─ Sidebar, Topbar, Toaster
-        │   ├─ StudentDashboard ─ AssignmentList ─ SubmissionPanel(A1..A4)
-        │   ├─ TeacherDashboard  ─ AssignmentEditor ─ GradingTable
-        │   └─ AdminDashboard    ─ UsersPage / ConfigPage / AuditLogViewer / ComparisonPage
+        │   ├─ AppShell ─ Sidebar, Topbar, Toaster, MfaEnrollmentPrompt (UC-09)
+        │   ├─ StudentDashboard ─ StatGrid ─ ChartBoard(STUDENT)
+        │   │    └─ /student/assignments[/:id] ── StudentAssignmentDetail (submit/resubmit/history)
+        │   ├─ TeacherDashboard  ─ ChartBoard(TEACHER)
+        │   │    └─ /teacher/assignments[/:id] ── TeacherAssignmentDetail (grading)
+        │   │    └─ /teacher/classes[/:id]     ── TeacherClassDetail (roster + results)
+        │   └─ AdminDashboard    ─ ChartBoard(ADMIN)
+        │        └─ /admin/users[/:id] · /admin/audit-logs[/:id] · /admin/config · /admin/comparison
         └─ ErrorPage(403/404/500)
+
+Every detail view is wrapped in DetailShell → BackButton (navigate(-1) + fallback).
 ```
 
 Shared: `api/*` (axios modules) ← consumed by feature pages; `hooks/*` ← used by pages/components.

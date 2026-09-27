@@ -85,6 +85,7 @@ com.authshield360
 ├── school/            StudentProfile, TeacherProfile, Classroom, Enrollment,
 │                      Assignment, AssignmentSubmission, ExamResult + services
 ├── dashboard/         Role-specific aggregation endpoints
+├── analytics/         Clickable role-dashboard charts + drill-down endpoints
 └── BackendApplication
 ```
 

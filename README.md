@@ -109,12 +109,33 @@ Email OTP dùng SMTP cấu hình trong Admin (mặc định mô phỏng, ví d�
 
 ---
 
-## 6. Ba dashboard theo vai trò
+## 6. Ba dashboard theo vai trò (có biểu đồ & drill-down)
 
 - **Học sinh** (`/student`): tổng quan, danh sách bài tập, nộp/ nộp lại bài, lịch sử nộp, kết quả thi.
 - **Giáo viên** (`/teacher`): lớp phụ trách, tạo/ sửa/ đóng bài tập, chấm điểm, thêm học sinh vào lớp.
 - **Quản trị viên** (`/admin`): người dùng & vai trò, cấu hình xác thực, nhật ký xác thực + xuất file,
   so sánh S1/S2/S3.
+
+### Biểu đồ theo vai trò (mỗi vai trò một logic riêng)
+
+| Vai trò | Biểu đồ | Bấm vào để xem |
+|---|---|---|
+| Học sinh | PIE trạng thái bài tập; BAR số lần nộp theo bài; BAR điểm theo bài thi | danh sách bài tập đã lọc (`?bucket=`), chi tiết bài tập, kết quả thi |
+| Giáo viên | BAR bài nộp theo bài tập; PIE tiến độ chấm; BAR học sinh theo lớp | chi tiết bài tập (chấm điểm), chi tiết lớp (danh sách + kết quả) |
+| Quản trị viên | BAR đăng nhập theo chế độ S1/S2/S3; PIE người dùng theo vai trò; BAR sự kiện bảo mật; LINE sự kiện 7 ngày | nhật ký đã lọc (`?mode=`/`?action=`/`?from=`/`?to=`), người dùng theo vai trò, chi tiết sự kiện |
+
+**Mọi thông tin đều bấm được:** thẻ số liệu, biểu đồ, dòng trong bảng đều dẫn tới trang chi tiết;
+mỗi trang chi tiết đều có nút **← Quay lại** để trở về trang trước (dùng lịch sử trình duyệt, có
+route dự phòng khi mở trực tiếp URL). Xem `docs/fe-rules.md` §8.
+
+## 6.1 Ai thiết lập MFA? (UC-08 / UC-09 / UC-16)
+
+**Mỗi người dùng tự đăng ký MFA cho chính mình** (Học sinh / Giáo viên / Quản trị viên) — quét mã QR
+ở trang **Hồ sơ & MFA**. Theo UC-09, sau lần đăng nhập mật khẩu thành công đầu tiên (khi MFA đã bật mà
+chưa đăng ký), hệ thống sẽ **nhắc** người dùng thiết lập.
+
+Quản trị viên **không tạo QR thay người dùng**: admin chỉ bật/cấu hình chế độ xác thực (UC-08) và có
+thể **đặt lại MFA** cho một tài khoản (UC-16), sau đó người dùng phải đăng ký lại.
 
 ---
 

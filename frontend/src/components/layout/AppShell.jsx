@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { ROLE_LABEL } from '../../i18n/messages.js'
+import { MfaEnrollmentPrompt } from './MfaEnrollmentPrompt.jsx'
 
 const NAV = {
   STUDENT: [
@@ -120,6 +121,9 @@ export function AppShell({ children, title, subtitle, actions }) {
           {children}
         </main>
       </div>
+
+      {/* UC-09: prompt the user to enrol their own second factor after first login. */}
+      <MfaEnrollmentPrompt />
     </div>
   )
 }

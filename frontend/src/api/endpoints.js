@@ -18,6 +18,13 @@ export const dashboardApi = {
   comparison: () => get('/admin/comparison'),
 }
 
+export const analyticsApi = {
+  student: () => get('/analytics/student'),
+  teacher: () => get('/analytics/teacher'),
+  admin: () => get('/analytics/admin'),
+  studentAssignments: (bucket) => get('/analytics/student/assignments', { bucket }),
+}
+
 export const assignmentApi = {
   list: () => get('/assignments'),
   detail: (id) => get(`/assignments/${id}`),
@@ -42,6 +49,7 @@ export const submissionApi = {
 export const classroomApi = {
   list: () => get('/classrooms'),
   students: () => get('/teacher/students'),
+  studentsInClass: (id) => get(`/teacher/classrooms/${id}/students`),
   create: (payload) => post('/teacher/classrooms', payload),
   update: (id, payload) => put(`/teacher/classrooms/${id}`, payload),
   remove: (id) => del(`/teacher/classrooms/${id}`),
@@ -65,6 +73,7 @@ export const adminApi = {
   config: () => get('/admin/config'),
   updateConfig: (payload) => put('/admin/config', payload),
   auditLogs: (params) => get('/admin/audit-logs', params),
+  auditLog: (id) => get(`/admin/audit-logs/${id}`),
 }
 
 export function auditExportUrl(params) {
