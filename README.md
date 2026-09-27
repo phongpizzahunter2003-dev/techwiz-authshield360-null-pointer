@@ -269,9 +269,22 @@ user re-enrols.
 ## 11. Testing
 
 ```bash
-cd backend && ./mvnw verify            # unit + context tests
+cd backend && ./mvnw verify            # unit + context + API automation tests
 cd frontend && npm run build           # production build (also validates every import)
 ```
+
+### Automation suites
+
+The cases in [`docs/test-cases.md`](docs/test-cases.md) are automated in two independent suites:
+
+| Suite | Scope | Command | Report |
+|---|---|---|---|
+| **API (JUnit)** — `backend/src/test/java/.../automation` | 100+ cases over the real REST API on H2: sign-in S1/S2/S3, lockout ladder, OTP expiry/resend limits, captcha, TOTP/MFA, sessions, the four submission rules, grading, RBAC, config guard-rails, audit/export | `cd backend && .\mvnw.cmd verify` | `backend/target/surefire-reports/` |
+| **UI (Playwright)** — `e2e/` | browser-only cases: login wizard, disabled buttons during async work, captcha box, TOTP, alert layer pinned on top, RBAC 403 page, Back navigation, submit/grade UX, admin dialogs and CSV download | `cd e2e && run-e2e.cmd` | `e2e/playwright-report/` |
+
+Run only the API automation classes with `cd backend && .\mvnw.cmd test "-Dtest=*ApiIT"`.
+The UI suite needs the backend on `:8080` (`dev` profile) — `e2e/run-e2e.cmd` starts it for you.
+See [`e2e/README.md`](e2e/README.md) for details.
 
 See `docs/qa-rules.md` for the mandatory test set and the evidence rules (7-column matrix:
 Test ID · User/Role · Action · Expected · Actual · Pass/Fail · Evidence).

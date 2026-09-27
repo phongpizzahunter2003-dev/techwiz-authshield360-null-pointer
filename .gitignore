@@ -96,6 +96,17 @@ $RECYCLE.BIN/
 *.old
 .~lock.*#
 
+# ── Playwright / e2e artefacts ──────────────────────────────────────────────
+e2e/node_modules/
+e2e/playwright-report/
+e2e/blob-report/
+e2e/test-results/
+e2e/.cache/
+
+# ── Maven Surefire / Failsafe reports ───────────────────────────────────────
+target/surefire-reports/
+target/failsafe-reports/
+
 # NOTE: these ARE intentional deliverables and must stay committed:
 #   package-lock.json   (reproducible frontend installs)
 #   .env.example         (template without secrets)

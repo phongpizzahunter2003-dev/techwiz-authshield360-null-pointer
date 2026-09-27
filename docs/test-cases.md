@@ -115,7 +115,7 @@ otpauth://totp/AuthShield%20360:student_mfa01?secret=JBSWY3DPEHPK3PXP&issuer=Aut
 | AUTH-29 | cả 3 | đang ở màn đăng ký MFA | – | Nhập **đúng** mã xác nhận | `MFA_ENROLL_SUCCESS`; từ lần đăng nhập sau phải nhập OTP | UC-09 |
 | AUTH-30 | cả 3 | đã đăng nhập | bất kỳ | Bấm **Đăng xuất** rồi dùng lại **token cũ** (DevTools/Postman) | Logout thành công + `LOGOUT`; token cũ → `401 SESSION_REPLAY_ATTEMPT/INVALID_SESSION`; nút Back của trình duyệt không mở lại được dashboard | UC-06/BR-08 |
 | AUTH-31 | cả 3 | đã đăng nhập | – | Gửi request với **token bị sửa 1 ký tự** | `401` (chữ ký HMAC không hợp lệ) | UC-06/BR-08 |
-| AUTH-32 | cả 3 | giảm `sessionTimeoutMinutes=1` (test nhanh) | – | Để yên quá thời gian chờ rồi thao tác | `401 SESSION_EXPIRED` → tự đăng xuất, về trang đăng nhập | UC-06/A1 |
+| AUTH-32 | cả 3 | giảm `sessionTimeoutMinutes=1` (test nhanh) | – | Để yên quá thời gian chờ rồi thao tác | `401` (phiên không còn hợp lệ — `SESSION_EXPIRED` hoặc `UNAUTHENTICATED`) → tự đăng xuất, về trang đăng nhập | UC-06/A1 |
 
 ---
 
@@ -235,6 +235,20 @@ otpauth://totp/AuthShield%20360:student_mfa01?secret=JBSWY3DPEHPK3PXP&issuer=Aut
 6. Với ca lockout: dùng `locked01` để kiểm tra trạng thái đang khóa; dùng `student01` + sai mật khẩu 5 lần để kiểm tra cơ chế kích hoạt (nhớ chờ hết 60s hoặc reset DB).
 7. Với ca OTP hết hạn: giảm `otpValiditySeconds` xuống **30** ở *Admin → Cấu hình xác thực* để test nhanh thay vì chờ 90s.
 8. Với ca captcha: đặt `requireCaptchaAfter = 3`, đăng nhập lại vài lần để vượt ngưỡng.
+
+### 7.1 Tự động hoá (đã hiện thực)
+
+Toàn bộ case ở trên đã được tự động hoá ở hai tầng, chạy lại được bất cứ lúc nào:
+
+| Tầng | Vị trí | Bao phủ | Lệnh | Báo cáo |
+|---|---|---|---|---|
+| **API** (JUnit + Spring Boot Test, H2) | `backend/src/test/java/com/authshield360/automation/` | `AuthApiIT` (AUTH-01…AUTH-33) · `StudentApiIT` (STU-01…STU-22) · `TeacherApiIT` (TEA-01…TEA-22) · `AdminApiIT` (ADM-01…ADM-20) · `CrossCuttingApiIT` (X-01…X-11) | `cd backend && .\mvnw.cmd verify` | `target/surefire-reports/` |
+| **Giao diện** (Playwright/Chromium) | `e2e/tests/` | login wizard S1/S2/S3 · khoá nút khi chờ · captcha · TOTP · alert nổi trên cùng · trang 403 · nút Back · UX nộp/chấm điểm · hộp thoại admin + tải CSV | `cd e2e && run-e2e.cmd` | `e2e/playwright-report/` |
+
+Ánh xạ: mã case trong tài liệu này trùng tên với `@DisplayName`/tiền tố phương thức trong mã test
+(ví dụ `AUTH-04` → `auth04FifthFailureLocks`), nên có thể đối chiếu kết quả tự động với ma trận 7 cột.
+Các case chỉ kiểm chứng được bằng mắt hoặc bằng môi trường MySQL (X-06 bền vững sau restart, X-07 reset)
+vẫn thực hiện theo quy trình thủ công ở §7 bước 5–6 và ghi bằng chứng vào ma trận.
 
 ## 8. Truy vết nhanh
 
