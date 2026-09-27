@@ -44,11 +44,6 @@ export function formatBytes(bytes) {
   return `${value.toFixed(i === 0 ? 0 : 1)} ${units[i]}`
 }
 
-export function isPast(value) {
-  if (!value) return false
-  return new Date(value).getTime() < Date.now()
-}
-
 export function toLocalInputValue(date = new Date()) {
   const d = new Date(date)
   const pad = (n) => String(n).padStart(2, '0')

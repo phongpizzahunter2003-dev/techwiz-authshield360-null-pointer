@@ -1,24 +1,104 @@
-# OS / editors
-.DS_Store
-Thumbs.db
-.idea/
-.vscode/
-*.iml
+# =============================================================================
+# AuthShield 360 — repository ignore rules
+#
+# Rule of thumb: commit SOURCE, SCHEMA, DOCS and TEMPLATES.
+# Never commit secrets, local configuration, build output or runtime data (BR-10).
+# =============================================================================
 
-# Secrets — BR-10
+# ── Secrets & local configuration (BR-10) ────────────────────────────────────
 .env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
 *.local.properties
 **/application-*.local.properties
+**/application-local.yml
+**/application-local.yaml
+*.pem
+*.key
+*.p12
+*.jks
+*.keystore
+secrets/
 
-# Backend
-backend/target/
+# ── Runtime data (created by the app while running) ─────────────────────────
 backend/uploads/
 !backend/uploads/.gitkeep
+backend/data/
+*.mv.db
+*.trace.db
+*.lock.db
 
-# Frontend
-frontend/node_modules/
+# ── Build output ────────────────────────────────────────────────────────────
+backend/target/
 frontend/dist/
 frontend/.vite/
+node_modules/
+**/node_modules/
+build/
+out/
+bin/
+!**/src/main/**/bin/
 
-# Logs
+# ── Logs & crash dumps ──────────────────────────────────────────────────────
 *.log
+logs/
+hs_err_pid*
+replay_pid*
+
+# ── Test & coverage output ──────────────────────────────────────────────────
+coverage/
+.nyc_output/
+*.exec
+
+# ── IDE / editors ───────────────────────────────────────────────────────────
+.idea/
+**/.idea/
+.vscode/
+**/.vscode/
+.fleet/
+*.iml
+*.ipr
+*.iws
+.classpath
+.project
+.settings/
+.apt_generated/
+.springBeans
+nbproject/private/
+nbdist/
+.nb-gradle/
+*.swp
+*.swo
+*~
+
+# ── Operating system ────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# ── Office temporary & lock files ───────────────────────────────────────────
+~$*
+*.~*
+*.tmp
+*.temp
+*.bak
+*.orig
+*.rej
+*.old
+.~lock.*#
+
+# NOTE: these ARE intentional deliverables and must stay committed:
+#   package-lock.json   (reproducible frontend installs)
+#   .env.example         (template without secrets)
+#   db/*.sql             (schema, seed, reset)
+#   docs/**              (governance documents and source specifications)
+#   backend/.mvn/wrapper (Maven Wrapper; distributionType=only-script needs no jar)

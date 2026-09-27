@@ -1,8 +1,9 @@
 import axios from 'axios'
 import { M } from '../i18n/messages.js'
 
-export const TOKEN_KEY = 'auth_token'
-export const SESSION_KEY = 'auth_session'
+// Storage keys are an implementation detail of this module.
+const TOKEN_KEY = 'auth_token'
+const SESSION_KEY = 'auth_session'
 
 const baseURL = import.meta.env.VITE_API_BASE_URL || '/api/v1'
 
@@ -47,7 +48,7 @@ http.interceptors.request.use((config) => {
 })
 
 // A single normalised error shape: { code, message, fields, status }
-export class ApiError extends Error {
+class ApiError extends Error {
   constructor({ code, message, fields, status }) {
     super(message)
     this.name = 'ApiError'

@@ -4,7 +4,6 @@ import com.authshield360.audit.AuditAction;
 import com.authshield360.audit.AuditEvent;
 import com.authshield360.audit.AuditService;
 import com.authshield360.common.BusinessException;
-import com.authshield360.common.ErrorCode;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

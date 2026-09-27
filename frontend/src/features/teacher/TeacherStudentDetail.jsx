@@ -5,7 +5,7 @@ import { EmptyState, ErrorState } from '../../components/ui/EmptyState.jsx'
 import { Spinner } from '../../components/ui/Spinner.jsx'
 import { useAsync } from '../../hooks/useAsync.js'
 import { classroomApi, submissionApi } from '../../api/endpoints.js'
-import { formatBytes, formatDate, formatDateTime } from '../../utils/format.js'
+import { formatDate, formatDateTime } from '../../utils/format.js'
 
 /** Teacher drill-down: one student's profile, submissions and exam results (UC-05). */
 export function TeacherStudentDetail() {
