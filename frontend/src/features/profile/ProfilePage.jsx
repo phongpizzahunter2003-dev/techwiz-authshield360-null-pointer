@@ -221,15 +221,37 @@ export function ProfilePage() {
                 </details>
 
                 <div className="rounded-2xl border border-sun-400 bg-sun-100/60 p-3 text-sm">
-                  <p className="font-semibold text-ink-900">
-                    Mã TOTP hiện tại (chỉ dùng cho môi trường thử nghiệm): <strong>{totpPreview}</strong>
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="font-semibold text-ink-900">
+                      Mã TOTP hiện tại (chỉ dùng cho môi trường thử nghiệm): <strong>{totpPreview}</strong>
+                    </p>
+                    <button
+                      type="button"
+                      className="btn-ghost !min-h-0 !px-2.5 !py-1.5 text-xs"
+                      onClick={() => setCode(totpPreview)}
+                      disabled={!totpPreview}
+                    >
+                      ⌨️ Điền mã này
+                    </button>
+                  </div>
+                  <p className="text-xs text-ink-600">
+                    Mã đổi sau {seconds}s. Trong môi trường thật, mã chỉ hiển thị trên thiết bị.
                   </p>
-                  <p className="text-xs text-ink-600">Mã đổi sau {seconds}s. Trong môi trường thật, mã chỉ hiển thị trên thiết bị.</p>
                 </div>
 
-                <div>
-                  <label className="label" htmlFor="txt-mfa-code">
-                    Nhập mã 6 chữ số từ ứng dụng để xác nhận
+                <div className="rounded-2xl border-2 border-brand-300 bg-brand-50/60 p-4">
+                  <p className="flex items-center gap-2 text-sm font-bold text-ink-900">
+                    <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand-500 text-xs text-white">
+                      4
+                    </span>
+                    Nhập mã 6 chữ số từ ứng dụng xác thực vào đây
+                  </p>
+                  <p className="mt-1 text-xs text-ink-600">
+                    Mở <strong>Google Authenticator</strong> → chọn mục <strong>AuthShield 360</strong> → gõ 6 số hiển
+                    thị vào ô dưới. Mã làm mới mỗi 30 giây.
+                  </p>
+                  <label className="label mt-3" htmlFor="txt-mfa-code">
+                    Mã xác nhận (6 chữ số)
                   </label>
                   <input
                     id="txt-mfa-code"
@@ -237,10 +259,15 @@ export function ProfilePage() {
                     inputMode="numeric"
                     pattern="[0-9]*"
                     maxLength={6}
+                    autoFocus
                     value={code}
                     onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                    placeholder="••••••"
+                    placeholder="123456"
                   />
+                  <p className="mt-2 text-xs text-ink-400">
+                    Đã nhập: <strong>{code ? `${code.length}/6` : '0/6'}</strong> chữ số
+                    {code.length === 6 ? ' — bấm “Xác nhận” bên dưới.' : ''}
+                  </p>
                 </div>
 
                 <div className="flex justify-end gap-2">
