@@ -1,4 +1,11 @@
+# =============================================================================
+# AuthShield 360 — repository ignore rules
+#
+# Rule of thumb: commit SOURCE, SCHEMA, DOCS and TEMPLATES.
+# Never commit secrets, local configuration, build output or runtime data (BR-10).
+# =============================================================================
 
+# ── Secrets & local configuration (BR-10) ────────────────────────────────────
 .env
 .env.*
 !.env.example
@@ -90,8 +97,8 @@ $RECYCLE.BIN/
 .~lock.*#
 
 # NOTE: these ARE intentional deliverables and must stay committed:
-package-lock.json   (reproducible frontend installs)
-.env.example         (template without secrets)
-db/*.sql             (schema, seed, reset)
-docs/**              (governance documents and source specifications)
-backend/.mvn/wrapper (Maven Wrapper; distributionType=only-script needs no jar)
+#   package-lock.json   (reproducible frontend installs)
+#   .env.example         (template without secrets)
+#   db/*.sql             (schema, seed, reset)
+#   docs/**              (governance documents and source specifications)
+#   backend/.mvn/wrapper (Maven Wrapper; distributionType=only-script needs no jar)
