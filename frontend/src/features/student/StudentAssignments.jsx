@@ -100,9 +100,25 @@ export function StudentAssignments() {
               )}
             </div>
 
-            <Link className="btn-primary mt-4 w-full" to={`/student/assignments/${a.id}`}>
-              {a.canSubmit ? (a.yourAttempts > 0 ? 'Cập nhật bài nộp' : 'Nộp bài') : 'Xem chi tiết'}
-            </Link>
+            <div className="mt-4 flex gap-2">
+              <Link className="btn-ghost flex-1" to={`/student/assignments/${a.id}`}>
+                Xem chi tiết
+              </Link>
+              {a.canSubmit ? (
+                <Link className="btn-primary flex-1" to={`/student/assignments/${a.id}?action=submit`}>
+                  {a.yourAttempts > 0 ? 'Cập nhật bài' : 'Nộp bài'}
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  className="btn-primary flex-1"
+                  disabled
+                  title={LOCK_MESSAGES[a.lockReason] || 'Bài tập hiện không cho phép nộp'}
+                >
+                  Nộp bài
+                </button>
+              )}
+            </div>
           </article>
         ))}
       </div>

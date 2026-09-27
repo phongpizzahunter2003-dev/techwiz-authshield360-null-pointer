@@ -1,5 +1,5 @@
-import { useRef, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { useParams, useSearchParams } from 'react-router-dom'
 import { DetailShell } from '../../components/layout/DetailShell.jsx'
 import { Badge, statusTone, SubmissionStatusBadge } from '../../components/ui/Badge.jsx'
 import { ErrorState, EmptyState } from '../../components/ui/EmptyState.jsx'
@@ -19,14 +19,23 @@ const LOCK_MESSAGES = {
 /** UC-A1..A4 detail view: full assignment info, submit/resubmit panel and attempt history. */
 export function StudentAssignmentDetail() {
   const { id } = useParams()
+  const [searchParams] = useSearchParams()
   const toast = useToast()
   const { data, loading, error, reload } = useAsync(() => assignmentApi.detail(id), [id])
   const [file, setFile] = useState(null)
   const [uploading, setUploading] = useState(false)
   const fileRef = useRef(null)
+  const submitRef = useRef(null)
 
   const assignment = data?.data
   const history = assignment?.submissions || []
+
+  // Arrived via the "Nộp bài" button → jump straight to the upload panel.
+  useEffect(() => {
+    if (assignment && searchParams.get('action') === 'submit' && submitRef.current) {
+      submitRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }, [assignment, searchParams])
 
   const upload = async () => {
     if (!file || uploading) return
@@ -92,7 +101,10 @@ export function StudentAssignmentDetail() {
             </dl>
           </section>
 
-          <section className="card">
+          <section
+            ref={submitRef}
+            className={`card ${searchParams.get('action') === 'submit' && assignment.canSubmit ? 'ring-2 ring-brand-400' : ''}`}
+          >
             <h2 className="text-base font-bold text-ink-900">
               {assignment.canSubmit
                 ? assignment.yourAttempts > 0

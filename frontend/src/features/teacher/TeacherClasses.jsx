@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { AppShell } from '../../components/layout/AppShell.jsx'
 import { Badge } from '../../components/ui/Badge.jsx'
 import { EmptyState, ErrorState } from '../../components/ui/EmptyState.jsx'
@@ -20,6 +21,8 @@ export function TeacherClasses() {
   const [enrollTarget, setEnrollTarget] = useState(null)
   const [selectedStudent, setSelectedStudent] = useState('')
   const [enrolling, setEnrolling] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(null)
+  const [deleting, setDeleting] = useState(false)
 
   const list = classrooms.data?.data || []
   const studentList = students.data?.data || []
@@ -56,13 +59,17 @@ export function TeacherClasses() {
     }
   }
 
-  const remove = async (id) => {
+  const remove = async (classroom) => {
+    setDeleting(true)
     try {
-      await classroomApi.remove(id)
+      await classroomApi.remove(classroom.id)
       toast.success('Đã xóa lớp học.')
+      setConfirmDelete(null)
       await classrooms.reload()
     } catch (err) {
       toast.error(err.message)
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -88,17 +95,24 @@ export function TeacherClasses() {
           {list.map((c) => (
             <article key={c.id} className="card flex flex-col">
               <div className="flex items-start justify-between gap-2">
-                <h3 className="text-sm font-bold text-ink-900">{c.name}</h3>
+                <h3 className="text-sm font-bold text-ink-900">
+                  <Link to={`/teacher/classes/${c.id}`} className="hover:underline">
+                    {c.name}
+                  </Link>
+                </h3>
                 <Badge tone="sky">{c.code}</Badge>
               </div>
               {c.description ? <p className="mt-1 text-xs text-ink-400">{c.description}</p> : null}
               <p className="mt-3 text-sm font-semibold text-ink-600">🎒 {c.studentCount} học sinh</p>
               <p className="mt-1 text-xs text-ink-400">Giáo viên: {c.teacherName || '—'}</p>
-              <div className="mt-auto flex gap-2 pt-4">
-                <button type="button" className="btn-accent flex-1" onClick={() => setEnrollTarget(c)}>
+              <div className="mt-auto flex flex-wrap gap-2 pt-4">
+                <Link className="btn-ghost flex-1 whitespace-nowrap" to={`/teacher/classes/${c.id}`}>
+                  Chi tiết
+                </Link>
+                <button type="button" className="btn-accent flex-1 whitespace-nowrap" onClick={() => setEnrollTarget(c)}>
                   Thêm học sinh
                 </button>
-                <button type="button" className="btn-danger !px-3" onClick={() => remove(c.id)}>
+                <button type="button" className="btn-danger !px-3" onClick={() => setConfirmDelete(c)}>
                   Xóa
                 </button>
               </div>
@@ -178,6 +192,31 @@ export function TeacherClasses() {
             {enrolling ? <InlineSpinner /> : '➕'} Thêm vào lớp
           </button>
         </div>
+      </Modal>
+
+      {/* Destructive action guard */}
+      <Modal
+        open={Boolean(confirmDelete)}
+        onClose={() => setConfirmDelete(null)}
+        title="Xác nhận xóa lớp học"
+        size="sm"
+        footer={
+          <>
+            <button type="button" className="btn-ghost" onClick={() => setConfirmDelete(null)}>
+              Hủy
+            </button>
+            <button type="button" className="btn-danger" onClick={() => remove(confirmDelete)} disabled={deleting}>
+              {deleting ? <InlineSpinner /> : '🗑'} Xóa lớp
+            </button>
+          </>
+        }
+      >
+        <p className="text-sm text-ink-600">
+          Bạn sắp xóa lớp <strong className="text-ink-900">{confirmDelete?.name}</strong> ({confirmDelete?.code}).
+        </p>
+        <p className="mt-2 rounded-xl bg-coral-100/50 px-3 py-2 text-xs text-ink-600">
+          Toàn bộ ghi danh học sinh trong lớp sẽ bị gỡ. Bài tập và nhật ký kiểm toán vẫn được giữ lại.
+        </p>
       </Modal>
     </AppShell>
   )
