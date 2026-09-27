@@ -111,23 +111,49 @@ pagination control has realistic content.
 | Teachers (20) | `teacher01` … `teacher20` | `teacher123` |
 | Students (20) | `student01` … `student20` | `student123` |
 
-Seeded volume on a fresh database:
+Seeded volume on a fresh database (measured):
 
 | Table | Rows |
 |---|---|
-| users | 41 (1 admin · 20 teachers · 20 students) |
+| users | 45 (1 admin · 20 teachers · 20 students · 4 test fixtures) |
 | classrooms | 20 (CS101 … CS120, one owner teacher each) |
-| enrollments | 41 (each student in 2 classes; CS101 keeps the two demo students) |
-| assignments | 43 (CS101 keeps the UC-A1..UC-A4 scenarios; the rest get 2 each) |
-| assignment_submissions | ~71 (mix of on-time / late, some graded; placeholder files are written to `backend/uploads`) |
+| enrollments | 41 (each student in 2 classes; CS101 keeps student01 + student02; `student_lonely01` in none) |
+| assignments | 46 (8 scenario assignments in CS101, one per submission rule; 2 for each other class) |
+| assignment_submissions | 67 (6 hand-written scenario rows + auto-generated mix of on-time / late / graded) |
 | exam_results | 40 (2 per student) |
-| notifications | ~160 (welcome + graded + submission-received) |
+| notifications | 245 (welcome + graded + submission-received) |
 
 Convenient accounts for demonstrations:
 
 - `student01` — the flagship class CS101, exercises the scenario assignments (on-time, late, locked, resubmit).
 - `teacher01` — owns CS101 (the class used in all the tutorial screenshots).
 - `teacher05`, `student10` — ordinary seeded accounts with submissions/grades already present.
+
+### 4.1 Test-fixture accounts (one per hard-to-reach scenario)
+
+These extra accounts are pre-set to a specific state so every case in
+[`docs/test-cases.md`](docs/test-cases.md) has its data ready. Password: `student123`.
+
+| Account | Pre-set state | Used by |
+|---|---|---|
+| `locked01` | `LOCKED`, 5 failed attempts, locked for 15 minutes | AUTH-05 (login while locked) |
+| `disabled01` | `DISABLED` | AUTH-08 (disabled account) |
+| `student_mfa01` | MFA **enrolled** with the known demo TOTP secret `JBSWY3DPEHPK3PXP` | AUTH-26 (real authenticator app) |
+| `student_lonely01` | active but **enrolled in no class** | STU-19 (empty states) |
+| `student03` | enrolled in CS103/CS104, **not** in CS101 | STU-06 / TEA-20 (not-enrolled cases) |
+
+### 4.2 CS101 scenario assignments (one per submission rule)
+
+| Assignment | Rule it demonstrates |
+|---|---|
+| Assignment 1 - Loops and arrays | submit on time (student02 already submitted; student01 free) |
+| Assignment 2 - Recursion (late allowed) | late submission accepted |
+| Assignment 3 - Data structures (no late) | late submission refused |
+| Assignment 4 - Resubmission allowed | update the submitted file (student01 has attempt 1, student02 graded) |
+| Assignment 5 - Late window closed | late window already closed |
+| Assignment 6 - Single attempt only | attempt limit reached (student02) |
+| Assignment 7 - Resubmission not allowed | resubmission refused (student02 submitted) |
+| Midterm exam (closed) | assignment closed — no submit/update |
 
 The system starts in **S1 (password only)** so you can sign in immediately. Switch to **S2** (adds
 Mobile OTP) or **S3** (adds Email OTP) in **Admin → Auth configuration**.

@@ -1,6 +1,8 @@
 # qa-rules.md — Test Strategy, Cases & Evidence
 
 > Owner: QA Lead · Status: **Baseline v1.0**
+> **Bộ test case đầy đủ theo vai trò (AUTH / STU / TEA / ADM / X) nằm ở [`test-cases.md`](test-cases.md)**
+> — bao gồm dữ liệu mẫu (fixture) cho từng tình huống.
 > Traceability: FR↔UC matrix (`use-cases.md` §9) and TC-01..TC-12 from the SRS, plus new
 > assignment cases TC-A1..TC-A4.
 
