@@ -199,12 +199,26 @@ export function ProfilePage() {
                   </div>
                 </div>
 
-                <p className="rounded-xl border border-sun-400 bg-sun-100/60 px-3 py-2 text-xs text-ink-600">
-                  <strong>Gặp lỗi “chỉ mở bằng ứng dụng”?</strong> Điện thoại đang mở liên kết{' '}
-                  <code className="font-mono">otpauth://</code> bằng trình duyệt nên không có ứng dụng nào nhận.
-                  Hãy quét QR <strong>trực tiếp trong ứng dụng xác thực</strong>, hoặc dùng chức năng “Nhập khóa
-                  thủ công” và dán mã bí mật ở trên.
-                </p>
+                <details className="rounded-xl border border-sky-300 bg-sky-100/50 px-3 py-2 text-xs text-ink-600">
+                  <summary className="cursor-pointer font-semibold text-sky-600">
+                    ❓ Không quét được mã QR? Mở hướng dẫn khắc phục
+                  </summary>
+                  <div className="mt-2 space-y-1.5">
+                    <p>
+                      • Điện thoại báo <strong>“chỉ mở bằng ứng dụng”</strong>: điện thoại đang mở liên kết{' '}
+                      <code className="font-mono">otpauth://</code> bằng trình duyệt/camera nên không có ứng dụng nào
+                      nhận. Hãy quét QR <strong>trực tiếp trong ứng dụng xác thực</strong>.
+                    </p>
+                    <p>
+                      • Không quét được? Chọn <strong>“Nhập khóa thủ công / Enter setup key”</strong> trong ứng dụng
+                      xác thực rồi dán <strong>mã bí mật</strong> ở trên.
+                    </p>
+                    <p>
+                      • Mã luôn báo sai dù đã nhập đúng? Kiểm tra <strong>thời gian trên điện thoại</strong> đã bật
+                      tự động chưa — TOTP cần đồng bộ giờ.
+                    </p>
+                  </div>
+                </details>
 
                 <div className="rounded-2xl border border-sun-400 bg-sun-100/60 p-3 text-sm">
                   <p className="font-semibold text-ink-900">

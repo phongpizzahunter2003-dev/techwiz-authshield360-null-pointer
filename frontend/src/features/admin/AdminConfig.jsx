@@ -292,7 +292,9 @@ export function AdminConfig() {
               </Badge>
             </div>
             <p className="mt-1 text-xs text-ink-400">
-              Mật khẩu SMTP được mã hóa AES-GCM khi lưu và không bao giờ trả về qua API (BR-10).
+              Đây là tài khoản của <strong>dịch vụ gửi thư</strong> dùng để gửi mã Email OTP ở bước 3 của chế độ S3
+              — không phải tài khoản đăng nhập portal. Mật khẩu được mã hóa AES-GCM khi lưu và không bao giờ trả về
+              qua API (BR-10).
             </p>
             {!emailApplies ? (
               <p className="mt-2 rounded-xl bg-sun-100/60 px-3 py-2 text-xs text-ink-600">
@@ -326,27 +328,37 @@ export function AdminConfig() {
               </div>
               <div>
                 <label className="label" htmlFor="smtp-user">
-                  Tài khoản
+                  Tài khoản (SMTP username)
                 </label>
                 <input
                   id="smtp-user"
                   className="input"
                   value={config.smtpUsername || ''}
                   onChange={(e) => set('smtpUsername', e.target.value)}
+                  placeholder="vd: 1a2b3c4d5e6f7g (Mailtrap)"
                 />
+                <p className="mt-1 text-[11px] text-ink-400">
+                  Tài khoản do nhà cung cấp SMTP cấp, dùng để xác thực khi gửi thư. Phải cùng nhà cung cấp với
+                  “Máy chủ” ở trên.
+                </p>
               </div>
               <div>
                 <label className="label" htmlFor="smtp-pass">
-                  Mật khẩu {config.smtpPasswordSet ? '(đã thiết lập — nhập để đổi)' : ''}
+                  Mật khẩu / API key
                 </label>
                 <input
                   id="smtp-pass"
                   type="password"
                   className="input"
-                  placeholder="••••••••"
+                  placeholder={config.smtpPasswordSet ? '•••••••• (đã thiết lập — nhập để thay)' : '••••••••'}
                   value={smtpPassword}
                   onChange={(e) => setSmtpPassword(e.target.value)}
                 />
+                <p className="mt-1 text-[11px] text-ink-400">
+                  {config.smtpPasswordSet
+                    ? 'Đã có mật khẩu lưu sẵn (đã mã hóa). Để trống nếu không muốn thay đổi.'
+                    : 'Chưa thiết lập. Không thể xem lại sau khi lưu.'}
+                </p>
               </div>
               <div className="sm:col-span-2">
                 <label className="label" htmlFor="smtp-from">
