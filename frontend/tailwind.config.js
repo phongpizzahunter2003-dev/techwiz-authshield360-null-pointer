@@ -32,10 +32,12 @@ export default {
       keyframes: {
         'fade-in': { '0%': { opacity: 0, transform: 'translateY(6px)' }, '100%': { opacity: 1, transform: 'translateY(0)' } },
         'pop-in': { '0%': { opacity: 0, transform: 'scale(0.96)' }, '100%': { opacity: 1, transform: 'scale(1)' } },
+        'slide-down': { '0%': { opacity: 0, transform: 'translateY(-14px)' }, '100%': { opacity: 1, transform: 'translateY(0)' } },
       },
       animation: {
         'fade-in': 'fade-in 220ms ease-out both',
         'pop-in': 'pop-in 180ms ease-out both',
+        'slide-down': 'slide-down 200ms ease-out both',
       },
     },
   },

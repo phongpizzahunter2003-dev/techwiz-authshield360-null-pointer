@@ -3,21 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { notificationsApi } from '../../api/endpoints.js'
 import { useToast } from '../ui/Toast.jsx'
 import { InlineSpinner } from '../ui/Spinner.jsx'
+import { timeAgo } from '../../utils/format.js'
 
 const POLL_MS = 30000
-
-export function timeAgo(value) {
-  if (!value) return ''
-  const diff = Date.now() - new Date(value).getTime()
-  const min = Math.floor(diff / 60000)
-  if (min < 1) return 'just now'
-  if (min < 60) return `${min}m ago`
-  const hours = Math.floor(min / 60)
-  if (hours < 24) return `${hours}h ago`
-  const days = Math.floor(hours / 24)
-  if (days < 30) return `${days}d ago`
-  return new Date(value).toLocaleDateString('en-GB')
-}
 
 const TYPE_ICON = {
   ASSIGNMENT_PUBLISHED: '📚',
@@ -59,7 +47,17 @@ export function NotificationBell() {
   useEffect(() => {
     load()
     const id = setInterval(load, POLL_MS)
-    return () => clearInterval(id)
+    // Background tabs get their timers throttled, so refresh as soon as the tab is visible again.
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') load()
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    window.addEventListener('focus', onVisible)
+    return () => {
+      clearInterval(id)
+      document.removeEventListener('visibilitychange', onVisible)
+      window.removeEventListener('focus', onVisible)
+    }
   }, [load])
 
   useEffect(() => {

@@ -7,7 +7,7 @@ import { EmptyState, ErrorState } from '../../components/ui/EmptyState.jsx'
 import { Spinner, InlineSpinner } from '../../components/ui/Spinner.jsx'
 import { useToast } from '../../components/ui/Toast.jsx'
 import { notificationsApi } from '../../api/endpoints.js'
-import { timeAgo } from '../../components/layout/NotificationBell.jsx'
+import { timeAgo } from '../../utils/format.js'
 
 const TYPE_ICON = {
   ASSIGNMENT_PUBLISHED: '📚',

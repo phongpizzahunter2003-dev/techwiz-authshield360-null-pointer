@@ -24,6 +24,7 @@ import { AdminComparison } from './features/admin/AdminComparison.jsx'
 import { AdminAuthMode } from './features/admin/AdminAuthMode.jsx'
 import { AdminSystem } from './features/admin/AdminSystem.jsx'
 import { NotificationsPage } from './features/notifications/NotificationsPage.jsx'
+import { NotificationAlerts } from './components/layout/NotificationAlerts.jsx'
 import { Spinner } from './components/ui/Spinner.jsx'
 
 function HomeRedirect() {
@@ -40,7 +41,10 @@ function HomeRedirect() {
 
 export default function App() {
   return (
-    <Routes>
+    <>
+      {/* System-wide top alerts for newly arrived notifications. */}
+      <NotificationAlerts />
+      <Routes>
       <Route path="/" element={<HomeRedirect />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/403" element={<ForbiddenPage />} />
@@ -219,6 +223,7 @@ export default function App() {
       />
 
       <Route path="*" element={<NotFoundPage />} />
-    </Routes>
+      </Routes>
+    </>
   )
 }
