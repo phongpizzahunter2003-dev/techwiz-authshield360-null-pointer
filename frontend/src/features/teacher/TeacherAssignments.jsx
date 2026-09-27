@@ -157,7 +157,7 @@ export function TeacherAssignments() {
 
       {list.length > 0 ? (
         <div className="table-wrap">
-          <table className="table">
+          <table className="table min-w-[900px]">
             <thead>
               <tr>
                 <th>Tiêu đề</th>
@@ -173,26 +173,28 @@ export function TeacherAssignments() {
               {list.map((a) => (
                 <tr key={a.id}>
                   <td className="font-semibold text-ink-900">{a.title}</td>
-                  <td>{a.classroomName}</td>
-                  <td>{formatDateTime(a.dueAt)}</td>
-                  <td>{a.allowLate ? `Có (${a.latePenaltyPct}%)` : 'Không'}</td>
-                  <td>{a.allowResubmission ? `Có (tối đa ${a.maxAttempts})` : 'Không'}</td>
-                  <td>
+                  <td className="whitespace-nowrap">{a.classroomName}</td>
+                  <td className="whitespace-nowrap">{formatDateTime(a.dueAt)}</td>
+                  <td className="whitespace-nowrap">{a.allowLate ? `Có (${a.latePenaltyPct}%)` : 'Không'}</td>
+                  <td className="whitespace-nowrap">
+                    {a.allowResubmission ? `Có (tối đa ${a.maxAttempts})` : 'Không'}
+                  </td>
+                  <td className="whitespace-nowrap">
                     <Badge tone={statusTone(a.status)}>{a.status}</Badge>
                   </td>
                   <td>
-                    <div className="flex flex-wrap justify-end gap-2">
-                      <Link className="btn-ghost !px-3 !py-1.5" to={`/teacher/assignments/${a.id}`}>
+                    <div className="table-actions">
+                      <Link className="btn-xs btn-ghost" to={`/teacher/assignments/${a.id}`}>
                         Chi tiết
                       </Link>
-                      <button type="button" className="btn-ghost !px-3 !py-1.5" onClick={() => openGrading(a)}>
+                      <button type="button" className="btn-xs btn-ghost" onClick={() => openGrading(a)}>
                         Chấm điểm
                       </button>
-                      <button type="button" className="btn-ghost !px-3 !py-1.5" onClick={() => openEdit(a)}>
+                      <button type="button" className="btn-xs btn-ghost" onClick={() => openEdit(a)}>
                         Sửa
                       </button>
                       {a.status !== 'CLOSED' ? (
-                        <button type="button" className="btn-danger !px-3 !py-1.5" onClick={() => closeAssignment(a)}>
+                        <button type="button" className="btn-xs btn-danger" onClick={() => closeAssignment(a)}>
                           Đóng
                         </button>
                       ) : null}

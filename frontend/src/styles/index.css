@@ -46,6 +46,13 @@
   .btn-danger {
     @apply btn bg-coral-400 text-white hover:bg-coral-600;
   }
+  /* Compact button for table action cells (keeps actions on one line). */
+  .btn-xs {
+    @apply btn !min-h-0 !px-2.5 !py-1.5 text-xs whitespace-nowrap;
+  }
+  .table-actions {
+    @apply flex items-center justify-end gap-1.5 whitespace-nowrap;
+  }
   .input {
     @apply w-full rounded-xl border border-brand-100 bg-white px-3.5 py-2.5 text-sm text-ink-900
            placeholder:text-ink-400 focus:border-brand-400 focus:ring-2 focus:ring-brand-100 transition;

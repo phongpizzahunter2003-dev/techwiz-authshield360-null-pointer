@@ -36,6 +36,8 @@ export function AdminUsers() {
   const [bulkOpen, setBulkOpen] = useState(false)
   const [bulkForm, setBulkForm] = useState({ mode: 'S2', role: '' })
   const [bulkSaving, setBulkSaving] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(null)
+  const [deleting, setDeleting] = useState(false)
 
   const load = async (next = filters) => {
     setLoading(true)
@@ -107,12 +109,16 @@ export function AdminUsers() {
   }
 
   const remove = async (u) => {
+    setDeleting(true)
     try {
       await adminApi.deleteUser(u.id)
       toast.success('Đã xóa tài khoản.')
+      setConfirmDelete(null)
       await load()
     } catch (err) {
       toast.error(err.message)
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -206,7 +212,7 @@ export function AdminUsers() {
       {!loading && items.length > 0 ? (
         <>
           <div className="table-wrap">
-            <table className="table">
+            <table className="table min-w-[880px]">
               <thead>
                 <tr>
                   <th>Tên đăng nhập</th>
@@ -214,8 +220,7 @@ export function AdminUsers() {
                   <th>Họ tên</th>
                   <th>Vai trò</th>
                   <th>Trạng thái</th>
-                  <th>MFA</th>
-                  <th>Chế độ xác thực</th>
+                  <th>Bảo mật</th>
                   <th>Sai liên tiếp</th>
                   <th className="text-right">Thao tác</th>
                 </tr>
@@ -223,47 +228,54 @@ export function AdminUsers() {
               <tbody>
                 {items.map((u) => (
                   <tr key={u.id} className="transition hover:bg-surface-soft">
-                    <td className="font-semibold text-ink-900">
+                    <td className="whitespace-nowrap font-semibold text-ink-900">
                       <Link to={`/admin/users/${u.id}`} className="hover:underline">
                         {u.username}
                       </Link>
                     </td>
-                    <td>{u.email}</td>
-                    <td>{u.fullName || '—'}</td>
-                    <td>
+                    <td className="whitespace-nowrap">{u.email}</td>
+                    <td className="whitespace-nowrap">{u.fullName || '—'}</td>
+                    <td className="whitespace-nowrap">
                       <Badge tone="brand">{ROLE_LABEL[u.role]}</Badge>
                     </td>
-                    <td>
+                    <td className="whitespace-nowrap">
                       <Badge tone={statusTone(u.status)}>{u.status}</Badge>
                     </td>
-                    <td>{u.mfaEnrolled ? '✅ Đã đăng ký' : u.mfaEnabled ? '⏳ Chưa đăng ký' : '—'}</td>
-                    <td>
-                      {u.authModeOverride ? (
-                        <Badge tone={u.authModeOverride === 'S1' ? 'coral' : u.authModeOverride === 'S2' ? 'sun' : 'accent'}>
-                          {u.authModeOverride}
-                        </Badge>
-                      ) : (
-                        <span className="text-xs text-ink-400">Theo cấu hình</span>
-                      )}
+                    <td className="whitespace-nowrap">
+                      <div className="flex items-center gap-1.5">
+                        {u.authModeOverride ? (
+                          <Badge
+                            tone={u.authModeOverride === 'S1' ? 'coral' : u.authModeOverride === 'S2' ? 'sun' : 'accent'}
+                          >
+                            {u.authModeOverride}
+                          </Badge>
+                        ) : (
+                          <span className="text-xs text-ink-400">Theo cấu hình</span>
+                        )}
+                        <span className="text-xs text-ink-400">·</span>
+                        <span className="text-xs text-ink-600">
+                          {u.mfaEnrolled ? '✅ MFA đã đăng ký' : u.mfaEnabled ? '⏳ Chưa đăng ký' : '— MFA tắt'}
+                        </span>
+                      </div>
                     </td>
-                    <td>
+                    <td className="whitespace-nowrap">
                       {u.failedAttempts}
                       {u.lockedUntil ? (
                         <span className="ml-1 text-xs text-coral-600">(khóa đến {formatDateTime(u.lockedUntil)})</span>
                       ) : null}
                     </td>
                     <td>
-                      <div className="flex flex-wrap justify-end gap-2">
-                        <Link className="btn-ghost !px-3 !py-1.5" to={`/admin/users/${u.id}`}>
+                      <div className="table-actions">
+                        <Link className="btn-xs btn-ghost" to={`/admin/users/${u.id}`}>
                           Chi tiết
                         </Link>
-                        <button type="button" className="btn-ghost !px-3 !py-1.5" onClick={() => openEdit(u)}>
+                        <button type="button" className="btn-xs btn-ghost" onClick={() => openEdit(u)}>
                           Sửa
                         </button>
-                        <button type="button" className="btn-ghost !px-3 !py-1.5" onClick={() => resetMfa(u)}>
+                        <button type="button" className="btn-xs btn-ghost" onClick={() => resetMfa(u)}>
                           Reset MFA
                         </button>
-                        <button type="button" className="btn-danger !px-3 !py-1.5" onClick={() => remove(u)}>
+                        <button type="button" className="btn-xs btn-danger" onClick={() => setConfirmDelete(u)}>
                           Xóa
                         </button>
                       </div>
@@ -501,6 +513,32 @@ export function AdminUsers() {
             </button>
           </div>
         </form>
+      </Modal>
+
+      {/* Destructive action guard: Xóa deletes immediately, so confirm first */}
+      <Modal
+        open={Boolean(confirmDelete)}
+        onClose={() => setConfirmDelete(null)}
+        title="Xác nhận xóa tài khoản"
+        size="sm"
+        footer={
+          <>
+            <button type="button" className="btn-ghost" onClick={() => setConfirmDelete(null)}>
+              Hủy
+            </button>
+            <button type="button" className="btn-danger" onClick={() => remove(confirmDelete)} disabled={deleting}>
+              {deleting ? <InlineSpinner /> : '🗑'} Xóa tài khoản
+            </button>
+          </>
+        }
+      >
+        <p className="text-sm text-ink-600">
+          Bạn sắp xóa vĩnh viễn tài khoản <strong className="text-ink-900">{confirmDelete?.username}</strong>
+          {confirmDelete?.fullName ? ` (${confirmDelete.fullName})` : ''}.
+        </p>
+        <p className="mt-2 rounded-xl bg-coral-100/50 px-3 py-2 text-xs text-ink-600">
+          Hành động này không thể hoàn tác. Nhật ký kiểm toán (audit log) của tài khoản vẫn được giữ lại theo BR-07.
+        </p>
       </Modal>
     </AppShell>
   )

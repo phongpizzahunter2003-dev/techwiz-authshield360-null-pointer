@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { ROLE_LABEL } from '../../i18n/messages.js'
 import { MfaEnrollmentPrompt } from './MfaEnrollmentPrompt.jsx'
@@ -32,7 +32,11 @@ export function AppShell({ children, title, subtitle, actions }) {
   const { session, role, logout } = useAuth()
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
+  const location = useLocation()
   const items = NAV[role] || []
+  // Show the UC-09 enrolment prompt on the role dashboard only, so its overlay can never
+  // block clicks on list pages / forms deeper in the app.
+  const isRoleHome = ['/student', '/teacher', '/admin'].includes(location.pathname)
 
   const navLinks = (
     <nav className="flex flex-col gap-1">
@@ -124,7 +128,7 @@ export function AppShell({ children, title, subtitle, actions }) {
       </div>
 
       {/* UC-09: prompt the user to enrol their own second factor after first login. */}
-      <MfaEnrollmentPrompt />
+      {isRoleHome ? <MfaEnrollmentPrompt /> : null}
     </div>
   )
 }
